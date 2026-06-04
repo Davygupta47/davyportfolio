@@ -2,6 +2,7 @@ import { Column, Heading, Text, Meta, Schema } from "@once-ui-system/core";
 import { baseURL, about, person, work } from "@/resources";
 import { getPosts } from "@/utils/utils";
 import { ProjectGrid } from "@/components/work/ProjectGrid";
+import DotField from "@/components/DotField";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -24,7 +25,23 @@ export default function Work() {
     }));
 
   return (
-    <Column maxWidth="l" paddingTop="40" paddingX="l" gap="32">
+    <Column maxWidth="l" paddingTop="40" paddingX="l" gap="32" style={{ position: "relative" }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
+        <DotField
+          dotRadius={1.5}
+          dotSpacing={14}
+          bulgeStrength={67}
+          glowRadius={160}
+          sparkle={false}
+          waveAmplitude={0}
+          cursorRadius={500}
+          cursorForce={0.1}
+          bulgeOnly
+          gradientFrom="#A855F7"
+          gradientTo="#B497CF"
+          glowColor="#120F17"
+        />
+      </div>
       <Schema
         as="webPage"
         baseURL={baseURL}
