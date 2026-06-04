@@ -49,9 +49,12 @@ function F1Scene() {
 
     // Visibility logic
     if (pathname === '/') {
-      targetPos.set(0, -1, 0);
-      targetRot.set(0, Math.PI / 4, 0);
-      targetScale = 1.5;
+      // Move slightly back and down so it doesn't block text
+      targetPos.set(0, -1.5, -2);
+      // As user scrolls down, spin the car 360 degrees and pitch it slightly
+      targetRot.set(scrollProgress * (Math.PI / 8), (Math.PI / 4) + (scrollProgress * Math.PI * 2), 0);
+      // Zoom out as we scroll down
+      targetScale = THREE.MathUtils.lerp(1.4, 0.6, scrollProgress);
     } else if (pathname === '/about') {
       // Scroll-based path mapping (Top Right -> Bottom Left driving)
       // At scroll 0: x = 4, z = -3 (Back right)
