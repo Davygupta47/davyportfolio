@@ -207,7 +207,6 @@ export default function ExploreView() {
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
   const [handActive, setHandActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
-  const [gameSpeed, setGameSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [patchesLevel, setPatchesLevel] = useState<number>(1);
 
   // Debug position state
@@ -220,6 +219,7 @@ export default function ExploreView() {
   const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const webcamStreamRef = useRef<MediaStream | null>(null);
   const anchorRef = useRef<{ x: number; y: number } | null>(null);
+  const smoothedPointerRef = useRef<{ x: number; y: number } | null>(null);
 
   // Refs for tracking React state inside external MediaPipe callbacks
   const activeGameRef = useRef(activeGame);
@@ -970,17 +970,7 @@ export default function ExploreView() {
     setSessionScores(prev => [finalScore, ...prev]);
   };
 
-  const getSpeedMs = () => {
-    return gameSpeed === "slow" ? 220 : gameSpeed === "normal" ? 150 : 95;
-  };
-
-  // 7b. Adjust speed dynamically mid-game
-  useEffect(() => {
-    if (activeGame === "snake" && gameStatus === "PLAYING") {
-      if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
-      gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
-    }
-  }, [gameSpeed]);
+  // Snake game runs exclusively at a smooth, slow tick rate of 220ms for optimal accessibility
 
   // Patches Level Initializer
   const initPatchesLevel = (levelNum: number) => {
@@ -1033,7 +1023,7 @@ export default function ExploreView() {
       };
 
       if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
-      gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
+      gameIntervalRef.current = setInterval(snakeGameTick, 220);
     } else if (activeGame === "bubble") {
       // Reset Bubble Game
       bubbleRef.current = {
@@ -1063,7 +1053,7 @@ export default function ExploreView() {
     } else if (gameStatus === "PAUSED") {
       setGameStatus("PLAYING");
       if (activeGame === "snake") {
-        gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
+        gameIntervalRef.current = setInterval(snakeGameTick, 220);
       } else if (activeGame === "bubble") {
         bubbleRef.current.lastSpawn = Date.now();
         bubbleRequestRef.current = requestAnimationFrame(bubbleGameTick);
@@ -1305,7 +1295,7 @@ export default function ExploreView() {
         x: radius + Math.random() * (canvas.width - radius * 2),
         y: canvas.height + radius,
         radius,
-        speedY: 1.2 + Math.random() * 2.2,
+        speedY: 0.8 + Math.random() * 1.0, // Slow, elegant drift
         color: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
         popped: false,
       });
@@ -1315,8 +1305,23 @@ export default function ExploreView() {
     let px: number | null = null;
     let py: number | null = null;
     if (bState.pointer) {
-      px = (1 - bState.pointer.x) * canvas.width;
-      py = bState.pointer.y * canvas.height;
+      const targetX = (1 - bState.pointer.x) * canvas.width;
+      const targetY = bState.pointer.y * canvas.height;
+      if (!useWebcam) {
+        px = targetX;
+        py = targetY;
+      } else {
+        if (!smoothedPointerRef.current) {
+          smoothedPointerRef.current = { x: targetX, y: targetY };
+        } else {
+          smoothedPointerRef.current.x += 0.22 * (targetX - smoothedPointerRef.current.x);
+          smoothedPointerRef.current.y += 0.22 * (targetY - smoothedPointerRef.current.y);
+        }
+        px = smoothedPointerRef.current.x;
+        py = smoothedPointerRef.current.y;
+      }
+    } else {
+      smoothedPointerRef.current = null;
     }
 
     for (let i = bState.bubbles.length - 1; i >= 0; i--) {
@@ -1417,8 +1422,23 @@ export default function ExploreView() {
     let px: number | null = null;
     let py: number | null = null;
     if (pState.pointer) {
-      px = (1 - pState.pointer.x) * canvas.width;
-      py = pState.pointer.y * canvas.height;
+      const targetX = (1 - pState.pointer.x) * canvas.width;
+      const targetY = pState.pointer.y * canvas.height;
+      if (!useWebcam) {
+        px = targetX;
+        py = targetY;
+      } else {
+        if (!smoothedPointerRef.current) {
+          smoothedPointerRef.current = { x: targetX, y: targetY };
+        } else {
+          smoothedPointerRef.current.x += 0.22 * (targetX - smoothedPointerRef.current.x);
+          smoothedPointerRef.current.y += 0.22 * (targetY - smoothedPointerRef.current.y);
+        }
+        px = smoothedPointerRef.current.x;
+        py = smoothedPointerRef.current.y;
+      }
+    } else {
+      smoothedPointerRef.current = null;
     }
 
     const levelData = PATCHES_LEVELS[pState.level];
@@ -1792,24 +1812,7 @@ export default function ExploreView() {
             </div>
           </div>
 
-          {/* Game Speed Settings */}
-          <div className={styles.controlGroup}>
-            <div className={styles.controlRow}>
-              <label>Simulation Speed</label>
-              <div style={{ display: "flex", gap: "4px" }}>
-                {(["slow", "normal", "fast"] as const).map((speed) => (
-                  <button
-                    key={speed}
-                    onClick={() => setGameSpeed(speed)}
-                    className={`${styles.btn} ${gameSpeed === speed ? styles.primary : ""}`}
-                    style={{ padding: "0.35rem 0.65rem", fontSize: "0.75rem" }}
-                  >
-                    {speed}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          {/* Simulation speed is locked to slow for maximum accessibility */}
 
           <Line background="neutral-alpha-weak" />
 
@@ -2010,7 +2013,7 @@ export default function ExploreView() {
                     {/* Realtime Session Stats Dashboard */}
           <div className={styles.consoleCard} style={{ flex: 1, marginTop: "0.5rem" }}>
             <div className={styles.cardHeader}>
-              <h2>📊 Live Session Stats</h2>
+              <h2>Live Session Stats</h2>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {/* Realtime score display */}
