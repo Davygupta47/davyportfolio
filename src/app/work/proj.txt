@@ -1,7 +1,7 @@
 EDA-https://github.com/Davygupta47/Vilearnx-Task-1
-House-https://github.com/Davygupta47/Vilearnx-Task-2
+HousePricePrediction-https://github.com/Davygupta47/Vilearnx-Task-2
 TF-IDF-https://github.com/Davygupta47/Codsoft1
-Credit-https://github.com/Davygupta47/Codsoft2
+CreditCardFraudDetection-https://github.com/Davygupta47/Codsoft2
 CustomerChurn-https://github.com/Davygupta47/Codsoft3
 sms-https://github.com/Davygupta47/Codsoft4
 movierecommendation-https://github.com/Davygupta47/Ideathinking
