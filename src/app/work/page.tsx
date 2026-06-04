@@ -1,6 +1,7 @@
-import { Column, Heading, Meta, Schema } from "@once-ui-system/core";
+import { Column, Heading, Text, Meta, Schema } from "@once-ui-system/core";
 import { baseURL, about, person, work } from "@/resources";
-import { Projects } from "@/components/work/Projects";
+import { getPosts } from "@/utils/utils";
+import { ProjectGrid } from "@/components/work/ProjectGrid";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -13,8 +14,17 @@ export async function generateMetadata() {
 }
 
 export default function Work() {
+  const allProjects = getPosts(["src", "app", "work", "projects"])
+    .sort((a, b) => new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime())
+    .map((post) => ({
+      slug: post.slug,
+      title: post.metadata.title,
+      images: post.metadata.images,
+      link: post.metadata.link || "",
+    }));
+
   return (
-    <Column maxWidth="m" paddingTop="24">
+    <Column maxWidth="l" paddingTop="40" paddingX="l" gap="32">
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -28,10 +38,15 @@ export default function Work() {
           image: `${baseURL}${person.avatar}`,
         }}
       />
-      <Heading marginBottom="l" variant="heading-strong-xl" align="center">
-        {work.title}
-      </Heading>
-      <Projects />
+      <Column gap="12" horizontal="center" marginBottom="8">
+        <Heading variant="display-strong-l" align="center">
+          {work.title}
+        </Heading>
+        <Text variant="body-default-m" onBackground="neutral-weak" align="center">
+          A collection of AI/ML projects — from research to production.
+        </Text>
+      </Column>
+      <ProjectGrid projects={allProjects} />
     </Column>
   );
 }

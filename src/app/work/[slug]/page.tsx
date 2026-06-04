@@ -4,22 +4,18 @@ import {
   Meta,
   Schema,
   AvatarGroup,
-  Button,
   Column,
-  Flex,
   Heading,
   Media,
   Text,
   SmartLink,
   Row,
-  Avatar,
   Line,
 } from "@once-ui-system/core";
 import { baseURL, about, person, work } from "@/resources";
-import { formatDate } from "@/utils/formatDate";
 import { ScrollToHash, CustomMDX } from "@/components";
 import { Metadata } from "next";
-import { Projects } from "@/components/work/Projects";
+import { ProjectGrid } from "@/components/work/ProjectGrid";
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getPosts(["src", "app", "work", "projects"]);
@@ -62,7 +58,8 @@ export default async function Project({
     ? routeParams.slug.join("/")
     : routeParams.slug || "";
 
-  let post = getPosts(["src", "app", "work", "projects"]).find((post) => post.slug === slugPath);
+  const allPosts = getPosts(["src", "app", "work", "projects"]);
+  let post = allPosts.find((post) => post.slug === slugPath);
 
   if (!post) {
     notFound();
@@ -72,6 +69,18 @@ export default async function Project({
     post.metadata.team?.map((person) => ({
       src: person.avatar,
     })) || [];
+
+  // Prepare related projects for the grid
+  const relatedProjects = allPosts
+    .filter((p) => p.slug !== post.slug)
+    .sort((a, b) => new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime())
+    .slice(0, 4)
+    .map((p) => ({
+      slug: p.slug,
+      title: p.metadata.title,
+      images: p.metadata.images,
+      link: p.metadata.link || "",
+    }));
 
   return (
     <Column as="section" maxWidth="m" horizontal="center" gap="l">
@@ -94,29 +103,36 @@ export default async function Project({
       />
       <Column maxWidth="s" gap="16" horizontal="center" align="center">
         <SmartLink href="/work">
-          <Text variant="label-strong-m">Projects</Text>
+          <Text variant="label-strong-m">← All Projects</Text>
         </SmartLink>
-        <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
-          {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
-        </Text>
         <Heading variant="display-strong-m">{post.metadata.title}</Heading>
       </Column>
-      <Row marginBottom="32" horizontal="center">
-        <Row gap="16" vertical="center">
-          {post.metadata.team && <AvatarGroup reverse avatars={avatars} size="s" />}
-          <Text variant="label-default-m" onBackground="brand-weak">
-            {post.metadata.team?.map((member, idx) => (
-              <span key={idx}>
-                {idx > 0 && (
-                  <Text as="span" onBackground="neutral-weak">
-                    ,{" "}
-                  </Text>
-                )}
-                <SmartLink href={member.linkedIn}>{member.name}</SmartLink>
-              </span>
-            ))}
-          </Text>
-        </Row>
+      <Row marginBottom="32" horizontal="center" gap="16" wrap>
+        {post.metadata.team && (
+          <Row gap="16" vertical="center">
+            <AvatarGroup reverse avatars={avatars} size="s" />
+            <Text variant="label-default-m" onBackground="brand-weak">
+              {post.metadata.team?.map((member, idx) => (
+                <span key={idx}>
+                  {idx > 0 && (
+                    <Text as="span" onBackground="neutral-weak">
+                      ,{" "}
+                    </Text>
+                  )}
+                  <SmartLink href={member.linkedIn}>{member.name}</SmartLink>
+                </span>
+              ))}
+            </Text>
+          </Row>
+        )}
+        {post.metadata.link && (
+          <SmartLink
+            href={post.metadata.link}
+            suffixIcon="arrowUpRightFromSquare"
+          >
+            <Text variant="body-default-s">View on GitHub</Text>
+          </SmartLink>
+        )}
       </Row>
       {post.metadata.images.length > 0 && (
         <Media priority aspectRatio="16 / 9" radius="m" alt="image" src={post.metadata.images[0]} />
@@ -127,9 +143,9 @@ export default async function Project({
       <Column fillWidth gap="40" horizontal="center" marginTop="40">
         <Line maxWidth="40" />
         <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
-          Related projects
+          More projects
         </Heading>
-        <Projects exclude={[post.slug]} range={[2]} />
+        <ProjectGrid projects={relatedProjects} />
       </Column>
       <ScrollToHash />
     </Column>
