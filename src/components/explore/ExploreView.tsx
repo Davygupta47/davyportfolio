@@ -40,16 +40,11 @@ interface Bubble {
   popped: boolean;
 }
 
-interface HighScore {
-  name: string;
-  score: number;
-  date: string;
-}
-
+// Scoreboard types represent active session scores
 interface ScoreBoard {
-  snake: HighScore[];
-  bubble: HighScore[];
-  patches: HighScore[];
+  snake: number[];
+  bubble: number[];
+  patches: number[];
 }
 
 // Patches Game Interfaces
@@ -198,23 +193,7 @@ const playSynthSound = (type: "eat" | "pop" | "crash" | "start", muted: boolean)
   }
 };
 
-const DEFAULT_SCORES: ScoreBoard = {
-  snake: [
-    { name: "Davy (Dev)", score: 280, date: "2026-06-04" },
-    { name: "MediaPipeBot", score: 180, date: "2026-06-04" },
-    { name: "AI Subagent", score: 120, date: "2026-06-04" },
-  ],
-  bubble: [
-    { name: "Davy (Dev)", score: 450, date: "2026-06-04" },
-    { name: "LaserFinger", score: 320, date: "2026-06-04" },
-    { name: "BubbleSlayer", score: 210, date: "2026-06-04" },
-  ],
-  patches: [
-    { name: "Davy (Dev)", score: 100, date: "2026-06-04" },
-    { name: "LogicQueen", score: 100, date: "2026-06-04" },
-    { name: "ShikakuExpert", score: 100, date: "2026-06-04" },
-  ],
-};
+// Session scores are calculated in real time dynamically
 
 const BUBBLE_COLORS = ["#00f3ff", "#ff007f", "#9d00ff", "#00ff66", "#ffb700"];
 
@@ -222,13 +201,12 @@ export default function ExploreView() {
   const [activeGame, setActiveGame] = useState<"snake" | "bubble" | "patches">("snake");
   const [gameStatus, setGameStatus] = useState<"IDLE" | "PLAYING" | "PAUSED" | "GAME_OVER">("IDLE");
   const [score, setScore] = useState(0);
-  const [highScores, setHighScores] = useState<ScoreBoard>(DEFAULT_SCORES);
+  const [sessionScores, setSessionScores] = useState<number[]>([]);
   const [useWebcam, setUseWebcam] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
   const [handActive, setHandActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
-  const [username, setUsername] = useState("Player");
   const [gameSpeed, setGameSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [patchesLevel, setPatchesLevel] = useState<number>(1);
 
@@ -339,19 +317,7 @@ export default function ExploreView() {
     solved: false,
   });
 
-  // 1. Load high scores from localstorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("davyportfolio_cv_scores");
-      if (stored) {
-        setHighScores(JSON.parse(stored));
-      } else {
-        localStorage.setItem("davyportfolio_cv_scores", JSON.stringify(DEFAULT_SCORES));
-      }
-    } catch (e) {
-      console.warn("localStorage not accessible:", e);
-    }
-  }, []);
+  // LocalStorage score sync is removed to rely on live session calculations
 
   // 2. Load MediaPipe scripts dynamically
   useEffect(() => {
@@ -998,32 +964,10 @@ export default function ExploreView() {
     return true; // Solved!
   };
 
-  // 7. Save high scores
+  // 7. Save session scores
   const saveHighScore = (finalScore: number) => {
     if (finalScore <= 0) return;
-
-    const newEntry: HighScore = {
-      name: username.substring(0, 15) || "Player",
-      score: finalScore,
-      date: new Date().toISOString().split("T")[0]
-    };
-
-    setHighScores(prev => {
-      const currentList = [...prev[activeGame]];
-      currentList.push(newEntry);
-      currentList.sort((a, b) => b.score - a.score);
-      const updated = {
-        ...prev,
-        [activeGame]: currentList.slice(0, 5)
-      };
-
-      try {
-        localStorage.setItem("davyportfolio_cv_scores", JSON.stringify(updated));
-      } catch (err) {
-        console.warn("Failed to write scoreboard to localStorage:", err);
-      }
-      return updated;
-    });
+    setSessionScores(prev => [finalScore, ...prev]);
   };
 
   const getSpeedMs = () => {
@@ -1743,6 +1687,7 @@ export default function ExploreView() {
     setActiveGame(game);
     setGameStatus("IDLE");
     setScore(0);
+    setSessionScores([]); // Reset session scores list when shifting tabs
 
     if (game === "patches") {
       initPatchesLevel(1);
@@ -2017,22 +1962,6 @@ export default function ExploreView() {
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem", width: "100%", justifyContent: "center" }}>
-                    <input
-                      type="text"
-                      placeholder="Enter name"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      maxLength={15}
-                      style={{
-                        background: "rgba(255,255,255,0.08)",
-                        border: "1px solid rgba(255,255,255,0.2)",
-                        color: "#fff",
-                        padding: "0.5rem",
-                        borderRadius: "var(--radius-s)",
-                        textAlign: "center",
-                        width: "120px"
-                      }}
-                    />
                     <button className={`${styles.btn} ${styles.primary}`} onClick={startGame}>
                       {activeGame === "patches" && score === 100 ? "Play Again" : "Replay"}
                     </button>
@@ -2078,28 +2007,83 @@ export default function ExploreView() {
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* High Scores Leaderboard */}
+                    {/* Realtime Session Stats Dashboard */}
           <div className={styles.consoleCard} style={{ flex: 1, marginTop: "0.5rem" }}>
             <div className={styles.cardHeader}>
-              <h2>Your Score</h2>
+              <h2>📊 Live Session Stats</h2>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              {highScores[activeGame]?.map((entry, index) => (
-                <div key={index} className={styles.scoreRow}>
-                  <span className={styles.rank}>#{index + 1}</span>
-                  <span className={styles.name}>{entry.name}</span>
-                  <span className={styles.val}>{entry.score} pts</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {/* Realtime score display */}
+              <div style={{
+                background: "rgba(0, 243, 255, 0.03)",
+                border: "1px dashed rgba(0, 243, 255, 0.2)",
+                borderRadius: "var(--radius-m)",
+                padding: "1rem",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.25rem",
+                boxShadow: "inset 0 0 15px rgba(0, 243, 255, 0.02)"
+              }}>
+                <span style={{ fontSize: "0.75rem", color: "var(--neutral-on-background-weak)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
+                  Realtime Score
+                </span>
+                <span style={{
+                  fontSize: "2.75rem",
+                  fontWeight: 800,
+                  color: "#00f3ff",
+                  fontFamily: "var(--font-code)",
+                  textShadow: "0 0 10px rgba(0, 243, 255, 0.4)",
+                  lineHeight: 1.1
+                }}>
+                  {score}
+                </span>
+                <span style={{ fontSize: "0.7rem", color: "var(--neutral-on-background-weak)" }}>
+                  active game: {activeGame === "snake" ? "Snake CV" : activeGame === "bubble" ? "Bubble Pop CV" : "Patches CV"}
+                </span>
+              </div>
+
+              {/* Best score in session */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0.5rem 0.75rem",
+                background: "rgba(255, 255, 255, 0.02)",
+                borderRadius: "var(--radius-s)",
+                border: "1px solid rgba(255, 255, 255, 0.05)"
+              }}>
+                <span style={{ fontSize: "0.8rem", color: "var(--neutral-on-background-weak)" }}>Session Best</span>
+                <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "#00ff66", fontFamily: "var(--font-code)" }}>
+                  {Math.max(0, ...sessionScores, score)} pts
+                </span>
+              </div>
+
+              {/* Session history / attempts list */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--neutral-on-background-strong)" }}>
+                  Recent Session Attempts
+                </span>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", maxHeight: "150px", overflowY: "auto" }}>
+                  {sessionScores.map((s, index) => (
+                    <div key={index} className={styles.scoreRow}>
+                      <span className={styles.rank}>#{sessionScores.length - index}</span>
+                      <span className={styles.name}>Attempt Score</span>
+                      <span className={styles.val}>{s} pts</span>
+                    </div>
+                  ))}
+                  {sessionScores.length === 0 && (
+                    <div style={{ textAlign: "center", color: "var(--neutral-on-background-weak)", fontSize: "0.8rem", padding: "0.75rem 0" }}>
+                      No completed attempts in this session.
+                    </div>
+                  )}
                 </div>
-              ))}
-              {(!highScores[activeGame] || highScores[activeGame].length === 0) && (
-                <div style={{ textAlign: "center", color: "var(--neutral-on-background-weak)", fontSize: "0.85rem", padding: "1rem" }}>
-                  No scores recorded yet. Be the first!
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          </div>  </div>
 
         </div>
 
