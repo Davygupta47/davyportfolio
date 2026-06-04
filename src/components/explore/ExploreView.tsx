@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Flex, Row, Line } from "@once-ui-system/core";
-import { PiCompassDuotone, PiGameControllerDuotone, PiCameraDuotone, PiCameraSlashDuotone, PiKeyReturnDuotone, PiSpeakerSimpleHighDuotone, PiSpeakerSimpleSlashDuotone } from "react-icons/pi";
+import { PiCompassDuotone, PiGameControllerDuotone, PiCameraDuotone, PiCameraSlashDuotone, PiSpeakerSimpleHighDuotone, PiSpeakerSimpleSlashDuotone } from "react-icons/pi";
 import styles from "./ExploreView.module.scss";
 
 // Declare global types for MediaPipe variables loaded via CDN
@@ -49,7 +49,88 @@ interface HighScore {
 interface ScoreBoard {
   snake: HighScore[];
   bubble: HighScore[];
+  patches: HighScore[];
 }
+
+// Patches Game Interfaces
+interface PatchesClue {
+  col: number;
+  row: number;
+  size: number;
+  type: "square" | "wide" | "tall" | "any";
+}
+
+interface PatchesLevel {
+  gridSize: number;
+  clues: PatchesClue[];
+  tray: Array<{ id: number; width: number; height: number; color: string }>;
+}
+
+const PATCHES_LEVELS: Record<number, PatchesLevel> = {
+  1: {
+    gridSize: 4,
+    clues: [
+      { col: 0, row: 0, size: 4, type: "square" }, // Needs 2x2
+      { col: 2, row: 0, size: 2, type: "tall" },   // Needs 1x2
+      { col: 3, row: 0, size: 2, type: "tall" },   // Needs 1x2
+      { col: 0, row: 2, size: 2, type: "wide" },   // Needs 2x1
+      { col: 0, row: 3, size: 2, type: "wide" },   // Needs 2x1
+      { col: 2, row: 2, size: 4, type: "square" }, // Needs 2x2
+    ],
+    tray: [
+      { id: 1, width: 2, height: 2, color: "#00f3ff" }, // Cyan 2x2
+      { id: 2, width: 1, height: 2, color: "#9d00ff" }, // Purple 1x2
+      { id: 3, width: 1, height: 2, color: "#9d00ff" }, // Purple 1x2
+      { id: 4, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
+      { id: 5, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
+      { id: 6, width: 2, height: 2, color: "#ff007f" }, // Pink 2x2
+    ]
+  },
+  2: {
+    gridSize: 5,
+    clues: [
+      { col: 0, row: 0, size: 6, type: "wide" },   // Needs 3x2
+      { col: 3, row: 0, size: 6, type: "tall" },   // Needs 2x3
+      { col: 0, row: 2, size: 4, type: "square" }, // Needs 2x2
+      { col: 2, row: 2, size: 3, type: "tall" },   // Needs 1x3
+      { col: 3, row: 3, size: 2, type: "wide" },   // Needs 2x1
+      { col: 0, row: 4, size: 2, type: "wide" },   // Needs 2x1
+      { col: 3, row: 4, size: 2, type: "wide" },   // Needs 2x1
+    ],
+    tray: [
+      { id: 1, width: 3, height: 2, color: "#00f3ff" }, // Cyan 3x2
+      { id: 2, width: 2, height: 3, color: "#9d00ff" }, // Purple 2x3
+      { id: 3, width: 2, height: 2, color: "#ff007f" }, // Pink 2x2
+      { id: 4, width: 1, height: 3, color: "#ffb700" }, // Yellow 1x3
+      { id: 5, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
+      { id: 6, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
+      { id: 7, width: 2, height: 1, color: "#00f3ff" }, // Cyan 2x1
+    ]
+  },
+  3: {
+    gridSize: 6,
+    clues: [
+      { col: 0, row: 0, size: 9, type: "square" }, // Needs 3x3
+      { col: 3, row: 0, size: 6, type: "wide" },   // Needs 3x2
+      { col: 5, row: 2, size: 4, type: "tall" },   // Needs 1x4
+      { col: 3, row: 2, size: 4, type: "square" }, // Needs 2x2
+      { col: 0, row: 3, size: 3, type: "wide" },   // Needs 3x1
+      { col: 0, row: 4, size: 4, type: "square" }, // Needs 2x2
+      { col: 2, row: 4, size: 2, type: "tall" },   // Needs 1x2
+      { col: 3, row: 4, size: 4, type: "square" }, // Needs 2x2
+    ],
+    tray: [
+      { id: 1, width: 3, height: 3, color: "#00f3ff" }, // Cyan 3x3
+      { id: 2, width: 3, height: 2, color: "#9d00ff" }, // Purple 3x2
+      { id: 3, width: 1, height: 4, color: "#ffb700" }, // Yellow 1x4
+      { id: 4, width: 2, height: 2, color: "#ff007f" }, // Pink 2x2
+      { id: 5, width: 3, height: 1, color: "#00ff66" }, // Green 3x1
+      { id: 6, width: 2, height: 2, color: "#ff007f" }, // Pink 2x2
+      { id: 7, width: 1, height: 2, color: "#9d00ff" }, // Purple 1x2
+      { id: 8, width: 2, height: 2, color: "#00f3ff" }, // Cyan 2x2
+    ]
+  }
+};
 
 // Audio Synth Utility
 let audioCtx: AudioContext | null = null;
@@ -128,12 +209,17 @@ const DEFAULT_SCORES: ScoreBoard = {
     { name: "LaserFinger", score: 320, date: "2026-06-04" },
     { name: "BubbleSlayer", score: 210, date: "2026-06-04" },
   ],
+  patches: [
+    { name: "Davy (Dev)", score: 100, date: "2026-06-04" },
+    { name: "LogicQueen", score: 100, date: "2026-06-04" },
+    { name: "ShikakuExpert", score: 100, date: "2026-06-04" },
+  ],
 };
 
 const BUBBLE_COLORS = ["#00f3ff", "#ff007f", "#9d00ff", "#00ff66", "#ffb700"];
 
 export default function ExploreView() {
-  const [activeGame, setActiveGame] = useState<"snake" | "bubble">("snake");
+  const [activeGame, setActiveGame] = useState<"snake" | "bubble" | "patches">("snake");
   const [gameStatus, setGameStatus] = useState<"IDLE" | "PLAYING" | "PAUSED" | "GAME_OVER">("IDLE");
   const [score, setScore] = useState(0);
   const [highScores, setHighScores] = useState<ScoreBoard>(DEFAULT_SCORES);
@@ -144,6 +230,7 @@ export default function ExploreView() {
   const [cameraError, setCameraError] = useState("");
   const [username, setUsername] = useState("Player");
   const [gameSpeed, setGameSpeed] = useState<"slow" | "normal" | "fast">("normal");
+  const [patchesLevel, setPatchesLevel] = useState<number>(1);
 
   // Debug position state
   const [trackedCoords, setTrackedCoords] = useState<{ x: number; y: number } | null>(null);
@@ -156,7 +243,19 @@ export default function ExploreView() {
   const webcamStreamRef = useRef<MediaStream | null>(null);
   const anchorRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Game engine refs (to avoid closure capture problems in loops)
+  // Refs for tracking React state inside external MediaPipe callbacks
+  const activeGameRef = useRef(activeGame);
+  const gameStatusRef = useRef(gameStatus);
+
+  useEffect(() => {
+    activeGameRef.current = activeGame;
+  }, [activeGame]);
+
+  useEffect(() => {
+    gameStatusRef.current = gameStatus;
+  }, [gameStatus]);
+
+  // Game engine refs
   const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const bubbleRequestRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -193,6 +292,53 @@ export default function ExploreView() {
     score: 0,
   });
 
+  // Patches State
+  const patchesRef = useRef<{
+    level: number;
+    placedPatches: Array<{
+      id: number;
+      col: number;
+      row: number;
+      width: number;
+      height: number;
+      color: string;
+    }>;
+    trayPatches: Array<{
+      id: number;
+      width: number;
+      height: number;
+      color: string;
+      placed: boolean;
+    }>;
+    selectedPatch: {
+      id: number;
+      width: number;
+      height: number;
+      color: string;
+      isFromGrid: boolean;
+      col?: number;
+      row?: number;
+    } | null;
+    pointer: { x: number; y: number } | null;
+    hoverStart: number;
+    hoverTarget: {
+      type: "tray" | "grid";
+      id?: number;
+      col?: number;
+      row?: number;
+    } | null;
+    solved: boolean;
+  }>({
+    level: 1,
+    placedPatches: [],
+    trayPatches: [],
+    selectedPatch: null,
+    pointer: null,
+    hoverStart: 0,
+    hoverTarget: null,
+    solved: false,
+  });
+
   // 1. Load high scores from localstorage
   useEffect(() => {
     try {
@@ -210,7 +356,7 @@ export default function ExploreView() {
   // 2. Load MediaPipe scripts dynamically
   useEffect(() => {
     let checkInterval: NodeJS.Timeout;
-    
+
     const injectScripts = () => {
       if (window.Hands && window.Camera) {
         setScriptsLoaded(true);
@@ -268,7 +414,7 @@ export default function ExploreView() {
         setCameraError("");
         const constraints = { video: { width: 320, height: 240, facingMode: "user" } };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        
+
         if (!active) {
           stream.getTracks().forEach(track => track.stop());
           return;
@@ -432,18 +578,23 @@ export default function ExploreView() {
       }
 
       // If active game is Bubble Pop, send pointer position directly (normalized)
-      if (activeGame === "bubble") {
+      if (activeGameRef.current === "bubble") {
         bubbleRef.current.pointer = { x: indexTip.x, y: indexTip.y };
       }
 
+      // If active game is Patches, send pointer position directly (normalized)
+      if (activeGameRef.current === "patches") {
+        patchesRef.current.pointer = { x: indexTip.x, y: indexTip.y };
+      }
+
       // If active game is Snake, use floating D-pad Virtual Joystick HUD
-      if (activeGame === "snake") {
+      if (activeGameRef.current === "snake") {
         const innerRadius = Math.min(canvas.width, canvas.height) * 0.07; // Dead zone radius
         let detectedDir: Direction | null = null;
-        
+
         if (distance > innerRadius) {
           const angle = Math.atan2(dy, dx); // range -PI to PI
-          
+
           if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
             detectedDir = "RIGHT";
           } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
@@ -457,7 +608,7 @@ export default function ExploreView() {
 
         setActiveGestureDirection(detectedDir);
 
-        if (detectedDir && gameStatus === "PLAYING") {
+        if (detectedDir && gameStatusRef.current === "PLAYING") {
           // Prevent standard 180-degree self-collisions in Snake
           const currentDir = snakeRef.current.dir;
           if (
@@ -475,20 +626,23 @@ export default function ExploreView() {
       setTrackedCoords(null);
       setActiveGestureDirection(null);
       anchorRef.current = null; // Reset anchor so it re-centers next time the hand appears
-      if (activeGame === "bubble") {
+      if (activeGameRef.current === "bubble") {
         bubbleRef.current.pointer = null;
+      }
+      if (activeGameRef.current === "patches") {
+        patchesRef.current.pointer = null;
       }
     }
 
     // Draw the Joystick D-Pad HUD overlays for Snake Game
-    if (activeGame === "snake" && anchorRef.current) {
+    if (activeGameRef.current === "snake" && anchorRef.current) {
       const ax = anchorRef.current.x;
       const ay = anchorRef.current.y;
       const innerRadius = Math.min(canvas.width, canvas.height) * 0.07;
       const outerRadius = Math.min(canvas.width, canvas.height) * 0.22;
 
       ctx.save();
-      
+
       // Draw tether line from anchor to palm
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const w = results.multiHandLandmarks[0][0];
@@ -505,7 +659,7 @@ export default function ExploreView() {
         ctx.lineTo(px, py);
         ctx.stroke();
         ctx.setLineDash([]);
-        
+
         // Draw small glowing dot on palm center
         ctx.fillStyle = "#ff007f";
         ctx.shadowBlur = 6;
@@ -607,33 +761,247 @@ export default function ExploreView() {
     };
   }, [gameStatus, activeGame]);
 
-  // 6. Handle Mouse pointer controls (fallback for Bubble Pop)
+  // 6. Handle Mouse pointer controls (fallback for Bubble Pop & Patches)
   const handleGameCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!useWebcam && activeGame === "bubble" && gameStatus === "PLAYING") {
-      const canvas = gameCanvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      // Mouse X/Y relative to canvas bounds
-      const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-      const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-      // Store in normalized format
-      bubbleRef.current.pointer = {
-        x: 1 - (mx / canvas.width),
-        y: my / canvas.height
-      };
+    const canvas = gameCanvasRef.current;
+    if (!canvas || gameStatus !== "PLAYING") return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (!useWebcam) {
+      if (activeGame === "bubble") {
+        bubbleRef.current.pointer = {
+          x: 1 - (mx / canvas.width),
+          y: my / canvas.height
+        };
+      } else if (activeGame === "patches") {
+        patchesRef.current.pointer = {
+          x: 1 - (mx / canvas.width),
+          y: my / canvas.height
+        };
+      }
     }
   };
 
   const handleGameCanvasMouseLeave = () => {
-    if (!useWebcam && activeGame === "bubble") {
-      bubbleRef.current.pointer = null;
+    if (!useWebcam) {
+      if (activeGame === "bubble") {
+        bubbleRef.current.pointer = null;
+      } else if (activeGame === "patches") {
+        patchesRef.current.pointer = null;
+      }
     }
+  };
+
+  // Patches action handler (Click or Gesture triggers)
+  const handlePatchesAction = (target: { type: "tray" | "grid"; id?: number; col?: number; row?: number }) => {
+    const pState = patchesRef.current;
+
+    if (target.type === "tray" && target.id) {
+      // Pick up from tray
+      const patch = pState.trayPatches.find(p => p.id === target.id);
+      if (patch && !patch.placed) {
+        pState.selectedPatch = {
+          id: patch.id,
+          width: patch.width,
+          height: patch.height,
+          color: patch.color,
+          isFromGrid: false
+        };
+        patch.placed = true;
+        playSynthSound("pop", isMuted);
+      }
+    } else if (target.type === "grid") {
+      if (pState.selectedPatch) {
+        // Try placing patch
+        const col = target.col ?? 0;
+        const row = target.row ?? 0;
+        const levelData = PATCHES_LEVELS[pState.level];
+
+        // Center patch relative to grid cell
+        const startCol = Math.max(0, Math.min(levelData.gridSize - pState.selectedPatch.width, col - Math.floor(pState.selectedPatch.width / 2)));
+        const startRow = Math.max(0, Math.min(levelData.gridSize - pState.selectedPatch.height, row - Math.floor(pState.selectedPatch.height / 2)));
+
+        // Check if overlaps with existing placed patches
+        let overlaps = false;
+        for (const existing of pState.placedPatches) {
+          const hOverlaps = Math.max(startCol, existing.col) < Math.min(startCol + pState.selectedPatch.width, existing.col + existing.width);
+          const vOverlaps = Math.max(startRow, existing.row) < Math.min(startRow + pState.selectedPatch.height, existing.row + existing.height);
+          if (hOverlaps && vOverlaps) {
+            overlaps = true;
+            break;
+          }
+        }
+
+        if (!overlaps) {
+          // Place it
+          pState.placedPatches.push({
+            id: pState.selectedPatch.id,
+            col: startCol,
+            row: startRow,
+            width: pState.selectedPatch.width,
+            height: pState.selectedPatch.height,
+            color: pState.selectedPatch.color
+          });
+          pState.selectedPatch = null;
+          playSynthSound("eat", isMuted);
+
+          // Check level solved
+          if (checkPatchesSolved()) {
+            pState.solved = true;
+            setScore(100); // 100 points for solving the puzzle!
+            playSynthSound("start", isMuted);
+            endGame(100);
+          }
+        } else {
+          // Return to tray if overlaps
+          const trayPatch = pState.trayPatches.find(p => p.id === pState.selectedPatch!.id);
+          if (trayPatch) trayPatch.placed = false;
+          pState.selectedPatch = null;
+          playSynthSound("crash", isMuted);
+        }
+      } else if (target.id) {
+        // Pick up placed patch back into selected state
+        const idx = pState.placedPatches.findIndex(p => p.id === target.id);
+        if (idx !== -1) {
+          const placed = pState.placedPatches[idx];
+          pState.selectedPatch = {
+            id: placed.id,
+            width: placed.width,
+            height: placed.height,
+            color: placed.color,
+            isFromGrid: true,
+            col: placed.col,
+            row: placed.row
+          };
+          pState.placedPatches.splice(idx, 1);
+          playSynthSound("pop", isMuted);
+        }
+      }
+    }
+  };
+
+  const handleGameCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Only process click fallbacks when camera is OFF (manual mode)
+    if (!useWebcam && activeGame === "patches" && gameStatus === "PLAYING") {
+      const canvas = gameCanvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+      const pState = patchesRef.current;
+      const gridStart = 50;
+      const gridWidth = 400;
+      const trayY = 460;
+      const trayWidth = 400;
+      const slotWidth = trayWidth / pState.trayPatches.length;
+
+      // 1. Click tray
+      if (my >= trayY - 30 && my <= trayY + 30 && mx >= gridStart && mx <= gridStart + trayWidth) {
+        const index = Math.floor((mx - gridStart) / slotWidth);
+        if (index >= 0 && index < pState.trayPatches.length) {
+          handlePatchesAction({ type: "tray", id: pState.trayPatches[index].id });
+        }
+      }
+      // 2. Click grid
+      else if (mx >= gridStart && mx <= gridStart + gridWidth && my >= gridStart && my <= gridStart + gridWidth) {
+        const levelData = PATCHES_LEVELS[pState.level];
+        const cellSize = gridWidth / levelData.gridSize;
+        const col = Math.floor((mx - gridStart) / cellSize);
+        const row = Math.floor((my - gridStart) / cellSize);
+
+        if (pState.selectedPatch) {
+          handlePatchesAction({ type: "grid", col, row });
+        } else {
+          // Try picking up patch
+          const patch = pState.placedPatches.find(p =>
+            col >= p.col && col < p.col + p.width &&
+            row >= p.row && row < p.row + p.height
+          );
+          if (patch) {
+            handlePatchesAction({ type: "grid", id: patch.id });
+          }
+        }
+      } else {
+        // Clicked outside bounds: if a patch is selected, return to tray
+        if (pState.selectedPatch) {
+          const trayPatch = pState.trayPatches.find(p => p.id === pState.selectedPatch!.id);
+          if (trayPatch) trayPatch.placed = false;
+          pState.selectedPatch = null;
+          playSynthSound("crash", isMuted);
+        }
+      }
+    }
+  };
+
+  // Shikaku patches game rules validator
+  const checkPatchesSolved = () => {
+    const pState = patchesRef.current;
+    const levelData = PATCHES_LEVELS[pState.level];
+    const { gridSize, clues } = levelData;
+
+    // 1. Create occupancy grid
+    const occupied = Array(gridSize).fill(0).map(() => Array(gridSize).fill(false));
+
+    // 2. Mark cells occupied by placed patches
+    for (const patch of pState.placedPatches) {
+      for (let c = 0; c < patch.width; c++) {
+        for (let r = 0; r < patch.height; r++) {
+          const col = patch.col + c;
+          const row = patch.row + r;
+          if (col < 0 || col >= gridSize || row < 0 || row >= gridSize) {
+            return false; // Out of bounds patch!
+          }
+          if (occupied[col][row]) {
+            return false; // Overlap!
+          }
+          occupied[col][row] = true;
+        }
+      }
+    }
+
+    // 3. Verify all grid cells are covered
+    for (let c = 0; c < gridSize; c++) {
+      for (let r = 0; r < gridSize; r++) {
+        if (!occupied[c][r]) return false; // Gap found!
+      }
+    }
+
+    // 4. Verify clues match placed patches
+    for (const clue of clues) {
+      // Find the patch covering this clue cell
+      const patch = pState.placedPatches.find(p =>
+        clue.col >= p.col && clue.col < p.col + p.width &&
+        clue.row >= p.row && clue.row < p.row + p.height
+      );
+
+      if (!patch) return false; // Clue not covered!
+
+      // Check size matches clue size
+      if (patch.width * patch.height !== clue.size) return false;
+
+      // Check shape type
+      if (clue.type === "square" && patch.width !== patch.height) return false;
+      if (clue.type === "wide" && patch.width <= patch.height) return false;
+      if (clue.type === "tall" && patch.height <= patch.width) return false;
+
+      // Check that this patch covers EXACTLY one clue
+      const cluesCovered = clues.filter(c =>
+        c.col >= patch.col && c.col < patch.col + patch.width &&
+        c.row >= patch.row && c.row < patch.row + patch.height
+      );
+      if (cluesCovered.length !== 1) return false; // Must contain exactly one clue
+    }
+
+    return true; // Solved!
   };
 
   // 7. Save high scores
   const saveHighScore = (finalScore: number) => {
     if (finalScore <= 0) return;
-    
+
     const newEntry: HighScore = {
       name: username.substring(0, 15) || "Player",
       score: finalScore,
@@ -643,13 +1011,12 @@ export default function ExploreView() {
     setHighScores(prev => {
       const currentList = [...prev[activeGame]];
       currentList.push(newEntry);
-      // Sort descending, keep top 5
       currentList.sort((a, b) => b.score - a.score);
       const updated = {
         ...prev,
         [activeGame]: currentList.slice(0, 5)
       };
-      
+
       try {
         localStorage.setItem("davyportfolio_cv_scores", JSON.stringify(updated));
       } catch (err) {
@@ -671,16 +1038,38 @@ export default function ExploreView() {
     }
   }, [gameSpeed]);
 
+  // Patches Level Initializer
+  const initPatchesLevel = (levelNum: number) => {
+    const levelData = PATCHES_LEVELS[levelNum] || PATCHES_LEVELS[1];
+
+    const tray = levelData.tray.map(p => ({
+      ...p,
+      placed: false
+    }));
+
+    patchesRef.current = {
+      level: levelNum,
+      placedPatches: [],
+      trayPatches: tray,
+      selectedPatch: null,
+      pointer: null,
+      hoverStart: 0,
+      hoverTarget: null,
+      solved: false,
+    };
+
+    setScore(0);
+    setPatchesLevel(levelNum);
+  };
+
   // 8. Start Game Controller
   const startGame = () => {
-    // Resume Audio Context on interaction
     getAudioContext();
 
     setGameStatus("PLAYING");
     setScore(0);
     playSynthSound("start", isMuted);
-    
-    // Reset explosion particles
+
     particlesRef.current = [];
 
     if (activeGame === "snake") {
@@ -701,7 +1090,7 @@ export default function ExploreView() {
 
       if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
       gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
-    } else {
+    } else if (activeGame === "bubble") {
       // Reset Bubble Game
       bubbleRef.current = {
         bubbles: [],
@@ -713,6 +1102,11 @@ export default function ExploreView() {
 
       if (bubbleRequestRef.current) cancelAnimationFrame(bubbleRequestRef.current);
       bubbleRequestRef.current = requestAnimationFrame(bubbleGameTick);
+    } else if (activeGame === "patches") {
+      // Reset Patches Game
+      initPatchesLevel(patchesLevel);
+      if (bubbleRequestRef.current) cancelAnimationFrame(bubbleRequestRef.current);
+      bubbleRequestRef.current = requestAnimationFrame(patchesGameTick);
     }
   };
 
@@ -726,9 +1120,11 @@ export default function ExploreView() {
       setGameStatus("PLAYING");
       if (activeGame === "snake") {
         gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
-      } else {
-        bubbleRef.current.lastSpawn = Date.now(); // reset timer
+      } else if (activeGame === "bubble") {
+        bubbleRef.current.lastSpawn = Date.now();
         bubbleRequestRef.current = requestAnimationFrame(bubbleGameTick);
+      } else if (activeGame === "patches") {
+        bubbleRequestRef.current = requestAnimationFrame(patchesGameTick);
       }
     }
   };
@@ -755,13 +1151,11 @@ export default function ExploreView() {
       case "RIGHT": head.x += 1; break;
     }
 
-    // Bounding check (Game Over)
     if (head.x < 0 || head.x >= sState.gridSize || head.y < 0 || head.y >= sState.gridSize) {
       endGame(sState.score);
       return;
     }
 
-    // Self-collision check
     for (let segment of sState.snake) {
       if (segment.x === head.x && segment.y === head.y) {
         endGame(sState.score);
@@ -769,23 +1163,19 @@ export default function ExploreView() {
       }
     }
 
-    // Insert new head
     sState.snake.unshift(head);
 
-    // Food collision check
     if (head.x === sState.food.x && head.y === sState.food.y) {
       sState.score += 10;
       setScore(sState.score);
       playSynthSound("eat", isMuted);
 
-      // Create particle burst at eat position
       const pX = head.x * 25 + 12.5;
       const pY = head.y * 25 + 12.5;
       createExplosion(pX, pY, "#ff007f");
 
       sState.food = generateSnakeFood(sState.gridSize, sState.snake);
     } else {
-      // Remove tail
       sState.snake.pop();
     }
 
@@ -833,7 +1223,6 @@ export default function ExploreView() {
     const cellSize = canvas.width / snakeRef.current.gridSize; // 25px
     const sState = snakeRef.current;
 
-    // Draw grid mesh
     ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
     ctx.lineWidth = 1;
     for (let i = 0; i <= canvas.width; i += cellSize) {
@@ -848,7 +1237,6 @@ export default function ExploreView() {
       ctx.stroke();
     }
 
-    // Draw food (pulsing glowing circle)
     const foodPulse = 1 + Math.sin(Date.now() / 120) * 0.12;
     const fx = sState.food.x * cellSize + cellSize / 2;
     const fy = sState.food.y * cellSize + cellSize / 2;
@@ -861,14 +1249,12 @@ export default function ExploreView() {
     ctx.fill();
     ctx.restore();
 
-    // Draw snake body
     sState.snake.forEach((seg, idx) => {
       const sx = seg.x * cellSize;
       const sy = seg.y * cellSize;
 
       ctx.save();
       if (idx === 0) {
-        // Head (neon green/cyan with eyes)
         ctx.shadowBlur = 15;
         ctx.shadowColor = "#00f3ff";
         ctx.fillStyle = "#00f3ff";
@@ -876,7 +1262,6 @@ export default function ExploreView() {
         ctx.roundRect(sx + 1, sy + 1, cellSize - 2, cellSize - 2, 6);
         ctx.fill();
 
-        // Draw eyes
         ctx.fillStyle = "#fff";
         const eyeOffset = 6;
         const eyeRad = 2.5;
@@ -901,14 +1286,12 @@ export default function ExploreView() {
         ctx.arc(e2.x, e2.y, eyeRad, 0, 2 * Math.PI);
         ctx.fill();
       } else {
-        // Tail Gradient (neon blue to violet)
         const ratio = idx / sState.snake.length;
         const color = `hsl(${180 + ratio * 90}, 100%, 50%)`;
         ctx.shadowBlur = 4;
         ctx.shadowColor = color;
         ctx.fillStyle = color;
 
-        // Shrink segment size near tail
         const scale = Math.max(0.6, 1 - ratio * 0.45);
         const sSize = cellSize * scale;
         const offset = (cellSize - sSize) / 2;
@@ -920,7 +1303,6 @@ export default function ExploreView() {
       ctx.restore();
     });
 
-    // Update & draw food particles
     drawParticles(ctx);
   };
 
@@ -952,6 +1334,8 @@ export default function ExploreView() {
 
   // 12. Bubble Pop CV Game Logic Loop
   const bubbleGameTick = () => {
+    if (activeGameRef.current !== "bubble") return;
+
     const bState = bubbleRef.current;
     const canvas = gameCanvasRef.current;
     if (!canvas) return;
@@ -960,7 +1344,6 @@ export default function ExploreView() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Grid details
     ctx.strokeStyle = "rgba(255, 255, 255, 0.01)";
     ctx.lineWidth = 1;
     for (let i = 0; i <= canvas.width; i += 50) {
@@ -970,7 +1353,6 @@ export default function ExploreView() {
       ctx.stroke();
     }
 
-    // Spawn bubbles (every 800ms)
     const now = Date.now();
     if (now - bState.lastSpawn > 850) {
       const radius = 20 + Math.random() * 20;
@@ -986,7 +1368,6 @@ export default function ExploreView() {
       bState.lastSpawn = now;
     }
 
-    // Get pointer coords scaled to game canvas (500x500)
     let px: number | null = null;
     let py: number | null = null;
     if (bState.pointer) {
@@ -994,13 +1375,10 @@ export default function ExploreView() {
       py = bState.pointer.y * canvas.height;
     }
 
-    // Update bubbles
     for (let i = bState.bubbles.length - 1; i >= 0; i--) {
       const b = bState.bubbles[i];
       b.y -= b.speedY;
 
-      // Bounding check (reached top -> cost score penalty or game over)
-      // For a fun arcade, let's deduct 5 points. If score goes below -30, Game Over!
       if (b.y < -b.radius) {
         bState.bubbles.splice(i, 1);
         bState.score = Math.max(0, bState.score - 5);
@@ -1008,13 +1386,12 @@ export default function ExploreView() {
         continue;
       }
 
-      // Check hit intersection with pointer
       if (px !== null && py !== null) {
         const dx = b.x - px;
         const dy = b.y - py;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < b.radius + 8) { // Added padding for friendly collision tolerance
+        if (dist < b.radius + 8) {
           b.popped = true;
           bState.score += 10;
           setScore(bState.score);
@@ -1025,12 +1402,10 @@ export default function ExploreView() {
         }
       }
 
-      // Draw beautiful bubble
       ctx.save();
       ctx.shadowBlur = 12;
       ctx.shadowColor = b.color;
-      
-      // Radial glass gradient
+
       const grad = ctx.createRadialGradient(
         b.x - b.radius * 0.25,
         b.y - b.radius * 0.25,
@@ -1050,7 +1425,6 @@ export default function ExploreView() {
       ctx.arc(b.x, b.y, b.radius, 0, 2 * Math.PI);
       ctx.fill();
 
-      // High light crescent reflect
       ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
       ctx.beginPath();
       ctx.arc(b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.22, 0, 2 * Math.PI);
@@ -1059,10 +1433,8 @@ export default function ExploreView() {
       ctx.restore();
     }
 
-    // Draw particle explosions
     drawParticles(ctx);
 
-    // Draw pointer tracking circle in canvas
     if (px !== null && py !== null) {
       ctx.save();
       ctx.shadowBlur = 15;
@@ -1070,12 +1442,10 @@ export default function ExploreView() {
       ctx.strokeStyle = "#00f3ff";
       ctx.lineWidth = 2.5;
 
-      // Outer targeting spinning ring
       ctx.beginPath();
       ctx.arc(px, py, 18, Date.now() / 150, Date.now() / 150 + Math.PI * 1.6);
       ctx.stroke();
 
-      // Inner dot
       ctx.fillStyle = "#fff";
       ctx.beginPath();
       ctx.arc(px, py, 5, 0, 2 * Math.PI);
@@ -1083,9 +1453,278 @@ export default function ExploreView() {
       ctx.restore();
     }
 
-    if (gameStatus === "PLAYING") {
+    if (gameStatusRef.current === "PLAYING") {
       bubbleRequestRef.current = requestAnimationFrame(bubbleGameTick);
     }
+  };
+
+  // 13. Patches CV Game Logic Loop (LinkedIn Style Shikaku Game)
+  const patchesGameTick = () => {
+    if (activeGameRef.current !== "patches") return;
+
+    const pState = patchesRef.current;
+    const canvas = gameCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let px: number | null = null;
+    let py: number | null = null;
+    if (pState.pointer) {
+      px = (1 - pState.pointer.x) * canvas.width;
+      py = pState.pointer.y * canvas.height;
+    }
+
+    const levelData = PATCHES_LEVELS[pState.level];
+    const { gridSize, clues } = levelData;
+    const gridStart = 50;
+    const gridWidth = 400;
+    const cellSize = gridWidth / gridSize;
+
+    // A. Draw board grids
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(gridStart, gridStart, gridWidth, gridWidth);
+
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.lineWidth = 1;
+    for (let i = 1; i < gridSize; i++) {
+      ctx.beginPath();
+      ctx.moveTo(gridStart + i * cellSize, gridStart);
+      ctx.lineTo(gridStart + i * cellSize, gridStart + gridWidth);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(gridStart, gridStart + i * cellSize);
+      ctx.lineTo(gridStart + gridWidth, gridStart + i * cellSize);
+      ctx.stroke();
+    }
+
+    // B. Draw shape clues in cells
+    clues.forEach(clue => {
+      const cx = gridStart + clue.col * cellSize + cellSize / 2;
+      const cy = gridStart + clue.row * cellSize + cellSize / 2;
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(clue.size.toString(), cx, cy - 8);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+      ctx.lineWidth = 1.5;
+
+      const iconSize = 12;
+      if (clue.type === "square") {
+        ctx.strokeRect(cx - iconSize / 2, cy + 6, iconSize, iconSize);
+      } else if (clue.type === "wide") {
+        ctx.strokeRect(cx - iconSize, cy + 8, iconSize * 2, iconSize / 2);
+      } else if (clue.type === "tall") {
+        ctx.strokeRect(cx - iconSize / 4, cy + 4, iconSize / 2, iconSize * 1.5);
+      } else {
+        ctx.beginPath();
+        ctx.arc(cx, cy + 12, iconSize / 2, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+    });
+
+    // C. Draw placed patches
+    pState.placedPatches.forEach(patch => {
+      const px = gridStart + patch.col * cellSize;
+      const py = gridStart + patch.row * cellSize;
+      const pW = patch.width * cellSize;
+      const pH = patch.height * cellSize;
+
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = patch.color;
+
+      ctx.fillStyle = hexToRgba(patch.color, 0.22);
+      ctx.beginPath();
+      ctx.roundRect(px + 4, py + 4, pW - 8, pH - 8, 8);
+      ctx.fill();
+
+      ctx.strokeStyle = patch.color;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // D. Draw tray area
+    const trayY = 460;
+    const trayWidth = 400;
+    const trayCellSize = 25;
+    const slotWidth = trayWidth / pState.trayPatches.length;
+
+    pState.trayPatches.forEach((patch, index) => {
+      const slotX = gridStart + index * slotWidth;
+      const centerX = slotX + slotWidth / 2;
+      const centerY = trayY;
+      const pW = patch.width * trayCellSize;
+      const pH = patch.height * trayCellSize;
+
+      ctx.save();
+      if (patch.placed) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(centerX - pW / 2, centerY - pH / 2, pW, pH, 4);
+        ctx.stroke();
+      } else {
+        let isHovered = false;
+        if (px !== null && py !== null) {
+          if (Math.abs(px - centerX) < slotWidth / 2 && Math.abs(py - centerY) < 30) {
+            isHovered = true;
+          }
+        }
+
+        ctx.shadowBlur = isHovered ? 12 : 5;
+        ctx.shadowColor = patch.color;
+        ctx.fillStyle = hexToRgba(patch.color, isHovered ? 0.35 : 0.15);
+        ctx.strokeStyle = patch.color;
+        ctx.lineWidth = isHovered ? 2.5 : 1.5;
+
+        ctx.beginPath();
+        ctx.roundRect(centerX - pW / 2, centerY - pH / 2, pW, pH, 4);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    // E. Gestures Hover select lock loader logic
+    if (gameStatusRef.current === "PLAYING" && px !== null && py !== null) {
+      let currentTarget: typeof pState.hoverTarget = null;
+
+      if (py >= trayY - 30 && py <= trayY + 30 && px >= gridStart && px <= gridStart + trayWidth) {
+        const index = Math.floor((px - gridStart) / slotWidth);
+        if (index >= 0 && index < pState.trayPatches.length) {
+          const patch = pState.trayPatches[index];
+          if (!patch.placed && !pState.selectedPatch) {
+            currentTarget = { type: "tray", id: patch.id };
+          }
+        }
+      } else if (px >= gridStart && px <= gridStart + gridWidth && py >= gridStart && py <= gridStart + gridWidth) {
+        const col = Math.floor((px - gridStart) / cellSize);
+        const row = Math.floor((py - gridStart) / cellSize);
+
+        if (pState.selectedPatch) {
+          currentTarget = { type: "grid", col, row };
+        } else {
+          const patch = pState.placedPatches.find(p =>
+            col >= p.col && col < p.col + p.width &&
+            row >= p.row && row < p.row + p.height
+          );
+          if (patch) {
+            currentTarget = { type: "grid", id: patch.id, col: patch.col, row: patch.row };
+          }
+        }
+      }
+
+      if (useWebcam && currentTarget) {
+        const isSameTarget = pState.hoverTarget && (
+          (pState.hoverTarget.type === currentTarget.type && pState.hoverTarget.id === currentTarget.id && pState.hoverTarget.col === currentTarget.col && pState.hoverTarget.row === currentTarget.row)
+        );
+
+        if (isSameTarget) {
+          const elapsed = Date.now() - pState.hoverStart;
+          const progress = Math.min(1, elapsed / 800); // 800ms hover select/drop trigger
+
+          ctx.save();
+          ctx.strokeStyle = "#ff007f";
+          ctx.lineWidth = 3.5;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#ff007f";
+          ctx.beginPath();
+          ctx.arc(px, py, 22, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+          if (progress >= 1) {
+            handlePatchesAction(currentTarget);
+            pState.hoverTarget = null;
+          }
+        } else {
+          pState.hoverTarget = currentTarget;
+          pState.hoverStart = Date.now();
+        }
+      } else {
+        pState.hoverTarget = null;
+      }
+
+      // F. Drag previews and outlines on canvas
+      if (pState.selectedPatch && px >= gridStart && px <= gridStart + gridWidth && py >= gridStart && py <= gridStart + gridWidth) {
+        const col = Math.floor((px - gridStart) / cellSize);
+        const row = Math.floor((py - gridStart) / cellSize);
+
+        const startCol = Math.max(0, Math.min(gridSize - pState.selectedPatch.width, col - Math.floor(pState.selectedPatch.width / 2)));
+        const startRow = Math.max(0, Math.min(gridSize - pState.selectedPatch.height, row - Math.floor(pState.selectedPatch.height / 2)));
+
+        const previewX = gridStart + startCol * cellSize;
+        const previewY = gridStart + startRow * cellSize;
+        const previewW = pState.selectedPatch.width * cellSize;
+        const previewH = pState.selectedPatch.height * cellSize;
+
+        ctx.save();
+        ctx.fillStyle = hexToRgba(pState.selectedPatch.color, 0.15);
+        ctx.strokeStyle = pState.selectedPatch.color;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.roundRect(previewX + 4, previewY + 4, previewW - 8, previewH - 8, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (pState.selectedPatch) {
+        const pW = pState.selectedPatch.width * cellSize;
+        const pH = pState.selectedPatch.height * cellSize;
+
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = pState.selectedPatch.color;
+        ctx.fillStyle = hexToRgba(pState.selectedPatch.color, 0.45);
+        ctx.strokeStyle = pState.selectedPatch.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(px - pW / 2, py - pH / 2, pW, pH, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    if (px !== null && py !== null) {
+      ctx.save();
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = "#00f3ff";
+      ctx.strokeStyle = "#00f3ff";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.arc(px, py, 14, Date.now() / 150, Date.now() / 150 + Math.PI * 1.5);
+      ctx.stroke();
+
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if (gameStatusRef.current === "PLAYING") {
+      bubbleRequestRef.current = requestAnimationFrame(patchesGameTick);
+    }
+  };
+
+  const hexToRgba = (hex: string, alpha: number) => {
+    const rgb = hexToRgb(hex);
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
   };
 
   const hexToRgb = (hex: string) => {
@@ -1098,13 +1737,17 @@ export default function ExploreView() {
   };
 
   // Helper cleanups on change games
-  const selectGame = (game: "snake" | "bubble") => {
+  const selectGame = (game: "snake" | "bubble" | "patches") => {
     if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
     if (bubbleRequestRef.current) cancelAnimationFrame(bubbleRequestRef.current);
     setActiveGame(game);
     setGameStatus("IDLE");
     setScore(0);
-    
+
+    if (game === "patches") {
+      initPatchesLevel(1);
+    }
+
     // Immediate canvas clear
     const canvas = gameCanvasRef.current;
     if (canvas) {
@@ -1129,7 +1772,7 @@ export default function ExploreView() {
       </div>
 
       <div className={styles.arcadeGrid}>
-        
+
         {/* Left Side: Camera Console & Controller settings */}
         <div className={styles.consoleCard}>
           <div className={styles.cardHeader}>
@@ -1172,7 +1815,7 @@ export default function ExploreView() {
                 </button>
               </div>
             )}
-            
+
             {useWebcam && cameraError && (
               <div className={styles.cameraFallback}>
                 <p style={{ color: "#ef4444" }}>{cameraError}</p>
@@ -1234,10 +1877,15 @@ export default function ExploreView() {
                   <li><strong>Gesture Mode</strong>: Hold your hand up in front of the lens. Move your index finger up, down, left, or right relative to the center ring. The active HUD direction lights up to guide the snake.</li>
                   <li><strong>Manual Mode</strong>: Disable webcam, then use <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> keys to navigate.</li>
                 </>
-              ) : (
+              ) : activeGame === "bubble" ? (
                 <>
                   <li><strong>Gesture Mode</strong>: Wave your hand in front of the lens. Guide the blue targeting crosshair with your index finger to pop the bubbles!</li>
                   <li><strong>Manual Mode</strong>: Disable webcam, then steer your cursor over the game screen to pop bubbles with your mouse.</li>
+                </>
+              ) : (
+                <>
+                  <li><strong>Gesture Mode</strong>: Hover your index finger over a tray patch for 0.8s to select it, then drag it over the grid. Hover over the snapping preview cell for 0.8s to drop/place it. Hover over a placed patch for 0.8s to return it to the tray.</li>
+                  <li><strong>Manual Mode</strong>: Disable webcam, then click to select, click to drop, and click placed patches to pick them up.</li>
                 </>
               )}
             </ul>
@@ -1246,7 +1894,7 @@ export default function ExploreView() {
 
         {/* Right Side: Arcade Screen and Dashboard */}
         <div className={styles.arcadeConsole}>
-          
+
           {/* Game Selection Tabs */}
           <div className={styles.gameSelectionArea}>
             <button
@@ -1256,7 +1904,7 @@ export default function ExploreView() {
               <h3>Snake CV</h3>
               <p>Steer the snake via index finger tilt joystick. Avoid walls and self-collision.</p>
             </button>
-            
+
             <button
               onClick={() => selectGame("bubble")}
               className={`${styles.gameCard} ${activeGame === "bubble" ? styles.active : ""}`}
@@ -1264,16 +1912,53 @@ export default function ExploreView() {
               <h3>Bubble Pop CV</h3>
               <p>Pop floating bubbles using your index finger as a laser cursor. Fast reactive fun.</p>
             </button>
+
+            <button
+              onClick={() => selectGame("patches")}
+              className={`${styles.gameCard} ${activeGame === "patches" ? styles.active : ""}`}
+            >
+              <h3>Patches CV</h3>
+              <p>Spatial logic puzzle like LinkedIn. Place grid patches satisfying region shape clues.</p>
+            </button>
           </div>
 
           {/* Retro Arcade CRT Monitor Screen */}
           <div className={`${styles.screenOuter} ${gameStatus === "PLAYING" ? styles.activePlay : ""}`}>
-            
+
             {/* Game Canvas Top HUD bar */}
             <div className={styles.hudBar}>
               <span>
-                GAME: <strong>{activeGame === "snake" ? "SNAKE CV" : "BUBBLE POP CV"}</strong>
+                GAME: <strong>{activeGame === "snake" ? "SNAKE CV" : activeGame === "bubble" ? "BUBBLE POP CV" : "PATCHES CV"}</strong>
               </span>
+              {activeGame === "patches" && (
+                <span>
+                  LEVEL:{" "}
+                  {[1, 2, 3].map((lvl) => (
+                    <button
+                      key={lvl}
+                      onClick={() => {
+                        initPatchesLevel(lvl);
+                        setGameStatus("PLAYING");
+                        if (bubbleRequestRef.current) cancelAnimationFrame(bubbleRequestRef.current);
+                        bubbleRequestRef.current = requestAnimationFrame(patchesGameTick);
+                      }}
+                      style={{
+                        background: patchesLevel === lvl ? "var(--brand-medium)" : "rgba(255,255,255,0.1)",
+                        color: patchesLevel === lvl ? "#000" : "#fff",
+                        border: "none",
+                        padding: "0.15rem 0.4rem",
+                        marginLeft: "0.25rem",
+                        borderRadius: "3px",
+                        fontSize: "0.75rem",
+                        cursor: "pointer",
+                        fontWeight: 700
+                      }}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </span>
+              )}
               <span>
                 SCORE: <strong>{score}</strong>
               </span>
@@ -1287,6 +1972,7 @@ export default function ExploreView() {
                 height={500}
                 onMouseMove={handleGameCanvasMouseMove}
                 onMouseLeave={handleGameCanvasMouseLeave}
+                onClick={handleGameCanvasClick}
               />
 
               {/* Game Over / Idle State Screens */}
@@ -1298,7 +1984,9 @@ export default function ExploreView() {
                     <p style={{ marginTop: "0.5rem" }}>
                       {activeGame === "snake"
                         ? "Steer the snake and eat glowing snacks. Control via gestures or arrow keys."
-                        : "Hover your hand or mouse to pop glowing bubbles before they drift off screen."}
+                        : activeGame === "bubble"
+                          ? "Hover your hand or mouse to pop glowing bubbles before they drift off screen."
+                          : "Drag colored patches from the bottom tray to cover the board matching the clue constraints."}
                     </p>
                   </div>
                   <button className={`${styles.btn} ${styles.primary}`} onClick={startGame}>
@@ -1319,7 +2007,9 @@ export default function ExploreView() {
 
               {gameStatus === "GAME_OVER" && (
                 <div className={styles.screenOverlay}>
-                  <h3 style={{ color: "#ef4444" }}>Simulation Over</h3>
+                  <h3 style={{ color: activeGame === "patches" && score === 100 ? "#00ff66" : "#ef4444" }}>
+                    {activeGame === "patches" && score === 100 ? "Level Solved!" : "Simulation Over"}
+                  </h3>
                   <div className={styles.overlayStats}>
                     <div className={styles.statItem}>
                       <span className={styles.val}>{score}</span>
@@ -1344,7 +2034,7 @@ export default function ExploreView() {
                       }}
                     />
                     <button className={`${styles.btn} ${styles.primary}`} onClick={startGame}>
-                      Replay
+                      {activeGame === "patches" && score === 100 ? "Play Again" : "Replay"}
                     </button>
                   </div>
                 </div>
@@ -1393,7 +2083,7 @@ export default function ExploreView() {
           {/* High Scores Leaderboard */}
           <div className={styles.consoleCard} style={{ flex: 1, marginTop: "0.5rem" }}>
             <div className={styles.cardHeader}>
-              <h2>🏆 High Scores</h2>
+              <h2>Your Score</h2>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
               {highScores[activeGame]?.map((entry, index) => (
