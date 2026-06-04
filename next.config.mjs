@@ -7,6 +7,7 @@ const withMDX = mdx({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   pageExtensions: ["ts", "tsx", "md", "mdx"],
   transpilePackages: ["next-mdx-remote"],
   images: {
