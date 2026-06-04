@@ -33,7 +33,7 @@
 .arcadeGrid {
   display: grid;
   grid-template-columns: 360px 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: start;
 
   @media (max-width: 900px) {
@@ -45,7 +45,7 @@
   background: var(--neutral-alpha-weak);
   border: 1px solid var(--neutral-alpha-medium);
   border-radius: var(--radius-l);
-  padding: 1.25rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;

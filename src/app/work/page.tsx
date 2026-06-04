@@ -25,8 +25,8 @@ export default function Work() {
     }));
 
   return (
-    <Column maxWidth="l" paddingTop="40" paddingX="l" gap="32" style={{ position: "relative" }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
+    <>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
         <DotField
           dotRadius={1.5}
           dotSpacing={14}
@@ -42,6 +42,7 @@ export default function Work() {
           glowColor="#120F17"
         />
       </div>
+      <Column maxWidth="l" paddingTop="40" paddingX="l" gap="32" style={{ position: "relative", zIndex: 1, margin: "0 auto", width: "100%" }}>
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -65,5 +66,6 @@ export default function Work() {
       </Column>
       <ProjectGrid projects={allProjects} />
     </Column>
+    </>
   );
 }

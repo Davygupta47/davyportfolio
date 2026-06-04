@@ -22,6 +22,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
           <div
             key={project.slug}
             className={`${styles.card} ${index % 5 === 0 || index % 5 === 3 ? styles.cardWide : styles.cardNarrow}`}
+            style={{ animationDelay: `${index * 0.05}s` }}
           >
             <SmartLink
               href={project.link || `/work/${project.slug}`}
@@ -44,12 +45,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
 
                 {/* Content layer */}
                 <div className={styles.content}>
-                  <div className={styles.topBadge}>
-                    <span className={styles.badge}>
-                      <Icon name="github" size="xs" />
-                      <span>Source Code</span>
-                    </span>
-                  </div>
+                  <div className={styles.topContent} />
                   <div className={styles.bottomContent}>
                     <h3 className={styles.title}>{project.title}</h3>
                     <div className={styles.arrow}>

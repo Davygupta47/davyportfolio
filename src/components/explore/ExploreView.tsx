@@ -1850,7 +1850,7 @@ export default function ExploreView() {
               className={`${styles.gameCard} ${activeGame === "snake" ? styles.active : ""}`}
             >
               <h3>Snake CV</h3>
-              <p>Steer the snake via index finger tilt joystick. Avoid walls and self-collision.</p>
+              <p>Steer via finger joystick. Avoid walls and collisions.</p>
             </button>
 
             <button
@@ -1858,7 +1858,7 @@ export default function ExploreView() {
               className={`${styles.gameCard} ${activeGame === "bubble" ? styles.active : ""}`}
             >
               <h3>Bubble Pop CV</h3>
-              <p>Pop floating bubbles using your index finger as a laser cursor. Fast reactive fun.</p>
+              <p>Use your finger as a cursor to pop floating bubbles.</p>
             </button>
 
             <button
@@ -1866,7 +1866,7 @@ export default function ExploreView() {
               className={`${styles.gameCard} ${activeGame === "patches" ? styles.active : ""}`}
             >
               <h3>Patches CV</h3>
-              <p>Spatial logic puzzle like LinkedIn. Place grid patches satisfying region shape clues.</p>
+              <p>Place patches on the grid to solve the spatial logic puzzle.</p>
             </button>
           </div>
 
@@ -2010,26 +2010,16 @@ export default function ExploreView() {
                 </button>
               </div>
             </div>
-                    {/* Realtime Session Stats Dashboard */}
-          <div className={styles.consoleCard} style={{ flex: 1, marginTop: "0.5rem" }}>
+          </div>
+
+          {/* Realtime Session Stats Dashboard */}
+          <div className={styles.consoleCard}>
             <div className={styles.cardHeader}>
               <h2>Live Session Stats</h2>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div className={styles.scorePanel}>
               {/* Realtime score display */}
-              <div style={{
-                background: "rgba(0, 243, 255, 0.03)",
-                border: "1px dashed rgba(0, 243, 255, 0.2)",
-                borderRadius: "var(--radius-m)",
-                padding: "1rem",
-                textAlign: "center",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.25rem",
-                boxShadow: "inset 0 0 15px rgba(0, 243, 255, 0.02)"
-              }}>
+              <div className={styles.scoreLive}>
                 <span style={{ fontSize: "0.75rem", color: "var(--neutral-on-background-weak)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
                   Realtime Score
                 </span>
@@ -2049,15 +2039,7 @@ export default function ExploreView() {
               </div>
 
               {/* Best score in session */}
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.5rem 0.75rem",
-                background: "rgba(255, 255, 255, 0.02)",
-                borderRadius: "var(--radius-s)",
-                border: "1px solid rgba(255, 255, 255, 0.05)"
-              }}>
+              <div className={styles.scoreBest}>
                 <span style={{ fontSize: "0.8rem", color: "var(--neutral-on-background-weak)" }}>Session Best</span>
                 <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "#00ff66", fontFamily: "var(--font-code)" }}>
                   {Math.max(0, ...sessionScores, score)} pts
@@ -2065,12 +2047,12 @@ export default function ExploreView() {
               </div>
 
               {/* Session history / attempts list */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--neutral-on-background-strong)" }}>
+              <div className={styles.scoreHistory}>
+                <span className={styles.historyTitle}>
                   Recent Session Attempts
                 </span>
                 
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", maxHeight: "150px", overflowY: "auto" }}>
+                <div className={styles.historyList}>
                   {sessionScores.map((s, index) => (
                     <div key={index} className={styles.scoreRow}>
                       <span className={styles.rank}>#{sessionScores.length - index}</span>
@@ -2079,14 +2061,14 @@ export default function ExploreView() {
                     </div>
                   ))}
                   {sessionScores.length === 0 && (
-                    <div style={{ textAlign: "center", color: "var(--neutral-on-background-weak)", fontSize: "0.8rem", padding: "0.75rem 0" }}>
+                    <div className={styles.emptyHistory}>
                       No completed attempts in this session.
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          </div>  </div>
+          </div>
 
         </div>
 
