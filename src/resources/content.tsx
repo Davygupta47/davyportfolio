@@ -6,7 +6,7 @@ const person: Person = {
   lastName: "Dasgupta",
   name: `Dwaipayan Dasgupta`,
   role: "AI/ML Engineer",
-  avatar: "/images/avatar.jpg",
+  avatar: "/images/my.jpg",
   email: "dwaipayan.dg07@gmail.com",
   location: "Asia/Kolkata",
   languages: ["English", "Hindi", "Bengali"],
@@ -164,16 +164,16 @@ const about: About = {
       },
       {
         name: "Delhi Public School, Joka",
-        description: <>Central Board of Secondary Education (CBSE) — scored 81%. (2021-2023)</>,
+        description: <>Central Board of Secondary Education (CBSE) (2021-2023)</>,
       },
       {
         name: "Vivekananda Mission School, Joka",
-        description: <>Indian Certificate of Secondary Education (ICSE) — scored 94%. (2021)</>,
+        description: <>Indian Certificate of Secondary Education (ICSE) (2021)</>,
       },
     ],
   },
   technical: {
-    display: true, // set to false to hide this section
+    display: true,
     title: "Technical Skills",
     skills: [
       {
