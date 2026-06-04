@@ -2,303 +2,284 @@ import { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/
 import { Line, Row, Text } from "@once-ui-system/core";
 
 const person: Person = {
-  firstName: "Selene",
-  lastName: "Yu",
-  name: `Selene Yu`,
-  role: "Design Engineer",
+  firstName: "Dwaipayan",
+  lastName: "Dasgupta",
+  name: `Dwaipayan Dasgupta`,
+  role: "AI/ML Engineer",
   avatar: "/images/avatar.jpg",
-  email: "example@gmail.com",
-  location: "Asia/Jakarta", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
-  languages: ["English", "Bahasa"], // optional: Leave the array empty if you don't want to display languages
-};
+  email: "dwaipayan.dg07@gmail.com",
+  location: "India/Kolkata",
+  languages: ["English", "Hindi", "Bengali"],
 
-const newsletter: Newsletter = {
-  display: true,
-  title: <>Subscribe to {person.firstName}'s Newsletter</>,
-  description: <>My weekly newsletter about creativity and engineering</>,
-};
+  const newsletter: Newsletter = {
+    display: false,
+    title: <>Subscribe to {person.firstName}'s Newsletter</>,
+    description: <>My weekly newsletter about creativity and engineering</>,
+  };
 
-const social: Social = [
-  // Links are automatically displayed.
-  // Import new icons in /once-ui/icons.ts
-  // Set essentials: true for links you want to show on the about page
-  {
-    name: "GitHub",
-    icon: "github",
-    link: "https://github.com/once-ui-system",
-    essential: true,
-  },
-  {
-    name: "LinkedIn",
-    icon: "linkedin",
-    link: "https://www.linkedin.com/company/once-ui/",
-    essential: true,
-  },
-  {
-    name: "Instagram",
-    icon: "instagram",
-    link: "https://www.instagram.com/once_ui/",
-    essential: false,
-  },
-  {
-    name: "Threads",
-    icon: "threads",
-    link: "https://www.threads.com/@once_ui",
-    essential: true,
-  },
-  {
-    name: "Email",
-    icon: "email",
-    link: `mailto:${person.email}`,
-    essential: true,
-  },
-];
+  const social: Social =[
+    // Links are automatically displayed.
+    // Import new icons in /once-ui/icons.ts
+    // Set essentials: true for links you want to show on the about page
+    {
+      name: "GitHub",
+      icon: "github",
+      link: "https://github.com/Davygupta47",
+      essential: true,
+    },
+    {
+      name: "Instagram",
+      icon: "instagram",
+      link: "https://www.instagram.com/davygupta47/",
+      essential: false,
+    },
+    {
+      name: "LinkedIn",
+      icon: "linkedin",
+      link: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319",
+      essential: true,
+    },
+    {
+      name: "Email",
+      icon: "email",
+      link: `mailto:${person.email}`,
+      essential: true,
+    },
+  ];
 
-const home: Home = {
-  path: "/",
-  image: "/images/og/home.jpg",
-  label: "Home",
-  title: `${person.name}'s Portfolio`,
-  description: `Portfolio website showcasing my work as a ${person.role}`,
-  headline: <>Building bridges between design and code</>,
-  featured: {
-    display: true,
-    title: (
-      <Row gap="12" vertical="center">
-        <strong className="ml-4">Once UI</strong>{" "}
-        <Line background="brand-alpha-strong" vert height="20" />
-        <Text marginRight="4" onBackground="brand-medium">
-          Featured work
-        </Text>
-      </Row>
-    ),
-    href: "/work/building-once-ui-a-customizable-design-system",
-  },
-  subline: (
-    <>
-    I'm Selene, a design engineer at <Text as="span" size="xl" weight="strong">ONCE UI</Text>, where I craft intuitive <br /> user experiences. After hours, I build my own projects.
-</>
-  ),
-};
-
-const about: About = {
-  path: "/about",
-  label: "About",
-  title: `About – ${person.name}`,
-  description: `Meet ${person.name}, ${person.role} from ${person.location}`,
-  tableOfContent: {
-    display: true,
-    subItems: false,
-  },
-  avatar: {
-    display: true,
-  },
-  calendar: {
-    display: true,
-    link: "https://cal.com",
-  },
-  intro: {
-    display: true,
-    title: "Introduction",
-    description: (
+  const home: Home = {
+    path: "/",
+    image: "/images/og/home.jpg",
+    label: "Home",
+    title: `${person.name}'s Portfolio`,
+    description: `Portfolio website showcasing my work as an ${person.role}`,
+    headline: <>Transforming data into actionable insights</>,
+    featured: {
+      display: true,
+      title: (
+        <Row gap="12" vertical="center">
+          <strong className="ml-4">Featured</strong>{" "}
+          <Line background="brand-alpha-strong" vert height="20" />
+          <Text marginRight="4" onBackground="brand-medium">
+            Projects
+          </Text>
+        </Row>
+      ),
+      href: "/work",
+    },
+    subline: (
       <>
-        Selene is a Jakarta-based design engineer with a passion for transforming complex challenges
-        into simple, elegant design solutions. Her work spans digital interfaces, interactive
-        experiences, and the convergence of design and technology.
+        I'm Dwaipayan, an AI/ML undergraduate specializing in <Text as="span" size="xl" weight="strong">Machine Learning and Deep Learning</Text>, developing impactful AI-driven solutions.
       </>
     ),
-  },
-  work: {
-    display: true, // set to false to hide this section
-    title: "Work Experience",
-    experiences: [
+  };
+
+  const about: About = {
+    path: "/about",
+    label: "About",
+    title: `About – ${person.name}`,
+    description: `Meet ${person.name}, ${person.role} from Kolkata, India`,
+    tableOfContent: {
+      display: true,
+      subItems: false,
+    },
+    avatar: {
+      display: true,
+    },
+    calendar: {
+      display: false,
+      link: "https://cal.com",
+    },
+    intro: {
+      display: true,
+      title: "Introduction",
+      description: (
+        <>
+          An AI/ML undergraduate specializing in Machine Learning, Deep Learning, Artificial Intelligence, and algorithms. Experienced in transforming data into meaningful, actionable insights using modern programming languages and frameworks. Dedicated to developing impactful AI-driven solutions and possesses strong team management, collaboration, and problem-solving skills to ensure successful product development.
+        </>
+      ),
+    },
+    work: {
+      display: true, // set to false to hide this section
+      title: "Work Experience",
+      experiences: [
+        {
+          company: "Fizofy (Startup)",
+          timeframe: "Oct 2025 - Jan 2026",
+          role: "Technical Team Lead",
+          achievements: [
+            <>
+              Led a cross-functional team to develop and launch AI-driven health features, including personalized diet planning and real-time fitness tracking.
+            </>,
+            <>
+              Managed project timelines and coordinated team efforts to ensure the successful delivery of high-quality, HIPAA-compliant healthcare solutions.
+            </>,
+            <>
+              Mentored team members and fostered a collaborative environment, driving continuous improvement in product development and user satisfaction.
+            </>,
+          ],
+          images: [],
+        },
+        {
+          company: "American Society of Microbiology",
+          timeframe: "Aug 2024 - Jan 2026",
+          role: "Global Outreach Student",
+          achievements: [
+            <>
+              Promoted microbial science to a global audience by organizing educational events and networking opportunities for students and professionals.
+            </>,
+            <>
+              Shared scientific research through workshops and outreach programs to help make complex microbiology accessible, and implemented cutting-edge AI technology for a better understanding of structures.
+            </>,
+          ],
+          images: [],
+        },
+        {
+          company: "Zidio Development",
+          timeframe: "Jan 2025 - Apr 2025",
+          role: "Data Research Analyst",
+          achievements: [
+            <>
+              Extracted and synthesized large datasets using Python and SQL to identify emerging market trends, providing actionable insights that informed strategic project planning.
+            </>,
+            <>
+              Developed interactive dashboards in Power BI/Tableau to visualize complex research findings, enabling stakeholders to make data-driven decisions with greater speed and accuracy.
+            </>,
+            <>
+              Streamlined data collection and cleaning workflows by implementing automated scripts, significantly reducing manual errors and improving the reliability of research outputs.
+            </>,
+          ],
+          images: [],
+        },
+      ],
+    },
+    studies: {
+      display: true, // set to false to hide this section
+      title: "Education",
+      institutions: [
+        {
+          name: "Heritage Institute of Technology",
+          description: <>B.Tech in Computer Science Engineering (AI & ML), located in Kolkata, WB. (2023-2027)</>,
+        },
+        {
+          name: "Delhi Public School, Joka",
+          description: <>Central Board of Secondary Education (CBSE) — scored 81%. (2021-2023)</>,
+        },
+        {
+          name: "Vivekananda Mission School, Joka",
+          description: <>Indian Certificate of Secondary Education (ICSE) — scored 94%. (2021)</>,
+        },
+      ],
+    },
+    technical: {
+      display: true, // set to false to hide this section
+      title: "Technical Skills",
+      skills: [
+        {
+          title: "Languages",
+          description: (
+            <>Python, R, C, C++, SQL, Java, MATLAB</>
+          ),
+          tags: [],
+          images: [],
+        },
+        {
+          title: "Frameworks",
+          description: (
+            <>PyTorch, TensorFlow, Keras, LangChain, MLflow, Apache Spark, AWS Sagemaker, Kubernetes</>
+          ),
+          tags: [],
+          images: [],
+        },
+        {
+          title: "Tools / Developer Tools",
+          description: (
+            <>Git, GitHub, MongoDB, PostgreSQL, Docker, Weka, Power BI, Tableau</>
+          ),
+          tags: [],
+          images: [],
+        },
+        {
+          title: "Analysis & Research",
+          description: (
+            <>Data Analysis, Business Intelligence, Feasibility Studies, Performance Metrics</>
+          ),
+          tags: [],
+          images: [],
+        },
+        {
+          title: "Leadership & Soft Skills",
+          description: (
+            <>Team Leadership, Time Management, Problem Solving, Critical Thinking, Effective Communication</>
+          ),
+          tags: [],
+          images: [],
+        },
+      ],
+    },
+  };
+
+  const blog: Blog = {
+    path: "/blog",
+    label: "Blog",
+    title: "Writing about AI and tech...",
+    description: `Read what ${person.name} has been up to recently`,
+  };
+
+  const work: Work = {
+    path: "/work",
+    label: "Work",
+    title: `Projects – ${person.name}`,
+    description: `AI/ML projects by ${person.name}`,
+  };
+
+  const gallery: Gallery = {
+    path: "/gallery",
+    label: "Gallery",
+    title: `Photo gallery – ${person.name}`,
+    description: `A photo collection by ${person.name}`,
+    images: [
       {
-        company: "FLY",
-        timeframe: "2022 - Present",
-        role: "Senior Design Engineer",
-        achievements: [
-          <>
-            Redesigned the UI/UX for the FLY platform, resulting in a 20% increase in user
-            engagement and 30% faster load times.
-          </>,
-          <>
-            Spearheaded the integration of AI tools into design workflows, enabling designers to
-            iterate 50% faster.
-          </>,
-        ],
-        images: [
-          // optional: leave the array empty if you don't want to display images
-          {
-            src: "/images/projects/project-01/cover-01.jpg",
-            alt: "Once UI Project",
-            width: 16,
-            height: 9,
-          },
-        ],
+        src: "/images/gallery/horizontal-1.jpg",
+        alt: "image",
+        orientation: "horizontal",
       },
       {
-        company: "Creativ3",
-        timeframe: "2018 - 2022",
-        role: "Lead Designer",
-        achievements: [
-          <>
-            Developed a design system that unified the brand across multiple platforms, improving
-            design consistency by 40%.
-          </>,
-          <>
-            Led a cross-functional team to launch a new product line, contributing to a 15% increase
-            in overall company revenue.
-          </>,
-        ],
-        images: [],
+        src: "/images/gallery/vertical-4.jpg",
+        alt: "image",
+        orientation: "vertical",
+      },
+      {
+        src: "/images/gallery/horizontal-3.jpg",
+        alt: "image",
+        orientation: "horizontal",
+      },
+      {
+        src: "/images/gallery/vertical-1.jpg",
+        alt: "image",
+        orientation: "vertical",
+      },
+      {
+        src: "/images/gallery/vertical-2.jpg",
+        alt: "image",
+        orientation: "vertical",
+      },
+      {
+        src: "/images/gallery/horizontal-2.jpg",
+        alt: "image",
+        orientation: "horizontal",
+      },
+      {
+        src: "/images/gallery/horizontal-4.jpg",
+        alt: "image",
+        orientation: "horizontal",
+      },
+      {
+        src: "/images/gallery/vertical-3.jpg",
+        alt: "image",
+        orientation: "vertical",
       },
     ],
-  },
-  studies: {
-    display: true, // set to false to hide this section
-    title: "Studies",
-    institutions: [
-      {
-        name: "University of Jakarta",
-        description: <>Studied software engineering.</>,
-      },
-      {
-        name: "Build the Future",
-        description: <>Studied online marketing and personal branding.</>,
-      },
-    ],
-  },
-  technical: {
-    display: true, // set to false to hide this section
-    title: "Technical skills",
-    skills: [
-      {
-        title: "Figma",
-        description: (
-          <>Able to prototype in Figma with Once UI with unnatural speed.</>
-        ),
-        tags: [
-          {
-            name: "Figma",
-            icon: "figma",
-          },
-        ],
-        // optional: leave the array empty if you don't want to display images
-        images: [
-          {
-            src: "/images/projects/project-01/cover-02.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-          {
-            src: "/images/projects/project-01/cover-03.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-        ],
-      },
-      {
-        title: "Next.js",
-        description: (
-          <>Building next gen apps with Next.js + Once UI + Supabase.</>
-        ),
-        tags: [
-          {
-            name: "JavaScript",
-            icon: "javascript",
-          },
-          {
-            name: "Next.js",
-            icon: "nextjs",
-          },
-          {
-            name: "Supabase",
-            icon: "supabase",
-          },
-        ],
-        // optional: leave the array empty if you don't want to display images
-        images: [
-          {
-            src: "/images/projects/project-01/cover-04.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-        ],
-      },
-    ],
-  },
-};
+  };
 
-const blog: Blog = {
-  path: "/blog",
-  label: "Blog",
-  title: "Writing about design and tech...",
-  description: `Read what ${person.name} has been up to recently`,
-  // Create new blog posts by adding a new .mdx file to app/blog/posts
-  // All posts will be listed on the /blog route
-};
-
-const work: Work = {
-  path: "/work",
-  label: "Work",
-  title: `Projects – ${person.name}`,
-  description: `Design and dev projects by ${person.name}`,
-  // Create new project pages by adding a new .mdx file to app/blog/posts
-  // All projects will be listed on the /home and /work routes
-};
-
-const gallery: Gallery = {
-  path: "/gallery",
-  label: "Gallery",
-  title: `Photo gallery – ${person.name}`,
-  description: `A photo collection by ${person.name}`,
-  // Images by https://lorant.one
-  // These are placeholder images, replace with your own
-  images: [
-    {
-      src: "/images/gallery/horizontal-1.jpg",
-      alt: "image",
-      orientation: "horizontal",
-    },
-    {
-      src: "/images/gallery/vertical-4.jpg",
-      alt: "image",
-      orientation: "vertical",
-    },
-    {
-      src: "/images/gallery/horizontal-3.jpg",
-      alt: "image",
-      orientation: "horizontal",
-    },
-    {
-      src: "/images/gallery/vertical-1.jpg",
-      alt: "image",
-      orientation: "vertical",
-    },
-    {
-      src: "/images/gallery/vertical-2.jpg",
-      alt: "image",
-      orientation: "vertical",
-    },
-    {
-      src: "/images/gallery/horizontal-2.jpg",
-      alt: "image",
-      orientation: "horizontal",
-    },
-    {
-      src: "/images/gallery/horizontal-4.jpg",
-      alt: "image",
-      orientation: "horizontal",
-    },
-    {
-      src: "/images/gallery/vertical-3.jpg",
-      alt: "image",
-      orientation: "vertical",
-    },
-  ],
-};
-
-export { person, social, newsletter, home, about, blog, work, gallery };
+  export { person, social, newsletter, home, about, blog, work, gallery };
