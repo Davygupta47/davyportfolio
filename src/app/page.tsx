@@ -15,6 +15,7 @@ import {
 import { home, about, person, baseURL, routes, social } from "@/resources";
 import { Mailchimp } from "@/components";
 import { Posts } from "@/components/blog/Posts";
+import F1CarCanvas from "@/components/3d/F1CarCanvas";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -28,7 +29,10 @@ export async function generateMetadata() {
 
 export default function Home() {
   return (
-    <Column maxWidth="m" gap="xl" paddingY="12" horizontal="center">
+    <Column maxWidth="m" gap="xl" paddingY="12" horizontal="center" style={{ position: "relative" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "600px", zIndex: -1, opacity: 0.8 }}>
+        <F1CarCanvas />
+      </div>
       <Schema
         as="webPage"
         baseURL={baseURL}
