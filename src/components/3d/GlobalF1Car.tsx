@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { useGLTF, Sparkles, Float, ContactShadows, Environment } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useGLTF, Sparkles, ContactShadows, Environment } from '@react-three/drei';
 import { usePathname } from 'next/navigation';
 import * as THREE from 'three';
 
 // Preload the model
 useGLTF.preload('/models/ferrari/scene.gltf');
 
-export default function GlobalF1Car() {
+function F1Scene() {
   const { scene } = useGLTF('/models/ferrari/scene.gltf');
   const pathname = usePathname();
   
@@ -101,5 +101,15 @@ export default function GlobalF1Car() {
       <ContactShadows position={[0, -1, 0]} opacity={0.6} scale={15} blur={2} far={4} />
       <Environment preset="city" />
     </>
+  );
+}
+
+export default function GlobalF1Car() {
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }}>
+      <Canvas camera={{ position: [4, 2, 5], fov: 45 }}>
+        <F1Scene />
+      </Canvas>
+    </div>
   );
 }

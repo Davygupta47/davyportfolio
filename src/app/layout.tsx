@@ -15,7 +15,7 @@ import {
 } from "@once-ui-system/core";
 import { Footer, Header, RouteGuard, Providers } from "@/components";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
-import { Canvas } from "@react-three/fiber";
+
 import GlobalF1Car from "@/components/3d/GlobalF1Car";
 
 export async function generateMetadata() {
@@ -115,11 +115,7 @@ export default async function RootLayout({
           padding="0"
           horizontal="center"
         >
-          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }}>
-            <Canvas camera={{ position: [4, 2, 5], fov: 45 }}>
-              <GlobalF1Car />
-            </Canvas>
-          </div>
+          <GlobalF1Car />
           
           <RevealFx fill position="absolute" style={{ zIndex: 1, pointerEvents: "none" }}>
             <Background
