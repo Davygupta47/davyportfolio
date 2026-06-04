@@ -143,6 +143,7 @@ export default function ExploreView() {
   const [handActive, setHandActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [username, setUsername] = useState("Player");
+  const [gameSpeed, setGameSpeed] = useState<"slow" | "normal" | "fast">("normal");
 
   // Debug position state
   const [trackedCoords, setTrackedCoords] = useState<{ x: number; y: number } | null>(null);
@@ -153,6 +154,7 @@ export default function ExploreView() {
   const cameraCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const webcamStreamRef = useRef<MediaStream | null>(null);
+  const anchorRef = useRef<{ x: number; y: number } | null>(null);
 
   // Game engine refs (to avoid closure capture problems in loops)
   const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -328,6 +330,7 @@ export default function ExploreView() {
     setHandActive(false);
     setTrackedCoords(null);
     setActiveGestureDirection(null);
+    anchorRef.current = null;
     if (webcamStreamRef.current) {
       webcamStreamRef.current.getTracks().forEach((track) => track.stop());
       webcamStreamRef.current = null;
@@ -345,17 +348,19 @@ export default function ExploreView() {
 
   // 4. Process Hand Landmarks and HUD Control
   const processGestureResults = (results: any) => {
+    const video = videoRef.current;
     const canvas = cameraCanvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !video) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Sync canvas size with video streaming dimensions for perfect mobile scaling
+    if (video.videoWidth && canvas.width !== video.videoWidth) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    }
 
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const innerRadius = 35;
-    const outerRadius = 85;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Detect hand
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
@@ -395,6 +400,13 @@ export default function ExploreView() {
         ctx.stroke();
       });
 
+      // Calculate palm center (average of wrist 0, index knuckle 5, pinky knuckle 17)
+      const w = landmarks[0];
+      const iKnuckle = landmarks[5];
+      const pKnuckle = landmarks[17];
+      const px = ((1 - w.x) + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3 * canvas.width;
+      const py = (w.y + iKnuckle.y + pKnuckle.y) / 3 * canvas.height;
+
       // Index finger tip (landmark index 8)
       const indexTip = landmarks[8];
       const pointerX = (1 - indexTip.x) * canvas.width;
@@ -402,18 +414,33 @@ export default function ExploreView() {
 
       setTrackedCoords({ x: Math.round(pointerX), y: Math.round(pointerY) });
 
-      // If active game is Bubble Pop, send pointer position directly
-      if (activeGame === "bubble") {
-        bubbleRef.current.pointer = { x: pointerX, y: pointerY };
+      // Initialize anchor if null
+      if (!anchorRef.current) {
+        anchorRef.current = { x: px, y: py };
       }
 
-      // If active game is Snake, use D-pad Virtual Joystick HUD
-      if (activeGame === "snake") {
-        const dx = pointerX - cx;
-        const dy = pointerY - cy;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+      const dx = px - anchorRef.current.x;
+      const dy = py - anchorRef.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
+      // Slide/drift anchor if hand is moved too far
+      const maxRadius = Math.min(canvas.width, canvas.height) * 0.22; // Dynamic outer radius based on camera size
+      if (distance > maxRadius) {
+        const angle = Math.atan2(dy, dx);
+        anchorRef.current.x = px - Math.cos(angle) * maxRadius;
+        anchorRef.current.y = py - Math.sin(angle) * maxRadius;
+      }
+
+      // If active game is Bubble Pop, send pointer position directly (normalized)
+      if (activeGame === "bubble") {
+        bubbleRef.current.pointer = { x: indexTip.x, y: indexTip.y };
+      }
+
+      // If active game is Snake, use floating D-pad Virtual Joystick HUD
+      if (activeGame === "snake") {
+        const innerRadius = Math.min(canvas.width, canvas.height) * 0.07; // Dead zone radius
         let detectedDir: Direction | null = null;
+        
         if (distance > innerRadius) {
           const angle = Math.atan2(dy, dx); // range -PI to PI
           
@@ -447,44 +474,76 @@ export default function ExploreView() {
       setHandActive(false);
       setTrackedCoords(null);
       setActiveGestureDirection(null);
+      anchorRef.current = null; // Reset anchor so it re-centers next time the hand appears
       if (activeGame === "bubble") {
         bubbleRef.current.pointer = null;
       }
     }
 
     // Draw the Joystick D-Pad HUD overlays for Snake Game
-    if (activeGame === "snake") {
+    if (activeGame === "snake" && anchorRef.current) {
+      const ax = anchorRef.current.x;
+      const ay = anchorRef.current.y;
+      const innerRadius = Math.min(canvas.width, canvas.height) * 0.07;
+      const outerRadius = Math.min(canvas.width, canvas.height) * 0.22;
+
       ctx.save();
+      
+      // Draw tether line from anchor to palm
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const w = results.multiHandLandmarks[0][0];
+        const iKnuckle = results.multiHandLandmarks[0][5];
+        const pKnuckle = results.multiHandLandmarks[0][17];
+        const px = ((1 - w.x) + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3 * canvas.width;
+        const py = (w.y + iKnuckle.y + pKnuckle.y) / 3 * canvas.height;
+
+        ctx.strokeStyle = "rgba(0, 243, 255, 0.4)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Draw small glowing dot on palm center
+        ctx.fillStyle = "#ff007f";
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#ff007f";
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
       // Draw Neutral Zone
-      ctx.strokeStyle = "rgba(0, 243, 255, 0.2)";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0, 243, 255, 0.25)";
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
+      ctx.arc(ax, ay, innerRadius, 0, 2 * Math.PI);
       ctx.stroke();
 
       // Outer boundary
-      ctx.strokeStyle = "rgba(0, 243, 255, 0.08)";
+      ctx.strokeStyle = "rgba(0, 243, 255, 0.05)";
       ctx.beginPath();
-      ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+      ctx.arc(ax, ay, outerRadius, 0, 2 * Math.PI);
       ctx.stroke();
 
       // Draw active quadrant highlight
       const drawArrow = (angle: number, label: string, active: boolean) => {
         ctx.save();
-        ctx.translate(cx, cy);
+        ctx.translate(ax, ay);
         ctx.rotate(angle);
 
-        // Arrow line
-        ctx.strokeStyle = active ? "#00f3ff" : "rgba(255, 255, 255, 0.15)";
-        ctx.fillStyle = active ? "rgba(0, 243, 255, 0.25)" : "rgba(255, 255, 255, 0.02)";
-        ctx.lineWidth = active ? 3 : 1.5;
+        // Arrow quadrant fill
+        ctx.strokeStyle = active ? "#00f3ff" : "rgba(255, 255, 255, 0.12)";
+        ctx.fillStyle = active ? "rgba(0, 243, 255, 0.2)" : "rgba(255, 255, 255, 0.01)";
+        ctx.lineWidth = active ? 2.5 : 1;
         if (active) {
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = 8;
           ctx.shadowColor = "#00f3ff";
         }
 
         ctx.beginPath();
-        // Sector bounding lines
         ctx.arc(0, 0, outerRadius, -Math.PI / 4, Math.PI / 4);
         ctx.lineTo(innerRadius * Math.cos(Math.PI / 4), innerRadius * Math.sin(Math.PI / 4));
         ctx.arc(0, 0, innerRadius, Math.PI / 4, -Math.PI / 4, true);
@@ -493,19 +552,19 @@ export default function ExploreView() {
         ctx.stroke();
 
         // Icon text/arrow character
-        ctx.fillStyle = active ? "#00f3ff" : "rgba(255, 255, 255, 0.3)";
-        ctx.font = "bold 9px sans-serif";
+        ctx.fillStyle = active ? "#00f3ff" : "rgba(255, 255, 255, 0.25)";
+        ctx.font = "bold 8px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText(label, (innerRadius + outerRadius) / 2, 4);
+        ctx.fillText(label, (innerRadius + outerRadius) / 2, 3);
 
         ctx.restore();
       };
 
       const act = activeGestureDirection;
-      drawArrow(0, "▶ RIGHT", act === "RIGHT");
-      drawArrow(Math.PI / 2, "▼ DOWN", act === "DOWN");
-      drawArrow(Math.PI, "◀ LEFT", act === "LEFT");
-      drawArrow(-Math.PI / 2, "▲ UP", act === "UP");
+      drawArrow(0, "▶ R", act === "RIGHT");
+      drawArrow(Math.PI / 2, "▼ D", act === "DOWN");
+      drawArrow(Math.PI, "◀ L", act === "LEFT");
+      drawArrow(-Math.PI / 2, "▲ U", act === "UP");
       ctx.restore();
     }
   };
@@ -557,10 +616,10 @@ export default function ExploreView() {
       // Mouse X/Y relative to canvas bounds
       const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
       const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-      // Map to pointer (mock camera space for consistent coordinates matching)
+      // Store in normalized format
       bubbleRef.current.pointer = {
-        x: mx * 320 / 500,
-        y: my * 240 / 500
+        x: 1 - (mx / canvas.width),
+        y: my / canvas.height
       };
     }
   };
@@ -600,6 +659,18 @@ export default function ExploreView() {
     });
   };
 
+  const getSpeedMs = () => {
+    return gameSpeed === "slow" ? 220 : gameSpeed === "normal" ? 150 : 95;
+  };
+
+  // 7b. Adjust speed dynamically mid-game
+  useEffect(() => {
+    if (activeGame === "snake" && gameStatus === "PLAYING") {
+      if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
+      gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
+    }
+  }, [gameSpeed]);
+
   // 8. Start Game Controller
   const startGame = () => {
     // Resume Audio Context on interaction
@@ -629,7 +700,7 @@ export default function ExploreView() {
       };
 
       if (gameIntervalRef.current) clearInterval(gameIntervalRef.current);
-      gameIntervalRef.current = setInterval(snakeGameTick, 130);
+      gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
     } else {
       // Reset Bubble Game
       bubbleRef.current = {
@@ -654,7 +725,7 @@ export default function ExploreView() {
     } else if (gameStatus === "PAUSED") {
       setGameStatus("PLAYING");
       if (activeGame === "snake") {
-        gameIntervalRef.current = setInterval(snakeGameTick, 130);
+        gameIntervalRef.current = setInterval(snakeGameTick, getSpeedMs());
       } else {
         bubbleRef.current.lastSpawn = Date.now(); // reset timer
         bubbleRequestRef.current = requestAnimationFrame(bubbleGameTick);
@@ -919,8 +990,8 @@ export default function ExploreView() {
     let px: number | null = null;
     let py: number | null = null;
     if (bState.pointer) {
-      px = bState.pointer.x * canvas.width / 320;
-      py = bState.pointer.y * canvas.height / 240;
+      px = (1 - bState.pointer.x) * canvas.width;
+      py = bState.pointer.y * canvas.height;
     }
 
     // Update bubbles
@@ -1130,6 +1201,25 @@ export default function ExploreView() {
               >
                 {useWebcam ? "Switch to Manual" : "Switch to Webcam"}
               </button>
+            </div>
+          </div>
+
+          {/* Game Speed Settings */}
+          <div className={styles.controlGroup}>
+            <div className={styles.controlRow}>
+              <label>Simulation Speed</label>
+              <div style={{ display: "flex", gap: "4px" }}>
+                {(["slow", "normal", "fast"] as const).map((speed) => (
+                  <button
+                    key={speed}
+                    onClick={() => setGameSpeed(speed)}
+                    className={`${styles.btn} ${gameSpeed === speed ? styles.primary : ""}`}
+                    style={{ padding: "0.35rem 0.65rem", fontSize: "0.75rem" }}
+                  >
+                    {speed}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

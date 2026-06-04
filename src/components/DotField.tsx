@@ -7,6 +7,21 @@ import './DotField.css';
 
 const TWO_PI = Math.PI * 2;
 
+interface DotFieldProps extends React.HTMLAttributes<HTMLDivElement> {
+  dotRadius?: number;
+  dotSpacing?: number;
+  cursorRadius?: number;
+  cursorForce?: number;
+  bulgeOnly?: boolean;
+  bulgeStrength?: number;
+  glowRadius?: number;
+  sparkle?: boolean;
+  waveAmplitude?: number;
+  gradientFrom?: string;
+  gradientTo?: string;
+  glowColor?: string;
+}
+
 const DotField = memo(({
   dotRadius = 1.5,
   dotSpacing = 14,
@@ -21,7 +36,7 @@ const DotField = memo(({
   gradientTo = 'rgba(180, 151, 207, 0.25)',
   glowColor = '#120F17',
   ...rest
-}) => {
+}: DotFieldProps) => {
   const canvasRef = useRef(null);
   const svgRef = useRef(null);
   const glowRef = useRef(null);

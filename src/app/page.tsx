@@ -10,10 +10,10 @@ import {
   Schema,
   Meta,
   Line,
+  IconButton,
 } from "@once-ui-system/core";
-import { home, about, person, baseURL, routes } from "@/resources";
+import { home, about, person, baseURL, routes, social } from "@/resources";
 import { Mailchimp } from "@/components";
-import { Projects } from "@/components/work/Projects";
 import { Posts } from "@/components/blog/Posts";
 
 export async function generateMetadata() {
@@ -100,9 +100,6 @@ export default function Home() {
           </RevealFx>
         </Column>
       </Column>
-      <RevealFx translateY="16" delay={0.6}>
-        <Projects range={[1, 1]} />
-      </RevealFx>
       {routes["/blog"] && (
         <Column fillWidth gap="24" marginBottom="l">
           <Row fillWidth paddingRight="64">
@@ -123,7 +120,71 @@ export default function Home() {
           </Row>
         </Column>
       )}
-      <Projects range={[2]} />
+      
+      <RevealFx translateY="16" delay={0.6} fillWidth>
+        <Column
+          fillWidth
+          background="neutral-alpha-weak"
+          border="neutral-alpha-weak"
+          radius="l-4"
+          padding="32"
+          gap="24"
+          horizontal="center"
+          style={{
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.2)",
+            border: "1px solid var(--neutral-alpha-medium)",
+          }}
+        >
+          <Column gap="8" horizontal="center" align="center">
+            <Heading variant="heading-strong-xl" align="center">
+              Let's build something amazing together
+            </Heading>
+            <Text variant="body-default-m" onBackground="neutral-weak" align="center" style={{ maxWidth: "480px" }}>
+              I'm always open to discussing new opportunities, creative collaborations, or machine learning challenges. Reach out and let's connect!
+            </Text>
+          </Column>
+          
+          <Row gap="16" vertical="center" horizontal="center" wrap style={{ width: "100%" }}>
+            <Button
+              href={`mailto:${person.email}`}
+              variant="primary"
+              size="m"
+              data-border="rounded"
+              prefixIcon="email"
+            >
+              Email Me
+            </Button>
+            <Button
+              href={about.path}
+              variant="secondary"
+              size="m"
+              data-border="rounded"
+            >
+              More About Me
+            </Button>
+          </Row>
+          
+          <Line background="neutral-alpha-weak" />
+          
+          <Row gap="16" horizontal="center" vertical="center">
+            {social.map(
+              (item) =>
+                item.link && (
+                  <IconButton
+                    key={item.name}
+                    href={item.link}
+                    icon={item.icon}
+                    tooltip={item.name}
+                    size="m"
+                    variant="ghost"
+                  />
+                ),
+            )}
+          </Row>
+        </Column>
+      </RevealFx>
+
       <Mailchimp />
     </Column>
   );
