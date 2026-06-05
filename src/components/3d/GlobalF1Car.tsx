@@ -192,15 +192,22 @@ function AboutCarScene() {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       const scrollProgress = maxScroll > 0 ? scrollY / maxScroll : 0;
       
-      // Car drives forward and steers slightly as you scroll down
-      const targetZ = scrollProgress * 20 - 10;
-      const targetX = Math.sin(scrollProgress * Math.PI) * 5;
-      const targetRotY = Math.PI + Math.sin(scrollProgress * Math.PI) * 0.5;
+      // Car drives diagonally from far top-right to close bottom-left
+      // Starts at Z=-50, X=30
+      // Ends at Z=20, X=-20
+      const targetZ = THREE.MathUtils.lerp(-40, 20, scrollProgress);
+      const targetX = THREE.MathUtils.lerp(30, -20, scrollProgress);
+      
+      // Face towards bottom left
+      const targetRotY = Math.atan2(-20 - 30, 20 - -40) - Math.PI / 2; // points the nose to the travel direction
+      
+      // Scale up as it gets closer
+      const dynamicScale = THREE.MathUtils.lerp(1.5, 4, scrollProgress);
 
       group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, targetZ, 0.1);
       group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, targetX, 0.1);
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
-      group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, 1, 0.1));
+      group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, dynamicScale, 0.1));
       
       // Gentle hover effect
       group.current.position.y = Math.sin(Date.now() * 0.002) * 0.2;
