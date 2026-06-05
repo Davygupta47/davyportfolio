@@ -17,7 +17,6 @@ import { Footer, Header, RouteGuard, Providers } from "@/components";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
 
 import GlobalF1Car from "@/components/3d/GlobalF1Car";
-import F1RacingTrack from "@/components/3d/F1RacingTrack";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -116,7 +115,6 @@ export default async function RootLayout({
           padding="0"
           horizontal="center"
         >
-          <F1RacingTrack />
           <GlobalF1Car />
           
           <RevealFx fill position="absolute" style={{ zIndex: 1, pointerEvents: "none" }}>
