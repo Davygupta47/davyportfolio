@@ -1,87 +1,31 @@
 "use client";
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Bounds } from '@react-three/drei';
+import { usePathname } from 'next/navigation';
 import * as THREE from 'three';
-import { useTheme } from 'next-themes';
 
 /**
- * Procedurally generates the asphalt texture with subtle grain and rubber streaks.
+ * Custom hook to detect light/dark theme from the HTML data-theme attribute used by once-ui.
  */
-function createAsphaltTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 512;
-  const context = canvas.getContext('2d');
-  if (!context) return null;
-
-  // Base dark gray
-  context.fillStyle = '#1a1a1a';
-  context.fillRect(0, 0, 512, 512);
-
-  // Noise / grain
-  for (let i = 0; i < 15000; i++) {
-    const x = Math.random() * 512;
-    const y = Math.random() * 512;
-    context.fillStyle = `rgba(255,255,255,${Math.random() * 0.03})`;
-    context.fillRect(x, y, 2, 2);
-  }
-
-  // Subtle rubber streaks
-  for (let i = 0; i < 20; i++) {
-    context.beginPath();
-    context.moveTo(Math.random() * 512, 0);
-    context.lineTo(Math.random() * 512, 512);
-    context.strokeStyle = 'rgba(0,0,0,0.15)';
-    context.lineWidth = Math.random() * 10 + 5;
-    context.stroke();
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(10, 1);
-  return texture;
-}
-
-/**
- * Procedurally generates the checkered start/finish line texture.
- */
-function createStartLineTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
+function useAppTheme() {
+  const [theme, setTheme] = useState('dark');
   
-  const size = 32;
-  for(let y=0; y<256; y+=size) {
-    for(let x=0; x<256; x+=size) {
-      ctx.fillStyle = ((x/size + y/size) % 2 === 0) ? '#ffffff' : '#1a1a1a';
-      ctx.fillRect(x, y, size, size);
-    }
-  }
-  return new THREE.CanvasTexture(canvas);
-}
-
-/**
- * Headlight Sprite Glow Texture
- */
-function createGlowTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 64; 
-  canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-
-  const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.3, 'rgba(255,255,255,0.5)');
-  gradient.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0,0,64,64);
-  return new THREE.CanvasTexture(canvas);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const updateTheme = () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      setTheme(current);
+    };
+    updateTheme();
+    
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+  
+  return theme;
 }
 
 // Track configuration
@@ -90,8 +34,8 @@ const CAR_SCALE = 1.5;
 const LAP_DURATION_SECONDS = 20;
 
 function TrackScene() {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme !== 'light';
+  const theme = useAppTheme();
+  const isDark = theme === 'dark';
 
   const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
   const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
@@ -99,11 +43,6 @@ function TrackScene() {
   const carGroup = useRef<THREE.Group>(null);
   const leftHeadlight = useRef<THREE.Sprite>(null);
   const rightHeadlight = useRef<THREE.Sprite>(null);
-
-  // 1. Memoize Textures
-  const asphaltTex = useMemo(() => createAsphaltTexture(), []);
-  const startLineTex = useMemo(() => createStartLineTexture(), []);
-  const glowTex = useMemo(() => createGlowTexture(), []);
 
   // 2. Define Spa-Francorchamps Track Path
   const trackCurve = useMemo(() => {
@@ -171,15 +110,6 @@ function TrackScene() {
     return geo;
   }, [trackCurve]);
 
-  // Infield Geometry
-  const infieldGeometry = useMemo(() => {
-    const points2d = trackCurve.getPoints(100).map(p => new THREE.Vector2(p.x, p.z));
-    const shape = new THREE.Shape(points2d);
-    const geo = new THREE.ShapeGeometry(shape);
-    geo.rotateX(-Math.PI / 2);
-    return geo;
-  }, [trackCurve]);
-
   // Track animation state
   const prevTangent = useRef(new THREE.Vector3());
 
@@ -205,11 +135,6 @@ function TrackScene() {
       carGroup.current.rotation.z = THREE.MathUtils.lerp(carGroup.current.rotation.z, Math.max(Math.min(targetRoll, 0.15), -0.15), 0.1);
     }
     prevTangent.current.copy(tangent);
-
-    // 4. Headlight Pulse
-    const pulse = 0.8 + Math.sin(time * 15) * 0.1;
-    if (leftHeadlight.current) leftHeadlight.current.material.opacity = pulse;
-    if (rightHeadlight.current) rightHeadlight.current.material.opacity = pulse;
   });
 
   return (
@@ -220,19 +145,12 @@ function TrackScene() {
         intensity={0.6} 
         color={0xaaaaff} 
         castShadow 
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-near={10}
-        shadow-camera-far={300}
-        shadow-camera-left={-150}
-        shadow-camera-right={150}
-        shadow-camera-top={150}
-        shadow-camera-bottom={-150}
       />
 
       {/* TRACK SURFACE */}
       <mesh geometry={trackGeometry} receiveShadow position={[0, 0.1, 0]}>
         <meshStandardMaterial 
-          color={isDark ? 0xffffff : 0x666666} 
+          color={isDark ? 0xffffff : 0x888888} 
           roughness={0.6} 
           metalness={0.1} 
         />
@@ -246,8 +164,6 @@ function TrackScene() {
         <meshBasicMaterial color={isDark ? 0xffffff : 0x666666} side={THREE.BackSide} />
       </mesh>
 
-      {/* INFIELD (Removed for realistic sleek look, leaving just the lines) */}
-
       {/* START/FINISH LINE STRAP */}
       <mesh position={trackCurve.getPointAt(0.95)} rotation={[-Math.PI / 2, 0, Math.atan2(trackCurve.getTangentAt(0.95).x, trackCurve.getTangentAt(0.95).z)]}>
         <planeGeometry args={[TRACK_WIDTH * 2, 2]} />
@@ -259,14 +175,6 @@ function TrackScene() {
         <group scale={3.5} position={[0, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
            <primitive object={clonedFerrari} />
         </group>
-
-        {/* Headlights */}
-        <sprite ref={leftHeadlight} position={[2, 1, 12]} scale={[6, 6, 1]}>
-          <spriteMaterial map={glowTex ? glowTex : undefined} color={0xffffff} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
-        </sprite>
-        <sprite ref={rightHeadlight} position={[-2, 1, 12]} scale={[6, 6, 1]}>
-          <spriteMaterial map={glowTex ? glowTex : undefined} color={0xffffff} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
-        </sprite>
       </group>
     </>
   );
@@ -293,7 +201,7 @@ function AboutCarScene() {
       // Face towards bottom left
       const targetRotY = Math.atan2(-20 - 30, 20 - -40) - Math.PI / 2; // points the nose to the travel direction
       
-      // Scale up as it gets closer (perspective handles most of it, but we can exaggerate)
+      // Scale up as it gets closer
       const dynamicScale = THREE.MathUtils.lerp(1, 3, scrollProgress);
 
       group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, targetZ, 0.1);
