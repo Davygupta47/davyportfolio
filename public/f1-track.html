@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1 Track Background</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #0a0a14;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Example overlay to demonstrate the layered effect */
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #ffffff;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .overlay h1 {
+      font-size: 4rem;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.05em;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .overlay p {
+      font-size: 1.5rem;
+      margin: 0;
+      color: #c0c0c0;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  
+  <div class="overlay">
+    <h1>Hi, I'm Davy</h1>
+    <p>Welcome to my portfolio</p>
+  </div>
+
+  <!-- Load Three.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    /**
+     * F1 Track Scene Configuration
+     */
+    const CONFIG = {
+      lapDurationSeconds: 20,
+      trackWidth: 12,
+      carScale: 0.8,
+    };
+
+    let scene, camera, renderer;
+    let trackCurve, carGroup, rearWheels = [], headlights = [];
+    let clock;
+
+    init();
+    animate();
+
+    function init() {
+      // 1. Setup Renderer
+      const container = document.getElementById('canvas-container');
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      // Opacity applied to the canvas element per requirements
+      renderer.domElement.style.opacity = '0.85';
+      container.appendChild(renderer.domElement);
+
+      // 2. Setup Scene
+      scene = new THREE.Scene();
+
+      // 3. Setup Orthographic Camera (top-down)
+      const aspect = window.innerWidth / window.innerHeight;
+      const frustumSize = 300;
+      camera = new THREE.OrthographicCamera(
+        frustumSize * aspect / -2,
+        frustumSize * aspect / 2,
+        frustumSize / 2,
+        frustumSize / -2,
+        1,
+        1000
+      );
+      // Positioned high up looking straight down
+      camera.position.set(0, 200, 0);
+      camera.lookAt(0, 0, 0);
+
+      clock = new THREE.Clock();
+
+      buildLights();
+      buildTrack();
+      buildCar();
+
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function buildLights() {
+      // Subtle ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+      scene.add(ambientLight);
+
+      // Directional light simulating moonlight
+      const dirLight = new THREE.DirectionalLight(0xaaaaff, 0.6);
+      dirLight.position.set(50, 100, 50);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.camera.near = 10;
+      dirLight.shadow.camera.far = 300;
+      dirLight.shadow.camera.left = -150;
+      dirLight.shadow.camera.right = 150;
+      dirLight.shadow.camera.top = 150;
+      dirLight.shadow.camera.bottom = -150;
+      scene.add(dirLight);
+    }
+
+    function createAsphaltTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const context = canvas.getContext('2d');
+
+      // Base dark gray
+      context.fillStyle = '#1a1a1a';
+      context.fillRect(0, 0, 512, 512);
+
+      // Noise / grain
+      for (let i = 0; i < 15000; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const v = Math.random() * 20;
+        context.fillStyle = `rgba(255,255,255,${Math.random() * 0.03})`;
+        context.fillRect(x, y, 2, 2);
+      }
+
+      // Subtle rubber streaks
+      for (let i = 0; i < 20; i++) {
+        context.beginPath();
+        context.moveTo(Math.random() * 512, 0);
+        context.lineTo(Math.random() * 512, 512);
+        context.strokeStyle = 'rgba(0,0,0,0.15)';
+        context.lineWidth = Math.random() * 10 + 5;
+        context.stroke();
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(10, 1);
+      return texture;
+    }
+
+    function createStartLineTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      
+      // Checkerboard
+      const size = 32;
+      for(let y=0; y<256; y+=size) {
+        for(let x=0; x<256; x+=size) {
+          ctx.fillStyle = ((x/size + y/size) % 2 === 0) ? '#ffffff' : '#1a1a1a';
+          ctx.fillRect(x, y, size, size);
+        }
+      }
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    function buildTrack() {
+      // 1. Define Track Path
+      // (irregular circuit with tight chicane on right, wide sweeping left, long bottom straight)
+      const controlPoints = [
+        new THREE.Vector3(-110, 0, 80),   // La Source Hairpin
+        new THREE.Vector3(-90, 0, 65),    // Straight to Eau Rouge
+        new THREE.Vector3(-70, 0, 50),    // Eau Rouge entry
+        new THREE.Vector3(-60, 0, 45),    // Eau Rouge left
+        new THREE.Vector3(-50, 0, 35),    // Raidillon right
+        new THREE.Vector3(-55, 0, 20),    // Raidillon crest
+        new THREE.Vector3(-45, 0, 0),     // Kemmel Straight
+        new THREE.Vector3(-25, 0, -25),
+        new THREE.Vector3(5, 0, -50),
+        new THREE.Vector3(40, 0, -75),    // Kemmel Straight end
+        new THREE.Vector3(65, 0, -85),    // Les Combes entry
+        new THREE.Vector3(85, 0, -90),    // Les Combes right
+        new THREE.Vector3(95, 0, -80),    // Les Combes left
+        new THREE.Vector3(85, 0, -65),    // Malmedy right
+        new THREE.Vector3(100, 0, -50),   // Straight to Bruxelles
+        new THREE.Vector3(115, 0, -40),
+        new THREE.Vector3(125, 0, -25),   // Bruxelles hairpin entry
+        new THREE.Vector3(125, 0, -5),    // Bruxelles hairpin apex
+        new THREE.Vector3(105, 0, 5),     // Bruxelles hairpin exit
+        new THREE.Vector3(85, 0, 0),      // No name curve
+        new THREE.Vector3(60, 0, 5),      // Approach to Pouhon
+        new THREE.Vector3(45, 0, 15),     // Pouhon entry
+        new THREE.Vector3(30, 0, 25),     // Pouhon apex 1
+        new THREE.Vector3(25, 0, 35),     // Pouhon apex 2
+        new THREE.Vector3(40, 0, 45),     // Pouhon exit
+        new THREE.Vector3(55, 0, 50),     // Fagnes entry
+        new THREE.Vector3(75, 0, 45),     // Fagnes right
+        new THREE.Vector3(85, 0, 55),     // Fagnes left
+        new THREE.Vector3(100, 0, 65),    // Campus right
+        new THREE.Vector3(115, 0, 80),    // Stavelot 1
+        new THREE.Vector3(115, 0, 95),    // Stavelot 2
+        new THREE.Vector3(100, 0, 105),   // Curve to Blanchimont
+        new THREE.Vector3(75, 0, 100),    // Blanchimont 1
+        new THREE.Vector3(40, 0, 85),     // Blanchimont 2
+        new THREE.Vector3(15, 0, 70),     // Approach to Bus Stop
+        new THREE.Vector3(-10, 0, 55),    // Bus Stop entry
+        new THREE.Vector3(-25, 0, 50),    // Bus Stop right
+        new THREE.Vector3(-40, 0, 60),    // Bus Stop left
+        new THREE.Vector3(-55, 0, 70),    // Bus Stop exit
+        new THREE.Vector3(-80, 0, 75),    // Start/Finish straight
+      ];
+
+      trackCurve = new THREE.CatmullRomCurve3(controlPoints, true);
+      trackCurve.tension = 0.5;
+
+      // 2. Track Surface Geometry (Tube)
+      const asphaltTexture = createAsphaltTexture();
+      const trackGeometry = new THREE.TubeGeometry(trackCurve, 200, CONFIG.trackWidth, 8, true);
+      // Flatten tube to make it a flat track road
+      trackGeometry.scale(1, 0.01, 1);
+      
+      const trackMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a,
+        map: asphaltTexture,
+        roughness: 0.85,
+        metalness: 0.05,
+      });
+
+      const trackMesh = new THREE.Mesh(trackGeometry, trackMaterial);
+      trackMesh.receiveShadow = true;
+      trackMesh.position.y = 0.1; // slightly above ground
+      scene.add(trackMesh);
+
+      // 3. Track Border (Twin edge lines)
+      const borderGeom = new THREE.TubeGeometry(trackCurve, 200, CONFIG.trackWidth + 0.8, 8, true);
+      borderGeom.scale(1, 0.005, 1);
+      const borderMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide });
+      const borderMesh = new THREE.Mesh(borderGeom, borderMat);
+      borderMesh.position.y = 0.05;
+      scene.add(borderMesh);
+
+      const outerBorderGeom = new THREE.TubeGeometry(trackCurve, 200, CONFIG.trackWidth + 1.6, 8, true);
+      outerBorderGeom.scale(1, 0.002, 1);
+      const outerBorderMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a, side: THREE.BackSide });
+      const outerBorderMesh = new THREE.Mesh(outerBorderGeom, outerBorderMat);
+      outerBorderMesh.position.y = 0.02;
+      scene.add(outerBorderMesh);
+
+      // 4. Infield (Flat Green)
+      // Extract points to create a flat shape for the infield
+      const points2d = trackCurve.getPoints(100).map(p => new THREE.Vector2(p.x, p.z));
+      const shape = new THREE.Shape(points2d);
+      const infieldGeom = new THREE.ShapeGeometry(shape);
+      // Rotate shape to lie flat on XZ plane
+      infieldGeom.rotateX(-Math.PI / 2);
+      
+      const infieldMat = new THREE.MeshStandardMaterial({
+        color: 0x1e3a1e,
+        roughness: 1,
+        metalness: 0,
+      });
+      const infieldMesh = new THREE.Mesh(infieldGeom, infieldMat);
+      infieldMesh.receiveShadow = true;
+      infieldMesh.position.y = 0;
+      scene.add(infieldMesh);
+
+      // 5. Start/Finish Line
+      const sfLineGeom = new THREE.PlaneGeometry(CONFIG.trackWidth * 2, 8);
+      const sfLineMat = new THREE.MeshBasicMaterial({ 
+        map: createStartLineTexture() 
+      });
+      const sfLineMesh = new THREE.Mesh(sfLineGeom, sfLineMat);
+      sfLineMesh.rotation.x = -Math.PI / 2;
+      
+      // Place start/finish on the bottom straight
+      const startPt = trackCurve.getPointAt(0.15); // Adjust based on curve param for bottom straight
+      const startTan = trackCurve.getTangentAt(0.15);
+      sfLineMesh.position.copy(startPt);
+      sfLineMesh.position.y = 0.2; // Above track
+      sfLineMesh.rotation.z = Math.atan2(startTan.x, startTan.z); // align to track
+      scene.add(sfLineMesh);
+
+      // 6. Tyre Barriers (Optional faint walls on outside)
+      // Created by slightly larger tube, colored dark navy/grey
+      const barrierGeom = new THREE.TubeGeometry(trackCurve, 100, CONFIG.trackWidth + 4, 4, true);
+      barrierGeom.scale(1, 1, 1);
+      const barrierMat = new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.9, side: THREE.BackSide });
+      const barrierMesh = new THREE.Mesh(barrierGeom, barrierMat);
+      barrierMesh.position.y = 2; // stick up slightly
+      scene.add(barrierMesh);
+    }
+
+    function buildCar() {
+      carGroup = new THREE.Group();
+      carGroup.scale.set(CONFIG.carScale, CONFIG.carScale, CONFIG.carScale);
+
+      // Materials
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x00D2BE, roughness: 0.3, metalness: 0.2 }); // Cyan
+      const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, metalness: 0.1 });
+      const silverMat = new THREE.MeshStandardMaterial({ color: 0xC0C0C0, roughness: 0.2, metalness: 0.8 });
+      const tyreMat = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.9, metalness: 0 });
+
+      // Main Body (Lathe/Box hybrid approximation)
+      // Central chassis (Box)
+      const chassisGeom = new THREE.BoxGeometry(3, 1.5, 12);
+      const chassis = new THREE.Mesh(chassisGeom, bodyMat);
+      chassis.position.y = 1;
+      chassis.castShadow = true;
+      carGroup.add(chassis);
+
+      // Nose (tapered)
+      const noseGeom = new THREE.CylinderGeometry(0.5, 1.5, 6, 4);
+      noseGeom.rotateX(Math.PI / 2);
+      noseGeom.rotateY(Math.PI / 4); // diamond taper
+      const nose = new THREE.Mesh(noseGeom, bodyMat);
+      nose.position.set(0, 1, 9); // front
+      nose.castShadow = true;
+      carGroup.add(nose);
+
+      // Side Pods (Black)
+      const podGeom = new THREE.BoxGeometry(5.5, 1.2, 7);
+      const pods = new THREE.Mesh(podGeom, blackMat);
+      pods.position.set(0, 0.8, -1);
+      pods.castShadow = true;
+      carGroup.add(pods);
+
+      // Silver trim lines on side pods
+      const trimGeom = new THREE.BoxGeometry(5.6, 0.2, 7);
+      const trim = new THREE.Mesh(trimGeom, silverMat);
+      trim.position.set(0, 1.4, -1);
+      carGroup.add(trim);
+
+      // Front Wing (Black)
+      const fWingGeom = new THREE.BoxGeometry(6.5, 0.2, 1.5);
+      const fWing = new THREE.Mesh(fWingGeom, blackMat);
+      fWing.position.set(0, 0.5, 11);
+      fWing.castShadow = true;
+      carGroup.add(fWing);
+
+      // Rear Wing (Cyan/Black)
+      const rWingGeom = new THREE.BoxGeometry(5, 0.2, 1.5);
+      const rWing = new THREE.Mesh(rWingGeom, bodyMat);
+      rWing.position.set(0, 2.5, -5.5);
+      rWing.castShadow = true;
+      carGroup.add(rWing);
+      
+      const rWingSupportGeom = new THREE.BoxGeometry(1.5, 2, 1);
+      const rWingSupport = new THREE.Mesh(rWingSupportGeom, blackMat);
+      rWingSupport.position.set(0, 1.5, -5.5);
+      carGroup.add(rWingSupport);
+
+      // Wheels
+      const rWheelGeom = new THREE.CylinderGeometry(1.4, 1.4, 1.8, 16);
+      rWheelGeom.rotateZ(Math.PI / 2);
+      
+      const fWheelGeom = new THREE.CylinderGeometry(1.2, 1.2, 1.5, 16);
+      fWheelGeom.rotateZ(Math.PI / 2);
+
+      // Rear Left
+      const rlWheel = new THREE.Mesh(rWheelGeom, tyreMat);
+      rlWheel.position.set(3.5, 1.4, -4);
+      rlWheel.castShadow = true;
+      carGroup.add(rlWheel);
+      rearWheels.push(rlWheel);
+
+      // Rear Right
+      const rrWheel = new THREE.Mesh(rWheelGeom, tyreMat);
+      rrWheel.position.set(-3.5, 1.4, -4);
+      rrWheel.castShadow = true;
+      carGroup.add(rrWheel);
+      rearWheels.push(rrWheel);
+
+      // Front Left
+      const flWheel = new THREE.Mesh(fWheelGeom, tyreMat);
+      flWheel.position.set(3.2, 1.2, 7);
+      flWheel.castShadow = true;
+      carGroup.add(flWheel);
+
+      // Front Right
+      const frWheel = new THREE.Mesh(fWheelGeom, tyreMat);
+      frWheel.position.set(-3.2, 1.2, 7);
+      frWheel.castShadow = true;
+      carGroup.add(frWheel);
+
+      // Headlight Glow Sprites (Simulated Bloom)
+      const glowCanvas = document.createElement('canvas');
+      glowCanvas.width = 64; glowCanvas.height = 64;
+      const ctx = glowCanvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, 'rgba(255,255,255,1)');
+      gradient.addColorStop(0.3, 'rgba(255,255,255,0.5)');
+      gradient.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0,0,64,64);
+      const glowTex = new THREE.CanvasTexture(glowCanvas);
+
+      const glowMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+      
+      const hlLeft = new THREE.Sprite(glowMat);
+      hlLeft.scale.set(6, 6, 1);
+      hlLeft.position.set(2, 1, 12);
+      carGroup.add(hlLeft);
+      headlights.push(hlLeft);
+
+      const hlRight = new THREE.Sprite(glowMat);
+      hlRight.scale.set(6, 6, 1);
+      hlRight.position.set(-2, 1, 12);
+      carGroup.add(hlRight);
+      headlights.push(hlRight);
+
+      scene.add(carGroup);
+    }
+
+    function onWindowResize() {
+      const aspect = window.innerWidth / window.innerHeight;
+      const frustumSize = 300;
+
+      camera.left = -frustumSize * aspect / 2;
+      camera.right = frustumSize * aspect / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    let prevTangent = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const time = clock.getElapsedTime();
+
+      // Track progress (0 to 1) looping endlessly
+      const t = (time % CONFIG.lapDurationSeconds) / CONFIG.lapDurationSeconds;
+
+      if (trackCurve && carGroup) {
+        // Position
+        const point = trackCurve.getPointAt(t);
+        carGroup.position.copy(point);
+
+        // Rotation (Yaw) based on tangent
+        const tangent = trackCurve.getTangentAt(t);
+        // atan2(x, z) to get the heading in the XZ plane
+        const yaw = Math.atan2(tangent.x, tangent.z);
+        carGroup.rotation.y = yaw;
+
+        // Body roll (Tilt/Bank)
+        // Determine curvature by comparing tangent with previous tangent
+        if (prevTangent.lengthSq() > 0) {
+          // Cross product of tangents gives a sense of left/right turn
+          const cross = new THREE.Vector3().crossVectors(prevTangent, tangent);
+          // cross.y is positive for left turns, negative for right turns
+          const targetRoll = cross.y * 30; // Scale factor for visual tilt
+          
+          // Smoothly lerp current roll to target roll
+          carGroup.rotation.z = THREE.MathUtils.lerp(carGroup.rotation.z, Math.max(Math.min(targetRoll, 0.15), -0.15), 0.1);
+        }
+        prevTangent.copy(tangent);
+
+        // Animate Wheels
+        const speed = 15; // arbitrary visual speed multiplier
+        rearWheels.forEach(w => {
+          w.rotation.x -= speed * 0.016; // approx delta
+        });
+
+        // Headlight Pulse
+        const pulse = 0.8 + Math.sin(time * 15) * 0.1; // 2Hz oscillation
+        headlights.forEach(hl => {
+          hl.material.opacity = pulse;
+        });
+      }
+
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
