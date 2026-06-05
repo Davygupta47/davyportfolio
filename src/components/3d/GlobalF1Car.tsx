@@ -2,6 +2,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { useGLTF, Bounds } from '@react-three/drei';
 import { usePathname } from 'next/navigation';
 import * as THREE from 'three';
 
@@ -89,10 +90,12 @@ const CAR_SCALE = 0.8;
 const LAP_DURATION_SECONDS = 20;
 
 function TrackScene() {
+  const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
+  const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
+
   const carGroup = useRef<THREE.Group>(null);
   const leftHeadlight = useRef<THREE.Sprite>(null);
   const rightHeadlight = useRef<THREE.Sprite>(null);
-  const rearWheelsRef = useRef<THREE.Mesh[]>([]);
 
   // 1. Memoize Textures
   const asphaltTex = useMemo(() => createAsphaltTexture(), []);
@@ -200,13 +203,7 @@ function TrackScene() {
     }
     prevTangent.current.copy(tangent);
 
-    // 4. Wheel Animation
-    const speed = 15;
-    rearWheelsRef.current.forEach(w => {
-      w.rotation.x -= speed * 0.016;
-    });
-
-    // 5. Headlight Pulse
+    // 4. Headlight Pulse
     const pulse = 0.8 + Math.sin(time * 15) * 0.1;
     if (leftHeadlight.current) leftHeadlight.current.material.opacity = pulse;
     if (rightHeadlight.current) rightHeadlight.current.material.opacity = pulse;
@@ -260,53 +257,11 @@ function TrackScene() {
 
       {/* CAR */}
       <group ref={carGroup} scale={CAR_SCALE}>
-        {/* Chassis */}
-        <mesh position={[0, 1, 0]} castShadow>
-          <boxGeometry args={[3, 1.5, 12]} />
-          <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
-        </mesh>
-        {/* Nose */}
-        <mesh position={[0, 1, 9]} rotation={[Math.PI / 2, Math.PI / 4, 0]} castShadow>
-          <cylinderGeometry args={[0.5, 1.5, 6, 4]} />
-          <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
-        </mesh>
-        {/* Side Pods */}
-        <mesh position={[0, 0.8, -1]} castShadow>
-          <boxGeometry args={[5.5, 1.2, 7]} />
-          <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
-        </mesh>
-        {/* Silver Trim */}
-        <mesh position={[0, 1.4, -1]}>
-          <boxGeometry args={[5.6, 0.2, 7]} />
-          <meshStandardMaterial color={0xC0C0C0} roughness={0.2} metalness={0.8} />
-        </mesh>
-        {/* Front Wing */}
-        <mesh position={[0, 0.5, 11]} castShadow>
-          <boxGeometry args={[6.5, 0.2, 1.5]} />
-          <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
-        </mesh>
-        {/* Rear Wing */}
-        <mesh position={[0, 2.5, -5.5]} castShadow>
-          <boxGeometry args={[5, 0.2, 1.5]} />
-          <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
-        </mesh>
-        {/* Wheels */}
-        <mesh position={[3.5, 1.4, -4]} rotation={[0, 0, Math.PI / 2]} castShadow ref={(el) => { if(el && !rearWheelsRef.current.includes(el)) rearWheelsRef.current.push(el); }}>
-          <cylinderGeometry args={[1.4, 1.4, 1.8, 16]} />
-          <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
-        </mesh>
-        <mesh position={[-3.5, 1.4, -4]} rotation={[0, 0, Math.PI / 2]} castShadow ref={(el) => { if(el && !rearWheelsRef.current.includes(el)) rearWheelsRef.current.push(el); }}>
-          <cylinderGeometry args={[1.4, 1.4, 1.8, 16]} />
-          <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
-        </mesh>
-        <mesh position={[3.2, 1.2, 7]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[1.2, 1.2, 1.5, 16]} />
-          <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
-        </mesh>
-        <mesh position={[-3.2, 1.2, 7]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[1.2, 1.2, 1.5, 16]} />
-          <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
-        </mesh>
+        {/* GLTF Ferrari Model */}
+        {/* The GLTF model might need slight rotation offset depending on its native orientation to match the tangent direction. If it drives sideways, add rotation Y offset here */}
+        <group scale={3.5} position={[0, -0.5, 0]}>
+           <primitive object={clonedFerrari} />
+        </group>
 
         {/* Headlights */}
         <sprite ref={leftHeadlight} position={[2, 1, 12]} scale={[6, 6, 1]}>
@@ -320,24 +275,74 @@ function TrackScene() {
   );
 }
 
+function AboutCarScene() {
+  const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
+  const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
+  const group = useRef<THREE.Group>(null);
+  
+  useFrame(() => {
+    if (group.current) {
+      // Calculate scroll progress (0 to 1)
+      const scrollY = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollProgress = maxScroll > 0 ? scrollY / maxScroll : 0;
+      
+      // Car drives forward and steers slightly as you scroll down
+      const targetZ = scrollProgress * 20 - 10;
+      const targetX = Math.sin(scrollProgress * Math.PI) * 5;
+      const targetRotY = Math.PI + Math.sin(scrollProgress * Math.PI) * 0.5;
+
+      group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, targetZ, 0.1);
+      group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, targetX, 0.1);
+      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+      
+      // Gentle hover effect
+      group.current.position.y = Math.sin(Date.now() * 0.002) * 0.2;
+    }
+  });
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 20, 10]} intensity={1.5} color={0xffffff} />
+      <pointLight position={[-10, 5, -10]} intensity={2} color={0xff0000} />
+      <group ref={group} scale={2}>
+        <primitive object={clonedFerrari} />
+      </group>
+    </>
+  );
+}
+
 export default function GlobalF1Car() {
   const pathname = usePathname();
   
-  // The user requested the track animation specifically on the home page as a background.
-  // The layout loads this globally, so we can render it conditionally, or across all pages.
-  // I will render it globally to provide a continuous feel, just hiding it if performance is a concern on other pages.
-  // Actually, we'll let it be global but visually dark so it doesn't obstruct content.
-  
-  return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.85 }}>
-      <Canvas 
-        shadows 
-        gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
-        camera={{ position: [0, 200, 0], zoom: 6 }} 
-        orthographic
-      >
-        <TrackScene />
-      </Canvas>
-    </div>
-  );
+  if (pathname === '/') {
+    return (
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.85 }}>
+        <Canvas 
+          shadows 
+          gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
+          camera={{ position: [0, 200, 0], zoom: 3 }} 
+          orthographic
+        >
+          <Bounds fit clip observe margin={1.2}>
+            <TrackScene />
+          </Bounds>
+        </Canvas>
+      </div>
+    );
+  }
+
+  if (pathname === '/about' || pathname === '/about/') {
+    return (
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.6 }}>
+        <Canvas camera={{ position: [10, 5, 10], fov: 45 }}>
+          <AboutCarScene />
+        </Canvas>
+      </div>
+    );
+  }
+
+  // Rest of the pages: F1 theme in bg (via global CSS), no animation and models
+  return null;
 }
