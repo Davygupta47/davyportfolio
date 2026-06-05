@@ -68,6 +68,11 @@ function F1Scene() {
       // Math.atan2 gives the angle. DX = -8, DZ = 4.
       targetRot.set(0, Math.atan2(-8, 4), 0);
       targetScale = 1.2;
+    } else if (pathname === '/work') {
+      // Subtle F1 car in bottom-right area, slowly rotating based on scroll
+      targetPos.set(5, -2.5, -4);
+      targetRot.set(0, (Math.PI / 6) + (scrollProgress * Math.PI * 1.5), 0);
+      targetScale = THREE.MathUtils.lerp(0.9, 0.5, scrollProgress);
     } else {
       // Hide on other pages by sinking it or scaling it down
       targetPos.set(0, -5, -10);
@@ -130,7 +135,7 @@ function F1Scene() {
         )}
       </group>
 
-      {pathname === '/' || pathname === '/about' ? (
+      {pathname === '/' || pathname === '/about' || pathname === '/work' ? (
         <ContactShadows position={[0, -1, 0]} opacity={0.7} scale={20} blur={2.5} far={4} />
       ) : null}
       

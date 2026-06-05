@@ -14,6 +14,11 @@
 
 :root {
   --background: var(--page-background);
+  --f1-red: #E10600;
+  --f1-red-dark: #B30500;
+  --f1-carbon: #0d0d0d;
+  --f1-silver: #C0C0C0;
+  --f1-yellow: #FFD700;
 }
 
 /* F1 Theme Custom Enhancements */
@@ -40,4 +45,37 @@ h1, h2, h3 {
 
 [data-theme="dark"] h1, [data-theme="dark"] h2 {
   text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+}
+
+/* ============================================
+   F1 Checkered Flag Scrollbar
+   ============================================ */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--f1-red), #A855F7);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff1a1a, #c084fc);
+}
+
+/* ============================================
+   F1 Selection Color
+   ============================================ */
+::selection {
+  background: rgba(225, 6, 0, 0.3);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: rgba(225, 6, 0, 0.3);
+  color: #ffffff;
 }
