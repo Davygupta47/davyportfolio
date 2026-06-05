@@ -1,182 +1,254 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Sparkles, ContactShadows, Environment } from '@react-three/drei';
+import { useGLTF, Bounds } from '@react-three/drei';
 import { usePathname } from 'next/navigation';
 import * as THREE from 'three';
 
-// Preload the model
-useGLTF.preload('/models/ferrari/scene.gltf');
-
-function F1Scene() {
-  const { scene } = useGLTF('/models/ferrari/scene.gltf');
-  const pathname = usePathname();
-
-  const group = useRef<THREE.Group>(null);
-  const prevPosition = useRef(new THREE.Vector3());
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isDrifting, setIsDrifting] = useState(false);
-
-  // Track window scroll
+/**
+ * Custom hook to detect light/dark theme from the HTML data-theme attribute used by once-ui.
+ */
+function useAppTheme() {
+  const [theme, setTheme] = useState('dark');
+  
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const maxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
-      setScrollProgress(Math.min(1, Math.max(0, scrollY / maxScroll)));
+    if (typeof window === 'undefined') return;
+    const updateTheme = () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      setTheme(current);
     };
+    updateTheme();
+    
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+  
+  return theme;
+}
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // init
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [pathname]); // re-bind if body height changes on route
+// Track configuration
+const TRACK_WIDTH = 1.8;
+const CAR_SCALE = 1.5;
+const LAP_DURATION_SECONDS = 20;
 
-  // Trigger smoke effect on route change (like a hard drift into the page)
-  useEffect(() => {
-    setIsDrifting(true);
-    const timeout = setTimeout(() => setIsDrifting(false), 2000);
-    return () => clearTimeout(timeout);
-  }, [pathname]);
+function TrackScene() {
+  const theme = useAppTheme();
+  const isDark = theme === 'dark';
 
-  useFrame((state, delta) => {
-    if (!group.current) return;
+  const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
+  const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
 
-    let targetPos = new THREE.Vector3(0, -1, 0);
-    let targetRot = new THREE.Euler(0, 0, 0);
-    let targetScale = 0; // default to hidden (scale 0)
+  const carGroup = useRef<THREE.Group>(null);
+  const leftHeadlight = useRef<THREE.Sprite>(null);
+  const rightHeadlight = useRef<THREE.Sprite>(null);
 
-    // ===== F1 Track-Following Logic =====
-    // Each page represents a different sector of the circuit.
-    // The car drives along the track path that's visible in F1RacingTrack.
-    // scroll controls position along that page's track segment.
+  // 2. Define Spa-Francorchamps Track Path
+  const trackCurve = useMemo(() => {
+    const points = [
+      new THREE.Vector3(-110, 0, 80),   // La Source Hairpin
+      new THREE.Vector3(-90, 0, 65),    // Straight to Eau Rouge
+      new THREE.Vector3(-70, 0, 50),    // Eau Rouge entry
+      new THREE.Vector3(-60, 0, 45),    // Eau Rouge left
+      new THREE.Vector3(-50, 0, 35),    // Raidillon right
+      new THREE.Vector3(-55, 0, 20),    // Raidillon crest
+      new THREE.Vector3(-45, 0, 0),     // Kemmel Straight
+      new THREE.Vector3(-25, 0, -25),
+      new THREE.Vector3(5, 0, -50),
+      new THREE.Vector3(40, 0, -75),    // Kemmel Straight end
+      new THREE.Vector3(65, 0, -85),    // Les Combes entry
+      new THREE.Vector3(85, 0, -90),    // Les Combes right
+      new THREE.Vector3(95, 0, -80),    // Les Combes left
+      new THREE.Vector3(85, 0, -65),    // Malmedy right
+      new THREE.Vector3(100, 0, -50),   // Straight to Bruxelles
+      new THREE.Vector3(115, 0, -40),
+      new THREE.Vector3(125, 0, -25),   // Bruxelles hairpin entry
+      new THREE.Vector3(125, 0, -5),    // Bruxelles hairpin apex
+      new THREE.Vector3(105, 0, 5),     // Bruxelles hairpin exit
+      new THREE.Vector3(85, 0, 0),      // No name curve
+      new THREE.Vector3(60, 0, 5),      // Approach to Pouhon
+      new THREE.Vector3(45, 0, 15),     // Pouhon entry
+      new THREE.Vector3(30, 0, 25),     // Pouhon apex 1
+      new THREE.Vector3(25, 0, 35),     // Pouhon apex 2
+      new THREE.Vector3(40, 0, 45),     // Pouhon exit
+      new THREE.Vector3(55, 0, 50),     // Fagnes entry
+      new THREE.Vector3(75, 0, 45),     // Fagnes right
+      new THREE.Vector3(85, 0, 55),     // Fagnes left
+      new THREE.Vector3(100, 0, 65),    // Campus right
+      new THREE.Vector3(115, 0, 80),    // Stavelot 1
+      new THREE.Vector3(115, 0, 95),    // Stavelot 2
+      new THREE.Vector3(100, 0, 105),   // Curve to Blanchimont
+      new THREE.Vector3(75, 0, 100),    // Blanchimont 1
+      new THREE.Vector3(40, 0, 85),     // Blanchimont 2
+      new THREE.Vector3(15, 0, 70),     // Approach to Bus Stop
+      new THREE.Vector3(-10, 0, 55),    // Bus Stop entry
+      new THREE.Vector3(-25, 0, 50),    // Bus Stop right
+      new THREE.Vector3(-40, 0, 60),    // Bus Stop left
+      new THREE.Vector3(-55, 0, 70),    // Bus Stop exit
+      new THREE.Vector3(-80, 0, 75),    // Start/Finish straight
+    ];
+    return new THREE.CatmullRomCurve3(points, true);
+  }, []);
 
-    if (pathname === '/') {
-      // SECTOR 1 — Starting Grid / Pit Straight
-      // Car enters from right, centers, then drives toward camera on scroll
-      const t = scrollProgress;
-      const x = THREE.MathUtils.lerp(2, -1, t);
-      const z = THREE.MathUtils.lerp(-2, 2, t);
-      targetPos.set(x, -1.4, z);
+  // Track Geometries
+  const trackGeometry = useMemo(() => {
+    const geo = new THREE.TubeGeometry(trackCurve, 200, TRACK_WIDTH, 8, true);
+    geo.scale(1, 0.01, 1);
+    return geo;
+  }, [trackCurve]);
 
-      // Car rotates as it drives along the track curve
-      const angle = Math.PI / 4 + t * Math.PI * 1.5;
-      targetRot.set(t * (Math.PI / 12), angle, 0);
-      targetScale = THREE.MathUtils.lerp(1.4, 0.7, t);
+  const borderGeometry = useMemo(() => {
+    const geo = new THREE.TubeGeometry(trackCurve, 200, TRACK_WIDTH + 0.8, 8, true);
+    geo.scale(1, 0.005, 1);
+    return geo;
+  }, [trackCurve]);
 
-    } else if (pathname === '/about') {
-      // SECTOR 2 — Long straight with chicane
-      // Car drives from top-right to bottom-left following the track
-      const t = scrollProgress;
-      const x = THREE.MathUtils.lerp(4, -4, t);
-      const z = THREE.MathUtils.lerp(-3, 1, t);
-      const y = -1.2 + Math.sin(t * Math.PI) * 0.3; // slight elevation through chicane
+  const outerBorderGeometry = useMemo(() => {
+    const geo = new THREE.TubeGeometry(trackCurve, 200, TRACK_WIDTH + 1.6, 8, true);
+    geo.scale(1, 0.002, 1);
+    return geo;
+  }, [trackCurve]);
 
-      targetPos.set(x, y, z);
-      targetRot.set(0, Math.atan2(-8, 4) + Math.sin(t * Math.PI * 2) * 0.3, 0);
-      targetScale = 1.2;
+  // Track animation state
+  const prevTangent = useRef(new THREE.Vector3());
 
-    } else if (pathname === '/work') {
-      // SECTOR 3 — Full circuit view, car drives across the bottom
-      // Car is fully visible, following the track from left to right
-      const t = scrollProgress;
-      const x = THREE.MathUtils.lerp(-3, 3, t);
-      const z = THREE.MathUtils.lerp(1, -1, t);
-      const y = -1.3 + Math.sin(t * Math.PI * 2) * 0.15; // subtle undulation
+  useFrame((state) => {
+    if (!carGroup.current) return;
 
-      targetPos.set(x, y, z);
-      // Car faces direction of travel, with slight steering adjustments
-      const steer = Math.cos(t * Math.PI * 3) * 0.2;
-      targetRot.set(0, -Math.PI / 6 + steer, 0);
-      targetScale = THREE.MathUtils.lerp(1.1, 0.8, Math.abs(t - 0.5) * 2);
+    const time = state.clock.getElapsedTime();
+    const t = (time % LAP_DURATION_SECONDS) / LAP_DURATION_SECONDS;
 
-    } else if (pathname?.startsWith('/work/')) {
-      // Project detail — car parked in a "pit garage" feel, smaller
-      targetPos.set(3, -1.8, -3);
-      targetRot.set(0, Math.PI / 3, 0);
-      targetScale = 0.7;
+    // 1. Position
+    const point = trackCurve.getPointAt(t);
+    carGroup.current.position.copy(point);
 
-    } else if (pathname === '/blog') {
-      // Blog — car cruising in the background
-      const t = scrollProgress;
-      targetPos.set(THREE.MathUtils.lerp(3, -3, t), -1.5, -2);
-      targetRot.set(0, Math.PI + t * Math.PI * 0.5, 0);
-      targetScale = 0.6;
+    // 2. Yaw (Rotation Y)
+    const tangent = trackCurve.getTangentAt(t);
+    const yaw = Math.atan2(tangent.x, tangent.z);
+    carGroup.current.rotation.y = yaw;
 
-    } else {
-      // Any other page — subtle presence
-      targetPos.set(0, -2, -4);
-      targetRot.set(0, scrollProgress * Math.PI, 0);
-      targetScale = 0.5;
+    // 3. Roll (Banking)
+    if (prevTangent.current.lengthSq() > 0) {
+      const cross = new THREE.Vector3().crossVectors(prevTangent.current, tangent);
+      const targetRoll = cross.y * 30; 
+      carGroup.current.rotation.z = THREE.MathUtils.lerp(carGroup.current.rotation.z, Math.max(Math.min(targetRoll, 0.15), -0.15), 0.1);
     }
+    prevTangent.current.copy(tangent);
+  });
 
-    // 1. Smooth lerping for Position and Scale
-    group.current.position.lerp(targetPos, 3 * delta);
-    group.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 4 * delta);
+  return (
+    <>
+      <ambientLight intensity={0.3} />
+      <directionalLight 
+        position={[50, 100, 50]} 
+        intensity={0.6} 
+        color={0xaaaaff} 
+        castShadow 
+      />
 
-    // 2. Realistic Physics (Banking/Tilt based on velocity)
-    const velocity = new THREE.Vector3().subVectors(group.current.position, prevPosition.current);
-    prevPosition.current.copy(group.current.position);
+      {/* TRACK SURFACE */}
+      <mesh geometry={trackGeometry} receiveShadow position={[0, 0.1, 0]}>
+        <meshStandardMaterial 
+          color={isDark ? 0xffffff : 0x888888} 
+          roughness={0.6} 
+          metalness={0.1} 
+        />
+      </mesh>
 
-    // If moving left (negative x velocity), tilt right (positive z rotation)
-    const targetBank = THREE.MathUtils.clamp(-velocity.x * 2, -Math.PI / 6, Math.PI / 6);
-    targetRot.z = targetBank;
+      {/* BORDERS */}
+      <mesh geometry={borderGeometry} position={[0, 0.05, 0]}>
+        <meshBasicMaterial color={isDark ? 0x1a1a1a : 0xdddddd} side={THREE.BackSide} />
+      </mesh>
+      <mesh geometry={outerBorderGeometry} position={[0, 0.02, 0]}>
+        <meshBasicMaterial color={isDark ? 0xffffff : 0x666666} side={THREE.BackSide} />
+      </mesh>
 
-    // Apply pitch based on forward/backward acceleration
-    const targetPitch = THREE.MathUtils.clamp(-velocity.z * 2, -Math.PI / 12, Math.PI / 12);
-    targetRot.x = targetPitch;
+      {/* START/FINISH LINE STRAP */}
+      <mesh position={trackCurve.getPointAt(0.95)} rotation={[-Math.PI / 2, 0, Math.atan2(trackCurve.getTangentAt(0.95).x, trackCurve.getTangentAt(0.95).z)]}>
+        <planeGeometry args={[TRACK_WIDTH * 2, 2]} />
+        <meshBasicMaterial color={isDark ? 0xff0000 : 0x000000} />
+      </mesh>
 
-    // 3. Smooth slerping for Rotation
-    const currentQuat = group.current.quaternion;
-    const targetQuat = new THREE.Quaternion().setFromEuler(targetRot);
-    currentQuat.slerp(targetQuat, 3.5 * delta);
+      {/* CAR */}
+      <group ref={carGroup} scale={CAR_SCALE}>
+        <group scale={3.5} position={[0, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+           <primitive object={clonedFerrari} />
+        </group>
+      </group>
+    </>
+  );
+}
 
-    // Continuous subtle hover (only when visible to save math)
-    if (targetScale > 0) {
-      group.current.position.y += Math.sin(state.clock.elapsedTime * 3) * 0.003;
+function AboutCarScene() {
+  const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
+  const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
+  const group = useRef<THREE.Group>(null);
+  
+  useFrame(() => {
+    if (group.current) {
+      // Calculate scroll progress (0 to 1)
+      const scrollY = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollProgress = maxScroll > 0 ? scrollY / maxScroll : 0;
+      
+      // Car drives forward and steers slightly as you scroll down
+      const targetZ = scrollProgress * 20 - 10;
+      const targetX = Math.sin(scrollProgress * Math.PI) * 5;
+      const targetRotY = Math.PI + Math.sin(scrollProgress * Math.PI) * 0.5;
+
+      group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, targetZ, 0.1);
+      group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, targetX, 0.1);
+      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+      group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, 1, 0.1));
+      
+      // Gentle hover effect
+      group.current.position.y = Math.sin(Date.now() * 0.002) * 0.2;
     }
   });
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 10, 5]} intensity={1.5} castShadow />
-      <pointLight position={[-10, 5, -10]} intensity={2.5} color="#ff0000" />
-      <pointLight position={[0, 2, -2]} intensity={1} color="#ffffff" />
-
-      <group ref={group} dispose={null}>
-        <primitive object={scene} />
-
-        {/* Realistic Dual-Tire Smoke Effects */}
-        {isDrifting && (
-          <>
-            {/* Left Rear Tire Smoke */}
-            <group position={[0.8, 0.2, -1.8]}>
-              <Sparkles count={100} scale={[1.5, 1, 2]} size={30} speed={0.4} opacity={0.4} color="#aaaaaa" noise={2} />
-            </group>
-            {/* Right Rear Tire Smoke */}
-            <group position={[-0.8, 0.2, -1.8]}>
-              <Sparkles count={100} scale={[1.5, 1, 2]} size={30} speed={0.4} opacity={0.4} color="#aaaaaa" noise={2} />
-            </group>
-            {/* Main turbulent smoke wake */}
-            <group position={[0, 0.5, -2.5]}>
-              <Sparkles count={150} scale={[3, 2, 4]} size={40} speed={0.6} opacity={0.2} color="#cccccc" noise={3} />
-            </group>
-          </>
-        )}
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 20, 10]} intensity={1.5} color={0xffffff} />
+      <pointLight position={[-10, 5, -10]} intensity={2} color={0xff0000} />
+      <group ref={group} scale={2}>
+        <primitive object={clonedFerrari} />
       </group>
-
-      <ContactShadows position={[0, -1, 0]} opacity={0.7} scale={20} blur={2.5} far={4} />
-      <Environment preset="city" />
     </>
   );
 }
 
 export default function GlobalF1Car() {
-  return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none" }}>
-      <Canvas camera={{ position: [4, 2, 5], fov: 45 }}>
-        <F1Scene />
-      </Canvas>
-    </div>
-  );
+  const pathname = usePathname();
+  
+  if (pathname === '/') {
+    return (
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.85 }}>
+        <Canvas 
+          shadows 
+          gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
+          camera={{ position: [0, 200, 0], zoom: 3 }} 
+          orthographic
+        >
+          <Bounds fit clip observe margin={1.2}>
+            <TrackScene />
+          </Bounds>
+        </Canvas>
+      </div>
+    );
+  }
+
+  if (pathname === '/about' || pathname === '/about/') {
+    return (
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.6 }}>
+        <Canvas camera={{ position: [10, 5, 10], fov: 45 }}>
+          <AboutCarScene />
+        </Canvas>
+      </div>
+    );
+  }
+
+  // Rest of the pages: F1 theme in bg (via global CSS), no animation and models
+  return null;
 }
