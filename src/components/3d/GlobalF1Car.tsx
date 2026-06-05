@@ -3,8 +3,8 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Bounds } from '@react-three/drei';
-import { usePathname } from 'next/navigation';
 import * as THREE from 'three';
+import { useTheme } from 'next-themes';
 
 /**
  * Procedurally generates the asphalt texture with subtle grain and rubber streaks.
@@ -85,11 +85,14 @@ function createGlowTexture() {
 }
 
 // Track configuration
-const TRACK_WIDTH = 12;
-const CAR_SCALE = 0.8;
+const TRACK_WIDTH = 1.8;
+const CAR_SCALE = 1.5;
 const LAP_DURATION_SECONDS = 20;
 
 function TrackScene() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme !== 'light';
+
   const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
   const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
 
@@ -229,37 +232,31 @@ function TrackScene() {
       {/* TRACK SURFACE */}
       <mesh geometry={trackGeometry} receiveShadow position={[0, 0.1, 0]}>
         <meshStandardMaterial 
-          color={0x1a1a1a} 
-          roughness={0.85} 
-          metalness={0.05} 
-          map={asphaltTex ? asphaltTex : undefined} 
+          color={isDark ? 0xffffff : 0x666666} 
+          roughness={0.6} 
+          metalness={0.1} 
         />
       </mesh>
 
       {/* BORDERS */}
       <mesh geometry={borderGeometry} position={[0, 0.05, 0]}>
-        <meshBasicMaterial color={0xffffff} side={THREE.BackSide} />
+        <meshBasicMaterial color={isDark ? 0x1a1a1a : 0xdddddd} side={THREE.BackSide} />
       </mesh>
       <mesh geometry={outerBorderGeometry} position={[0, 0.02, 0]}>
-        <meshBasicMaterial color={0x1a1a1a} side={THREE.BackSide} />
+        <meshBasicMaterial color={isDark ? 0xffffff : 0x666666} side={THREE.BackSide} />
       </mesh>
 
-      {/* INFIELD */}
-      <mesh geometry={infieldGeometry} receiveShadow position={[0, 0, 0]}>
-        <meshStandardMaterial color={0x1e3a1e} roughness={1} metalness={0} />
-      </mesh>
+      {/* INFIELD (Removed for realistic sleek look, leaving just the lines) */}
 
-      {/* START/FINISH LINE */}
+      {/* START/FINISH LINE STRAP */}
       <mesh position={trackCurve.getPointAt(0.95)} rotation={[-Math.PI / 2, 0, Math.atan2(trackCurve.getTangentAt(0.95).x, trackCurve.getTangentAt(0.95).z)]}>
-        <planeGeometry args={[TRACK_WIDTH * 2, 8]} />
-        <meshBasicMaterial map={startLineTex ? startLineTex : undefined} />
+        <planeGeometry args={[TRACK_WIDTH * 2, 2]} />
+        <meshBasicMaterial color={isDark ? 0xff0000 : 0x000000} />
       </mesh>
 
       {/* CAR */}
       <group ref={carGroup} scale={CAR_SCALE}>
-        {/* GLTF Ferrari Model */}
-        {/* The GLTF model might need slight rotation offset depending on its native orientation to match the tangent direction. If it drives sideways, add rotation Y offset here */}
-        <group scale={3.5} position={[0, -0.5, 0]}>
+        <group scale={3.5} position={[0, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
            <primitive object={clonedFerrari} />
         </group>
 
@@ -287,14 +284,22 @@ function AboutCarScene() {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       const scrollProgress = maxScroll > 0 ? scrollY / maxScroll : 0;
       
-      // Car drives forward and steers slightly as you scroll down
-      const targetZ = scrollProgress * 20 - 10;
-      const targetX = Math.sin(scrollProgress * Math.PI) * 5;
-      const targetRotY = Math.PI + Math.sin(scrollProgress * Math.PI) * 0.5;
+      // Car drives diagonally from far top-right to close bottom-left
+      // Starts at Z=-50, X=30
+      // Ends at Z=20, X=-20
+      const targetZ = THREE.MathUtils.lerp(-40, 20, scrollProgress);
+      const targetX = THREE.MathUtils.lerp(30, -20, scrollProgress);
+      
+      // Face towards bottom left
+      const targetRotY = Math.atan2(-20 - 30, 20 - -40) - Math.PI / 2; // points the nose to the travel direction
+      
+      // Scale up as it gets closer (perspective handles most of it, but we can exaggerate)
+      const dynamicScale = THREE.MathUtils.lerp(1, 3, scrollProgress);
 
       group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, targetZ, 0.1);
       group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, targetX, 0.1);
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+      group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, dynamicScale, 0.1));
       
       // Gentle hover effect
       group.current.position.y = Math.sin(Date.now() * 0.002) * 0.2;

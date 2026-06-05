@@ -183,11 +183,11 @@
   padding: 1.5rem;
   text-align: center;
   z-index: 1;
-  color: var(--neutral-on-background-weak);
+  color: #aaaaaa;
 
   svg {
     font-size: 2rem;
-    color: var(--neutral-on-background-weak);
+    color: #aaaaaa;
   }
 
   p {
@@ -344,11 +344,12 @@
     font-weight: 800;
     margin: 0;
     letter-spacing: -0.02em;
+    color: #ffffff;
   }
 
   p {
     font-size: 0.95rem;
-    color: var(--neutral-on-background-weak);
+    color: #cccccc;
     margin: 0;
     max-width: 280px;
   }
@@ -373,7 +374,7 @@
 
     .lbl {
       font-size: 0.7rem;
-      color: var(--neutral-on-background-weak);
+      color: #aaaaaa;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -398,11 +399,11 @@
   margin-bottom: 0.75rem;
   font-family: var(--font-code);
   font-size: 0.9rem;
-  color: var(--neutral-on-background-weak);
+  color: #aaaaaa;
   font-weight: 600;
 
   span {
-    color: var(--neutral-on-background-strong);
+    color: #ffffff;
     strong {
       color: #00f3ff;
       font-weight: 700;
