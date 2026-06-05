@@ -78,8 +78,12 @@ export default async function Project({
     .map((p) => ({
       slug: p.slug,
       title: p.metadata.title,
+      summary: p.metadata.summary || "",
       images: p.metadata.images,
       link: p.metadata.link || "",
+      tag: (p.metadata.tag as string[]) || [],
+      tech: (p.metadata.tech as string[]) || [],
+      publishedAt: p.metadata.publishedAt,
     }));
 
   return (

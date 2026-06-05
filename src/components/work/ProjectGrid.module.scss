@@ -1,5 +1,6 @@
 /* ============================================
    ProjectGrid — F1-Themed Card Layout
+   Supports both dark and light modes
    ============================================ */
 
 /* F1 Theme Tokens */
@@ -29,11 +30,6 @@ $f1-glow: rgba(225, 6, 0, 0.3);
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 6, 0, 0); }
-  50% { box-shadow: 0 0 20px 2px rgba(225, 6, 0, 0.15); }
 }
 
 @keyframes racingLineIn {
@@ -97,7 +93,6 @@ $f1-glow: rgba(225, 6, 0, 0.3);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: $f1-white;
   font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 20px;
@@ -400,7 +395,7 @@ $f1-glow: rgba(225, 6, 0, 0.3);
   opacity: 1;
 }
 
-/* ===================== Glow Border on Hover ===================== */
+/* Glow Border on Hover */
 .card::before {
   content: "";
   position: absolute;
@@ -434,6 +429,153 @@ $f1-glow: rgba(225, 6, 0, 0.3);
   padding: 64px 16px;
   color: $f1-gray;
   font-size: 1rem;
+}
+
+/* ============================================
+   LIGHT MODE OVERRIDES
+   ============================================ */
+:global([data-theme="light"]) {
+  .headerTitle {
+    background: linear-gradient(135deg, #7C3AED 0%, #DC2626 50%, #7C3AED 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .headerSubtitle {
+    color: #64748b;
+  }
+
+  .headerLine {
+    background: linear-gradient(90deg, #DC2626, #7C3AED);
+  }
+
+  .filterLabel {
+    color: #1e293b;
+  }
+
+  .filterBtn {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #475569;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.15);
+      color: #1e293b;
+    }
+  }
+
+  .filterBtnActive {
+    background: linear-gradient(135deg, #DC2626, #7C3AED) !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.25), 0 0 0 1px rgba(124, 58, 237, 0.15);
+  }
+
+  .card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 248, 250, 0.98));
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+    &::after {
+      /* Light carbon fiber texture */
+      background-image:
+        linear-gradient(45deg, rgba(0, 0, 0, 0.015) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.015) 75%),
+        linear-gradient(45deg, rgba(0, 0, 0, 0.015) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.015) 75%);
+      opacity: 0.5;
+    }
+
+    &:hover {
+      border-color: rgba(220, 38, 38, 0.3);
+      box-shadow:
+        0 24px 48px -12px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(220, 38, 38, 0.1),
+        0 0 40px -8px rgba(220, 38, 38, 0.06);
+    }
+  }
+
+  .cardImageOverlay {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 40%,
+      rgba(248, 248, 250, 0.95) 100%
+    );
+  }
+
+  .cardImage {
+    filter: brightness(1) saturate(1.05);
+  }
+
+  .card:hover .cardImage {
+    filter: brightness(0.9) saturate(1.2);
+  }
+
+  .badgeCompleted {
+    background: rgba(220, 38, 38, 0.9);
+  }
+
+  .badgeYear {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #334155;
+  }
+
+  .cardTitle {
+    color: #1e293b;
+  }
+
+  .cardDescription {
+    color: #64748b;
+  }
+
+  .categoryTag {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.15);
+    color: #7C3AED;
+  }
+
+  .techTag {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .viewDetailsBtn {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(124, 58, 237, 0.06));
+    border-color: rgba(220, 38, 38, 0.15);
+    color: #1e293b;
+  }
+
+  .viewDetailsBtnIcon {
+    color: #DC2626;
+  }
+
+  .card:hover .viewDetailsBtn {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(124, 58, 237, 0.1));
+    border-color: rgba(220, 38, 38, 0.3);
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.08);
+  }
+
+  .racingStripe {
+    background: linear-gradient(90deg, #DC2626, #7C3AED, #DC2626);
+  }
+
+  .card::before {
+    background: linear-gradient(
+      135deg,
+      rgba(220, 38, 38, 0.2),
+      transparent 40%,
+      transparent 60%,
+      rgba(124, 58, 237, 0.15)
+    );
+  }
+
+  .emptyState {
+    color: #94a3b8;
+  }
 }
 
 /* ===================== Responsive ===================== */

@@ -33,11 +33,9 @@ function F1Scene() {
 
   // Trigger smoke effect on route change (like a hard drift into the page)
   useEffect(() => {
-    if (pathname === '/' || pathname === '/about') {
-      setIsDrifting(true);
-      const timeout = setTimeout(() => setIsDrifting(false), 2000);
-      return () => clearTimeout(timeout);
-    }
+    setIsDrifting(true);
+    const timeout = setTimeout(() => setIsDrifting(false), 2000);
+    return () => clearTimeout(timeout);
   }, [pathname]);
 
   useFrame((state, delta) => {
@@ -47,36 +45,68 @@ function F1Scene() {
     let targetRot = new THREE.Euler(0, 0, 0);
     let targetScale = 0; // default to hidden (scale 0)
 
-    // Visibility logic
+    // ===== F1 Track-Following Logic =====
+    // Each page represents a different sector of the circuit.
+    // The car drives along the track path that's visible in F1RacingTrack.
+    // scroll controls position along that page's track segment.
+
     if (pathname === '/') {
-      // Move slightly back and down so it doesn't block text
-      targetPos.set(0, -1.5, -2);
-      // As user scrolls down, spin the car 360 degrees and pitch it slightly
-      targetRot.set(scrollProgress * (Math.PI / 8), (Math.PI / 4) + (scrollProgress * Math.PI * 2), 0);
-      // Zoom out as we scroll down
-      targetScale = THREE.MathUtils.lerp(1.4, 0.6, scrollProgress);
+      // SECTOR 1 — Starting Grid / Pit Straight
+      // Car enters from right, centers, then drives toward camera on scroll
+      const t = scrollProgress;
+      const x = THREE.MathUtils.lerp(2, -1, t);
+      const z = THREE.MathUtils.lerp(-2, 2, t);
+      targetPos.set(x, -1.4, z);
+      
+      // Car rotates as it drives along the track curve
+      const angle = Math.PI / 4 + t * Math.PI * 1.5;
+      targetRot.set(t * (Math.PI / 12), angle, 0);
+      targetScale = THREE.MathUtils.lerp(1.4, 0.7, t);
+
     } else if (pathname === '/about') {
-      // Scroll-based path mapping (Top Right -> Bottom Left driving)
-      // At scroll 0: x = 4, z = -3 (Back right)
-      // At scroll 1: x = -4, z = 1 (Front left)
-      const x = THREE.MathUtils.lerp(4, -4, scrollProgress);
-      const z = THREE.MathUtils.lerp(-3, 1, scrollProgress);
+      // SECTOR 2 — Long straight with chicane
+      // Car drives from top-right to bottom-left following the track
+      const t = scrollProgress;
+      const x = THREE.MathUtils.lerp(4, -4, t);
+      const z = THREE.MathUtils.lerp(-3, 1, t);
+      const y = -1.2 + Math.sin(t * Math.PI) * 0.3; // slight elevation through chicane
       
-      targetPos.set(x, -1.2, z);
-      
-      // Angle the car so it points along its path of travel
-      // Math.atan2 gives the angle. DX = -8, DZ = 4.
-      targetRot.set(0, Math.atan2(-8, 4), 0);
+      targetPos.set(x, y, z);
+      targetRot.set(0, Math.atan2(-8, 4) + Math.sin(t * Math.PI * 2) * 0.3, 0);
       targetScale = 1.2;
+
     } else if (pathname === '/work') {
-      // Subtle F1 car in bottom-right area, slowly rotating based on scroll
-      targetPos.set(5, -2.5, -4);
-      targetRot.set(0, (Math.PI / 6) + (scrollProgress * Math.PI * 1.5), 0);
-      targetScale = THREE.MathUtils.lerp(0.9, 0.5, scrollProgress);
+      // SECTOR 3 — Full circuit view, car drives across the bottom
+      // Car is fully visible, following the track from left to right
+      const t = scrollProgress;
+      const x = THREE.MathUtils.lerp(-3, 3, t);
+      const z = THREE.MathUtils.lerp(1, -1, t);
+      const y = -1.3 + Math.sin(t * Math.PI * 2) * 0.15; // subtle undulation
+      
+      targetPos.set(x, y, z);
+      // Car faces direction of travel, with slight steering adjustments
+      const steer = Math.cos(t * Math.PI * 3) * 0.2;
+      targetRot.set(0, -Math.PI / 6 + steer, 0);
+      targetScale = THREE.MathUtils.lerp(1.1, 0.8, Math.abs(t - 0.5) * 2);
+
+    } else if (pathname?.startsWith('/work/')) {
+      // Project detail — car parked in a "pit garage" feel, smaller
+      targetPos.set(3, -1.8, -3);
+      targetRot.set(0, Math.PI / 3, 0);
+      targetScale = 0.7;
+
+    } else if (pathname === '/blog') {
+      // Blog — car cruising in the background
+      const t = scrollProgress;
+      targetPos.set(THREE.MathUtils.lerp(3, -3, t), -1.5, -2);
+      targetRot.set(0, Math.PI + t * Math.PI * 0.5, 0);
+      targetScale = 0.6;
+
     } else {
-      // Hide on other pages by sinking it or scaling it down
-      targetPos.set(0, -5, -10);
-      targetScale = 0;
+      // Any other page — subtle presence
+      targetPos.set(0, -2, -4);
+      targetRot.set(0, scrollProgress * Math.PI, 0);
+      targetScale = 0.5;
     }
 
     // 1. Smooth lerping for Position and Scale
@@ -135,10 +165,7 @@ function F1Scene() {
         )}
       </group>
 
-      {pathname === '/' || pathname === '/about' || pathname === '/work' ? (
-        <ContactShadows position={[0, -1, 0]} opacity={0.7} scale={20} blur={2.5} far={4} />
-      ) : null}
-      
+      <ContactShadows position={[0, -1, 0]} opacity={0.7} scale={20} blur={2.5} far={4} />
       <Environment preset="city" />
     </>
   );

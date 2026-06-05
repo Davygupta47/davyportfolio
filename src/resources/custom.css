@@ -14,6 +14,7 @@
 
 :root {
   --background: var(--page-background);
+  /* F1 Theme Shared Tokens */
   --f1-red: #E10600;
   --f1-red-dark: #B30500;
   --f1-carbon: #0d0d0d;
@@ -21,9 +22,23 @@
   --f1-yellow: #FFD700;
 }
 
-/* F1 Theme Custom Enhancements */
+/* ============================================
+   DARK MODE — Carbon Fiber Racing Aesthetic
+   ============================================ */
+[data-theme="dark"] {
+  /* F1 Track CSS Variables */
+  --f1-track-color: rgba(225, 6, 0, 0.12);
+  --f1-track-mid: rgba(168, 85, 247, 0.08);
+  --f1-track-border: rgba(255, 255, 255, 0.04);
+  --f1-checker-a: rgba(255, 255, 255, 0.03);
+  --f1-checker-b: rgba(0, 0, 0, 0.02);
+  --f1-sector-text: rgba(255, 255, 255, 0.06);
+  --f1-kerb-inner: rgba(255, 255, 255, 0.4);
+  --f1-glow-a: rgba(225, 6, 0, 0.04);
+  --f1-glow-b: rgba(168, 85, 247, 0.035);
+}
+
 [data-theme="dark"] body {
-  /* Subtle carbon fiber pattern for Dark Mode */
   background-color: #0d0d0d !important;
   background-image: 
     linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111), 
@@ -32,39 +47,82 @@
   background-position: 0 0, 5px 5px !important;
 }
 
-[data-theme="light"] body {
-  /* Sporty clean look for Light Mode */
-  background-color: #f4f4f5 !important;
-}
-
-/* Enhancing typography for racing theme */
-h1, h2, h3 {
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-}
-
 [data-theme="dark"] h1, [data-theme="dark"] h2 {
   text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
 }
 
 /* ============================================
-   F1 Checkered Flag Scrollbar
+   LIGHT MODE — Clean Sporty Paddock Aesthetic
+   ============================================ */
+[data-theme="light"] {
+  /* F1 Track CSS Variables — adapted for light bg */
+  --f1-track-color: rgba(225, 6, 0, 0.08);
+  --f1-track-mid: rgba(168, 85, 247, 0.06);
+  --f1-track-border: rgba(0, 0, 0, 0.04);
+  --f1-checker-a: rgba(0, 0, 0, 0.04);
+  --f1-checker-b: rgba(255, 255, 255, 0.8);
+  --f1-sector-text: rgba(0, 0, 0, 0.06);
+  --f1-kerb-inner: rgba(225, 6, 0, 0.5);
+  --f1-glow-a: rgba(225, 6, 0, 0.05);
+  --f1-glow-b: rgba(168, 85, 247, 0.04);
+}
+
+[data-theme="light"] body {
+  background-color: #f8f8fa !important;
+  /* Subtle diagonal racing stripe texture */
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 80px,
+      rgba(225, 6, 0, 0.012) 80px,
+      rgba(225, 6, 0, 0.012) 81px,
+      transparent 81px,
+      transparent 160px
+    ) !important;
+}
+
+[data-theme="light"] h1, [data-theme="light"] h2 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   Shared Typography — Racing Theme
+   ============================================ */
+h1, h2, h3 {
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================
+   F1 Scrollbar — Both Themes
    ============================================ */
 [data-theme="dark"] ::-webkit-scrollbar {
   width: 8px;
 }
-
 [data-theme="dark"] ::-webkit-scrollbar-track {
   background: #0d0d0d;
 }
-
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--f1-red), #A855F7);
   border-radius: 4px;
 }
-
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ff1a1a, #c084fc);
+}
+
+[data-theme="light"] ::-webkit-scrollbar {
+  width: 8px;
+}
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f0f0f2;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--f1-red), #d946ef);
+  border-radius: 4px;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff1a1a, #e879f9);
 }
 
 /* ============================================
@@ -74,8 +132,12 @@ h1, h2, h3 {
   background: rgba(225, 6, 0, 0.3);
   color: #ffffff;
 }
-
 ::-moz-selection {
   background: rgba(225, 6, 0, 0.3);
   color: #ffffff;
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(225, 6, 0, 0.2);
+  color: #1a1a1a;
 }
