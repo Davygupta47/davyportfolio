@@ -750,6 +750,56 @@ export default function ExploreView() {
     }
   };
 
+  const handleGameCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = gameCanvasRef.current;
+    if (!canvas || gameStatus !== "PLAYING" || e.touches.length === 0) return;
+    // Prevent scrolling while playing
+    if (activeGame === "bubble" || activeGame === "patches") {
+      // Cannot call e.preventDefault() in passive event listener easily, but we can do it via CSS touch-action
+    }
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const mx = (touch.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (touch.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (!useWebcam) {
+      if (activeGame === "bubble") {
+        bubbleRef.current.pointer = {
+          x: 1 - (mx / canvas.width),
+          y: my / canvas.height
+        };
+      } else if (activeGame === "patches") {
+        patchesRef.current.pointer = {
+          x: 1 - (mx / canvas.width),
+          y: my / canvas.height
+        };
+      }
+    }
+  };
+
+  const handleGameCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = gameCanvasRef.current;
+    if (!canvas || gameStatus !== "PLAYING" || e.touches.length === 0) return;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const mx = (touch.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (touch.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (!useWebcam) {
+      if (activeGame === "bubble") {
+        bubbleRef.current.pointer = {
+          x: 1 - (mx / canvas.width),
+          y: my / canvas.height
+        };
+      } else if (activeGame === "patches") {
+        patchesRef.current.pointer = {
+          x: 1 - (mx / canvas.width),
+          y: my / canvas.height
+        };
+      }
+    }
+  };
+
   const handleGameCanvasMouseLeave = () => {
     if (!useWebcam) {
       if (activeGame === "bubble") {
@@ -1920,7 +1970,11 @@ export default function ExploreView() {
                 height={500}
                 onMouseMove={handleGameCanvasMouseMove}
                 onMouseLeave={handleGameCanvasMouseLeave}
+                onTouchMove={handleGameCanvasTouch}
+                onTouchStart={handleGameCanvasTouch}
+                onTouchEnd={handleGameCanvasMouseLeave}
                 onClick={handleGameCanvasClick}
+                style={{ touchAction: (activeGame === "bubble" || activeGame === "patches") ? "none" : "auto" }}
               />
 
               {/* Game Over / Idle State Screens */}

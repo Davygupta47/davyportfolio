@@ -23,6 +23,10 @@ const F1RacingTrack = memo(() => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
 
+  if (pathname === '/' || pathname === '/about') {
+    return null;
+  }
+
   // The track "segment" changes per page, but the visual style is consistent
   // Home → Starting grid / pit lane feel
   // About → Long straight / chicane
@@ -135,8 +139,16 @@ const F1RacingTrack = memo(() => {
           strokeLinecap="round"
           filter="url(#trackGlow)"
           opacity="0.7"
-          style={{ transition: 'stroke-dashoffset 0.1s linear' }}
+          style={{ transition: 'stroke-dashoffset 0.1s linear', animation: 'dashMove 20s linear infinite' }}
         />
+        
+        <style>
+          {`
+            @keyframes dashMove {
+              to { stroke-dashoffset: -2000; }
+            }
+          `}
+        </style>
 
         {/* Kerb markers — red/white curbing at key corners */}
         {/* Corner 1 — top right approach */}

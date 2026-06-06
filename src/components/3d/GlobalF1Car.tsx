@@ -1,220 +1,427 @@
 "use client";
 
 import React, { useRef, useMemo, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Bounds } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrthographicCamera, PerspectiveCamera } from '@react-three/drei';
 import { usePathname } from 'next/navigation';
 import * as THREE from 'three';
 
-/**
- * Custom hook to detect light/dark theme from the HTML data-theme attribute used by once-ui.
- */
-function useAppTheme() {
-  const [theme, setTheme] = useState('dark');
-  
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const updateTheme = () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      setTheme(current);
-    };
-    updateTheme();
-    
-    const observer = new MutationObserver(updateTheme);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => observer.disconnect();
+const CONFIG = {
+  lapDurationSeconds: 15,
+  trackWidth: 4,
+  carScale: 0.8,
+};
+
+// Textures
+function useTrackTextures() {
+  return useMemo(() => {
+    // Asphalt
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = '#1a1a1a';
+    context.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 15000; i++) {
+      const x = Math.random() * 512;
+      const y = Math.random() * 512;
+      context.fillStyle = `rgba(255,255,255,${Math.random() * 0.03})`;
+      context.fillRect(x, y, 2, 2);
+    }
+    for (let i = 0; i < 20; i++) {
+      context.beginPath();
+      context.moveTo(Math.random() * 512, 0);
+      context.lineTo(Math.random() * 512, 512);
+      context.strokeStyle = 'rgba(0,0,0,0.15)';
+      context.lineWidth = Math.random() * 10 + 5;
+      context.stroke();
+    }
+    const asphaltTexture = new THREE.CanvasTexture(canvas);
+    asphaltTexture.wrapS = THREE.RepeatWrapping;
+    asphaltTexture.wrapT = THREE.RepeatWrapping;
+    asphaltTexture.repeat.set(10, 1);
+
+    // Start Line
+    const canvas2 = document.createElement('canvas');
+    canvas2.width = 256;
+    canvas2.height = 256;
+    const ctx2 = canvas2.getContext('2d')!;
+    const size = 32;
+    for(let y=0; y<256; y+=size) {
+      for(let x=0; x<256; x+=size) {
+        ctx2.fillStyle = ((x/size + y/size) % 2 === 0) ? '#ffffff' : '#1a1a1a';
+        ctx2.fillRect(x, y, size, size);
+      }
+    }
+    const startLineTexture = new THREE.CanvasTexture(canvas2);
+
+    // Headlight Glow
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 64; glowCanvas.height = 64;
+    const ctx = glowCanvas.getContext('2d')!;
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.3, 'rgba(255,255,255,0.5)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0,0,64,64);
+    const glowTexture = new THREE.CanvasTexture(glowCanvas);
+
+    return { asphaltTexture, startLineTexture, glowTexture };
   }, []);
-  
-  return theme;
 }
 
-// Track configuration
-const TRACK_WIDTH = 1.8;
-const CAR_SCALE = 1.5;
-const LAP_DURATION_SECONDS = 20;
+function MercedesF1CarMesh({ headlightsRef, rearWheelsRef }: any) {
+  const { glowTexture } = useTrackTextures();
+  return (
+    <>
+      <mesh position={[0, 1, 0]} castShadow>
+        <boxGeometry args={[3, 1.5, 12]} />
+        <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
+      </mesh>
+
+      <mesh position={[0, 1, 9]} rotation={[Math.PI / 2, Math.PI / 4, 0]} castShadow>
+        <cylinderGeometry args={[0.5, 1.5, 6, 4]} />
+        <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
+      </mesh>
+
+      <mesh position={[0, 0.8, -1]} castShadow>
+        <boxGeometry args={[5.5, 1.2, 7]} />
+        <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      <mesh position={[0, 1.4, -1]}>
+        <boxGeometry args={[5.6, 0.2, 7]} />
+        <meshStandardMaterial color={0xC0C0C0} roughness={0.2} metalness={0.8} />
+      </mesh>
+
+      <mesh position={[0, 0.5, 11]} castShadow>
+        <boxGeometry args={[6.5, 0.2, 1.5]} />
+        <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      <mesh position={[0, 2.5, -5.5]} castShadow>
+        <boxGeometry args={[5, 0.2, 1.5]} />
+        <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
+      </mesh>
+
+      <mesh position={[0, 1.5, -5.5]}>
+        <boxGeometry args={[1.5, 2, 1]} />
+        <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
+      </mesh>
+
+      <mesh position={[3.5, 1.4, -4]} rotation={[0, 0, Math.PI / 2]} castShadow ref={(el) => { if(el && rearWheelsRef) rearWheelsRef.current[0] = el; }}>
+        <cylinderGeometry args={[1.4, 1.4, 1.8, 16]} />
+        <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
+      </mesh>
+      <mesh position={[-3.5, 1.4, -4]} rotation={[0, 0, Math.PI / 2]} castShadow ref={(el) => { if(el && rearWheelsRef) rearWheelsRef.current[1] = el; }}>
+        <cylinderGeometry args={[1.4, 1.4, 1.8, 16]} />
+        <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
+      </mesh>
+
+      <mesh position={[3.2, 1.2, 7]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[1.2, 1.2, 1.5, 16]} />
+        <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
+      </mesh>
+      <mesh position={[-3.2, 1.2, 7]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[1.2, 1.2, 1.5, 16]} />
+        <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
+      </mesh>
+
+      <sprite position={[2, 1, 12]} scale={[6, 6, 1]} ref={(el) => { if(el && headlightsRef) headlightsRef.current[0] = el; }}>
+        <spriteMaterial map={glowTexture} color={0xffffff} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+      </sprite>
+      <sprite position={[-2, 1, 12]} scale={[6, 6, 1]} ref={(el) => { if(el && headlightsRef) headlightsRef.current[1] = el; }}>
+        <spriteMaterial map={glowTexture} color={0xffffff} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+      </sprite>
+    </>
+  );
+}
+
+function ParticleTrail({ targetRef }: { targetRef: React.RefObject<THREE.Group | null> }) {
+  const count = 40;
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const particles = useMemo(() => Array.from({ length: count }, () => ({ pos: new THREE.Vector3(), age: 1000 })), []);
+  
+  useFrame((state, delta) => {
+    if (!meshRef.current || !targetRef.current) return;
+    const dummy = new THREE.Object3D();
+    let spawned = false;
+    
+    for (let i = 0; i < count; i++) {
+      const p = particles[i];
+      p.age += delta;
+      
+      if (!spawned && p.age > 0.4) {
+        // Find local rear of the car
+        const backOffset = new THREE.Vector3(0, 0.2, -6).applyMatrix4(targetRef.current.matrixWorld);
+        p.pos.copy(backOffset);
+        p.pos.x += (Math.random() - 0.5) * 4;
+        p.pos.z += (Math.random() - 0.5) * 4;
+        p.age = 0;
+        spawned = true;
+      }
+      
+      if (p.age < 0.4) {
+        const scale = 1 - (p.age / 0.4);
+        dummy.position.copy(p.pos);
+        dummy.scale.set(scale * 1.5, scale * 1.5, scale * 1.5);
+        dummy.position.y += delta * 3;
+        dummy.updateMatrix();
+        meshRef.current.setMatrixAt(i, dummy.matrix);
+      } else {
+        dummy.scale.set(0,0,0);
+        dummy.updateMatrix();
+        meshRef.current.setMatrixAt(i, dummy.matrix);
+      }
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+  
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+      <sphereGeometry args={[0.5, 8, 8]} />
+      <meshBasicMaterial color={0xdddddd} transparent opacity={0.15} blending={THREE.AdditiveBlending} />
+    </instancedMesh>
+  );
+}
+
+function MercedesF1TrackCar({ trackCurve }: { trackCurve: THREE.CatmullRomCurve3 }) {
+  const carGroupRef = useRef<THREE.Group>(null);
+  const rearWheelsRef = useRef<THREE.Mesh[]>([]);
+  const headlightsRef = useRef<THREE.Sprite[]>([]);
+  const prevTangent = useRef(new THREE.Vector3());
+
+  useFrame((state) => {
+    if (!carGroupRef.current) return;
+    const time = state.clock.getElapsedTime();
+    const t = (time % CONFIG.lapDurationSeconds) / CONFIG.lapDurationSeconds;
+
+    const point = trackCurve.getPointAt(t);
+    carGroupRef.current.position.copy(point);
+
+    const tangent = trackCurve.getTangentAt(t);
+    const yaw = Math.atan2(tangent.x, tangent.z);
+    carGroupRef.current.rotation.y = yaw;
+
+    if (prevTangent.current.lengthSq() > 0) {
+      const cross = new THREE.Vector3().crossVectors(prevTangent.current, tangent);
+      const targetRoll = cross.y * 30;
+      carGroupRef.current.rotation.z = THREE.MathUtils.lerp(carGroupRef.current.rotation.z, Math.max(Math.min(targetRoll, 0.15), -0.15), 0.1);
+    }
+    prevTangent.current.copy(tangent);
+
+    const speed = 15;
+    rearWheelsRef.current.forEach(w => {
+      if (w) w.rotation.x -= speed * 0.016;
+    });
+
+    const pulse = 0.8 + Math.sin(time * 15) * 0.1;
+    headlightsRef.current.forEach(hl => {
+      if (hl) hl.material.opacity = pulse;
+    });
+  });
+
+  return (
+    <group>
+      <group ref={carGroupRef} scale={[CONFIG.carScale, CONFIG.carScale, CONFIG.carScale]}>
+        <MercedesF1CarMesh headlightsRef={headlightsRef} rearWheelsRef={rearWheelsRef} />
+      </group>
+      <ParticleTrail targetRef={carGroupRef} />
+    </group>
+  );
+}
+
+function ResponsiveOrthographicCamera() {
+  const { size } = useThree();
+  const frustumSize = 120; // Tightened from 300 to show the smaller track better
+  const calculatedZoom = Math.max(size.width / frustumSize, 1.5); 
+  
+  return (
+    <OrthographicCamera 
+      makeDefault 
+      position={[0, 200, 0]} 
+      zoom={calculatedZoom} 
+    />
+  );
+}
 
 function TrackScene() {
-  const theme = useAppTheme();
-  const isDark = theme === 'dark';
+  const { asphaltTexture, startLineTexture } = useTrackTextures();
 
-  const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
-  const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
-
-  const carGroup = useRef<THREE.Group>(null);
-  const leftHeadlight = useRef<THREE.Sprite>(null);
-  const rightHeadlight = useRef<THREE.Sprite>(null);
-
-  // 2. Define Spa-Francorchamps Track Path
   const trackCurve = useMemo(() => {
-    const points = [
-      new THREE.Vector3(-110, 0, 80),   // La Source Hairpin
-      new THREE.Vector3(-90, 0, 65),    // Straight to Eau Rouge
-      new THREE.Vector3(-70, 0, 50),    // Eau Rouge entry
-      new THREE.Vector3(-60, 0, 45),    // Eau Rouge left
-      new THREE.Vector3(-50, 0, 35),    // Raidillon right
-      new THREE.Vector3(-55, 0, 20),    // Raidillon crest
-      new THREE.Vector3(-45, 0, 0),     // Kemmel Straight
-      new THREE.Vector3(-25, 0, -25),
-      new THREE.Vector3(5, 0, -50),
-      new THREE.Vector3(40, 0, -75),    // Kemmel Straight end
-      new THREE.Vector3(65, 0, -85),    // Les Combes entry
-      new THREE.Vector3(85, 0, -90),    // Les Combes right
-      new THREE.Vector3(95, 0, -80),    // Les Combes left
-      new THREE.Vector3(85, 0, -65),    // Malmedy right
-      new THREE.Vector3(100, 0, -50),   // Straight to Bruxelles
-      new THREE.Vector3(115, 0, -40),
-      new THREE.Vector3(125, 0, -25),   // Bruxelles hairpin entry
-      new THREE.Vector3(125, 0, -5),    // Bruxelles hairpin apex
-      new THREE.Vector3(105, 0, 5),     // Bruxelles hairpin exit
-      new THREE.Vector3(85, 0, 0),      // No name curve
-      new THREE.Vector3(60, 0, 5),      // Approach to Pouhon
-      new THREE.Vector3(45, 0, 15),     // Pouhon entry
-      new THREE.Vector3(30, 0, 25),     // Pouhon apex 1
-      new THREE.Vector3(25, 0, 35),     // Pouhon apex 2
-      new THREE.Vector3(40, 0, 45),     // Pouhon exit
-      new THREE.Vector3(55, 0, 50),     // Fagnes entry
-      new THREE.Vector3(75, 0, 45),     // Fagnes right
-      new THREE.Vector3(85, 0, 55),     // Fagnes left
-      new THREE.Vector3(100, 0, 65),    // Campus right
-      new THREE.Vector3(115, 0, 80),    // Stavelot 1
-      new THREE.Vector3(115, 0, 95),    // Stavelot 2
-      new THREE.Vector3(100, 0, 105),   // Curve to Blanchimont
-      new THREE.Vector3(75, 0, 100),    // Blanchimont 1
-      new THREE.Vector3(40, 0, 85),     // Blanchimont 2
-      new THREE.Vector3(15, 0, 70),     // Approach to Bus Stop
-      new THREE.Vector3(-10, 0, 55),    // Bus Stop entry
-      new THREE.Vector3(-25, 0, 50),    // Bus Stop right
-      new THREE.Vector3(-40, 0, 60),    // Bus Stop left
-      new THREE.Vector3(-55, 0, 70),    // Bus Stop exit
-      new THREE.Vector3(-80, 0, 75),    // Start/Finish straight
+    // Scaled down by 2.5
+    const controlPoints = [
+      new THREE.Vector3(-44, 0, 32), new THREE.Vector3(-36, 0, 26), new THREE.Vector3(-28, 0, 20),
+      new THREE.Vector3(-24, 0, 18), new THREE.Vector3(-20, 0, 14), new THREE.Vector3(-22, 0, 8),
+      new THREE.Vector3(-18, 0, 0), new THREE.Vector3(-10, 0, -10), new THREE.Vector3(2, 0, -20),
+      new THREE.Vector3(16, 0, -30), new THREE.Vector3(26, 0, -34), new THREE.Vector3(34, 0, -36),
+      new THREE.Vector3(38, 0, -32), new THREE.Vector3(34, 0, -26), new THREE.Vector3(40, 0, -20),
+      new THREE.Vector3(46, 0, -16), new THREE.Vector3(50, 0, -10), new THREE.Vector3(50, 0, -2),
+      new THREE.Vector3(42, 0, 2), new THREE.Vector3(34, 0, 0), new THREE.Vector3(24, 0, 2),
+      new THREE.Vector3(18, 0, 6), new THREE.Vector3(12, 0, 10), new THREE.Vector3(10, 0, 14),
+      new THREE.Vector3(16, 0, 18), new THREE.Vector3(22, 0, 20), new THREE.Vector3(30, 0, 18),
+      new THREE.Vector3(34, 0, 22), new THREE.Vector3(40, 0, 26), new THREE.Vector3(46, 0, 32),
+      new THREE.Vector3(46, 0, 38), new THREE.Vector3(40, 0, 42), new THREE.Vector3(30, 0, 40),
+      new THREE.Vector3(16, 0, 34), new THREE.Vector3(6, 0, 28), new THREE.Vector3(-4, 0, 22),
+      new THREE.Vector3(-10, 0, 20), new THREE.Vector3(-16, 0, 24), new THREE.Vector3(-22, 0, 28),
+      new THREE.Vector3(-32, 0, 30)
     ];
-    return new THREE.CatmullRomCurve3(points, true);
+    const curve = new THREE.CatmullRomCurve3(controlPoints, true);
+    curve.tension = 0.5;
+    return curve;
   }, []);
 
-  // Track Geometries
   const trackGeometry = useMemo(() => {
-    const geo = new THREE.TubeGeometry(trackCurve, 200, TRACK_WIDTH, 8, true);
+    const geo = new THREE.TubeGeometry(trackCurve, 200, CONFIG.trackWidth, 8, true);
     geo.scale(1, 0.01, 1);
     return geo;
   }, [trackCurve]);
 
-  const borderGeometry = useMemo(() => {
-    const geo = new THREE.TubeGeometry(trackCurve, 200, TRACK_WIDTH + 0.8, 8, true);
+  const borderGeom = useMemo(() => {
+    const geo = new THREE.TubeGeometry(trackCurve, 200, CONFIG.trackWidth + 0.3, 8, true);
     geo.scale(1, 0.005, 1);
     return geo;
   }, [trackCurve]);
 
-  const outerBorderGeometry = useMemo(() => {
-    const geo = new THREE.TubeGeometry(trackCurve, 200, TRACK_WIDTH + 1.6, 8, true);
+  const outerBorderGeom = useMemo(() => {
+    const geo = new THREE.TubeGeometry(trackCurve, 200, CONFIG.trackWidth + 0.6, 8, true);
     geo.scale(1, 0.002, 1);
     return geo;
   }, [trackCurve]);
 
-  // Track animation state
-  const prevTangent = useRef(new THREE.Vector3());
+  const infieldGeom = useMemo(() => {
+    const points2d = trackCurve.getPoints(100).map(p => new THREE.Vector2(p.x, p.z));
+    const shape = new THREE.Shape(points2d);
+    const geo = new THREE.ShapeGeometry(shape);
+    geo.rotateX(-Math.PI / 2);
+    return geo;
+  }, [trackCurve]);
 
-  useFrame((state) => {
-    if (!carGroup.current) return;
-
-    const time = state.clock.getElapsedTime();
-    const t = (time % LAP_DURATION_SECONDS) / LAP_DURATION_SECONDS;
-
-    // 1. Position
-    const point = trackCurve.getPointAt(t);
-    carGroup.current.position.copy(point);
-
-    // 2. Yaw (Rotation Y)
-    const tangent = trackCurve.getTangentAt(t);
-    const yaw = Math.atan2(tangent.x, tangent.z);
-    carGroup.current.rotation.y = yaw;
-
-    // 3. Roll (Banking)
-    if (prevTangent.current.lengthSq() > 0) {
-      const cross = new THREE.Vector3().crossVectors(prevTangent.current, tangent);
-      const targetRoll = cross.y * 30; 
-      carGroup.current.rotation.z = THREE.MathUtils.lerp(carGroup.current.rotation.z, Math.max(Math.min(targetRoll, 0.15), -0.15), 0.1);
-    }
-    prevTangent.current.copy(tangent);
-  });
+  const sfPosition = useMemo(() => trackCurve.getPointAt(0.15), [trackCurve]);
+  const sfTangent = useMemo(() => trackCurve.getTangentAt(0.15), [trackCurve]);
 
   return (
     <>
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.3} color={0xffffff} />
       <directionalLight 
         position={[50, 100, 50]} 
         intensity={0.6} 
         color={0xaaaaff} 
         castShadow 
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-near={10}
+        shadow-camera-far={300}
+        shadow-camera-left={-60}
+        shadow-camera-right={60}
+        shadow-camera-top={60}
+        shadow-camera-bottom={-60}
       />
 
-      {/* TRACK SURFACE */}
-      <mesh geometry={trackGeometry} receiveShadow position={[0, 0.1, 0]}>
-        <meshStandardMaterial 
-          color={isDark ? 0xffffff : 0x888888} 
-          roughness={0.6} 
-          metalness={0.1} 
-        />
+      {/* Reflective Ground Plane under track */}
+      <mesh position={[0, -0.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color={0x030303} roughness={0.1} metalness={0.8} />
       </mesh>
 
-      {/* BORDERS */}
-      <mesh geometry={borderGeometry} position={[0, 0.05, 0]}>
-        <meshBasicMaterial color={isDark ? 0x1a1a1a : 0xdddddd} side={THREE.BackSide} />
-      </mesh>
-      <mesh geometry={outerBorderGeometry} position={[0, 0.02, 0]}>
-        <meshBasicMaterial color={isDark ? 0xffffff : 0x666666} side={THREE.BackSide} />
+      <mesh geometry={trackGeometry} position={[0, 0.1, 0]} receiveShadow>
+        <meshStandardMaterial color={0x1a1a1a} map={asphaltTexture} roughness={0.85} metalness={0.05} />
       </mesh>
 
-      {/* START/FINISH LINE STRAP */}
-      <mesh position={trackCurve.getPointAt(0.95)} rotation={[-Math.PI / 2, 0, Math.atan2(trackCurve.getTangentAt(0.95).x, trackCurve.getTangentAt(0.95).z)]}>
-        <planeGeometry args={[TRACK_WIDTH * 2, 2]} />
-        <meshBasicMaterial color={isDark ? 0xff0000 : 0x000000} />
+      <mesh geometry={borderGeom} position={[0, 0.05, 0]}>
+        <meshBasicMaterial color={0xffffff} side={THREE.BackSide} />
       </mesh>
 
-      {/* CAR */}
-      <group ref={carGroup} scale={CAR_SCALE}>
-        <group scale={3.5} position={[0, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-           <primitive object={clonedFerrari} />
-        </group>
-      </group>
+      <mesh geometry={outerBorderGeom} position={[0, 0.02, 0]}>
+        <meshBasicMaterial color={0x1a1a1a} side={THREE.BackSide} />
+      </mesh>
+
+      <mesh geometry={infieldGeom} position={[0, 0, 0]} receiveShadow>
+        <meshStandardMaterial color={0x1e3a1e} roughness={1} metalness={0} />
+      </mesh>
+
+      <mesh 
+        position={[sfPosition.x, 0.2, sfPosition.z]} 
+        rotation={[-Math.PI / 2, 0, Math.atan2(sfTangent.x, sfTangent.z)]}
+      >
+        <planeGeometry args={[CONFIG.trackWidth * 2, 3]} />
+        <meshBasicMaterial map={startLineTexture} />
+      </mesh>
+
+      <MercedesF1TrackCar trackCurve={trackCurve} />
     </>
   );
 }
 
 function AboutCarScene() {
-  const { scene: ferrariScene } = useGLTF('/models/ferrari/scene.gltf');
-  const clonedFerrari = useMemo(() => ferrariScene.clone(), [ferrariScene]);
-  const group = useRef<THREE.Group>(null);
-  
-  useFrame(() => {
-    if (group.current) {
-      // Calculate scroll progress (0 to 1)
-      const scrollY = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = maxScroll > 0 ? scrollY / maxScroll : 0;
-      
-      // Car drives forward and steers slightly as you scroll down
-      const targetZ = scrollProgress * 20 - 10;
-      const targetX = Math.sin(scrollProgress * Math.PI) * 5;
-      const targetRotY = Math.PI + Math.sin(scrollProgress * Math.PI) * 0.5;
+  const carGroupRef = useRef<THREE.Group>(null);
+  const rearWheelsRef = useRef<THREE.Mesh[]>([]);
+  const headlightsRef = useRef<THREE.Sprite[]>([]);
+  const scrollOffset = useRef(0);
 
-      group.current.position.z = THREE.MathUtils.lerp(group.current.position.z, targetZ, 0.1);
-      group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, targetX, 0.1);
-      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
-      group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, 1, 0.1));
-      
-      // Gentle hover effect
-      group.current.position.y = Math.sin(Date.now() * 0.002) * 0.2;
-    }
+  useEffect(() => {
+    const handleScroll = () => {
+      const maxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
+      scrollOffset.current = window.scrollY / maxScroll;
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useFrame((state) => {
+    if (!carGroupRef.current) return;
+    
+    // Smooth scroll following
+    const t = THREE.MathUtils.lerp(scrollOffset.current, scrollOffset.current, 0.1); 
+    
+    // Path definition: straight line from back to front with an S-curve horizontally
+    const z = -30 + t * 60; // From z=-30 to z=30
+    const x = Math.sin(t * Math.PI * 3) * 12; 
+    
+    const targetPos = new THREE.Vector3(x, 0, z);
+    carGroupRef.current.position.lerp(targetPos, 0.1);
+    
+    // Yaw calculation (derivative of path)
+    const dxdt = Math.cos(t * Math.PI * 3) * 12 * Math.PI * 3;
+    const dzdt = 60;
+    const angle = Math.atan2(dxdt, dzdt);
+    
+    // Oversteer drift angle based on cornering sharpness
+    const driftAngle = Math.sin(t * Math.PI * 3) * 0.4;
+    const targetYaw = angle + driftAngle;
+    carGroupRef.current.rotation.y = THREE.MathUtils.lerp(carGroupRef.current.rotation.y, targetYaw, 0.05);
+
+    // Spin wheels
+    rearWheelsRef.current.forEach(w => {
+      if (w) w.rotation.x -= 0.3;
+    });
+
+    // Camera dynamic follow
+    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, x * 0.2, 0.05);
+    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, 15, 0.05);
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, z + 25, 0.05);
+    state.camera.lookAt(x, 0, z - 10);
   });
 
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 20, 10]} intensity={1.5} color={0xffffff} />
-      <pointLight position={[-10, 5, -10]} intensity={2} color={0xff0000} />
-      <group ref={group} scale={2}>
-        <primitive object={clonedFerrari} />
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
+      <pointLight position={[0, 5, 0]} intensity={2} color={0xff0000} distance={20} />
+
+      <mesh position={[0, -0.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color={0x050505} roughness={0.15} metalness={0.8} />
+      </mesh>
+      
+      <gridHelper args={[200, 40, 0x222222, 0x111111]} position={[0, -0.04, 0]} />
+
+      <group ref={carGroupRef} scale={[CONFIG.carScale, CONFIG.carScale, CONFIG.carScale]}>
+        <MercedesF1CarMesh headlightsRef={headlightsRef} rearWheelsRef={rearWheelsRef} />
       </group>
+      <ParticleTrail targetRef={carGroupRef} />
     </>
   );
 }
@@ -222,33 +429,26 @@ function AboutCarScene() {
 export default function GlobalF1Car() {
   const pathname = usePathname();
   
-  if (pathname === '/') {
+  if (pathname === '/' || pathname === '/work') {
     return (
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.85 }}>
-        <Canvas 
-          shadows 
-          gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
-          camera={{ position: [0, 200, 0], zoom: 3 }} 
-          orthographic
-        >
-          <Bounds fit clip observe margin={1.2}>
-            <TrackScene />
-          </Bounds>
+        <Canvas shadows gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}>
+          <ResponsiveOrthographicCamera />
+          <TrackScene />
         </Canvas>
       </div>
     );
   }
 
-  if (pathname === '/about' || pathname === '/about/') {
+  if (pathname === '/about') {
     return (
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.6 }}>
-        <Canvas camera={{ position: [10, 5, 10], fov: 45 }}>
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: "none", opacity: 0.75 }}>
+        <Canvas shadows camera={{ position: [0, 15, 30], fov: 45 }} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}>
           <AboutCarScene />
         </Canvas>
       </div>
     );
   }
 
-  // Rest of the pages: F1 theme in bg (via global CSS), no animation and models
   return null;
 }

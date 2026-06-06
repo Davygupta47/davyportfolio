@@ -106,6 +106,18 @@ export default function Home() {
         <InlineF1Car />
       </RevealFx>
 
+      {/* Gradient fade separator */}
+      <div style={{
+        width: "100%",
+        height: "150px",
+        background: "linear-gradient(to bottom, transparent, var(--page-background))",
+        position: "absolute",
+        bottom: "350px",
+        left: 0,
+        zIndex: 1,
+        pointerEvents: "none"
+      }} />
+
       <RevealFx translateY="16" delay={0.6} fillWidth>
         <Column
           fillWidth
@@ -116,6 +128,9 @@ export default function Home() {
           gap="24"
           horizontal="center"
           style={{
+            position: "relative",
+            zIndex: 2,
+            marginTop: "6rem",
             backdropFilter: "blur(12px)",
             boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.2)",
             border: "1px solid var(--neutral-alpha-medium)",

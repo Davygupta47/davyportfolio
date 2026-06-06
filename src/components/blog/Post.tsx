@@ -13,6 +13,7 @@ interface PostProps {
 export default function Post({ post, thumbnail, direction }: PostProps) {
   return (
     <Card
+      className="f1-post-card"
       fillWidth
       key={post.slug}
       href={`/blog/${post.slug}`}
@@ -42,7 +43,7 @@ export default function Post({ post, thumbnail, direction }: PostProps) {
           <Row gap="24" vertical="center">
             <Row vertical="center" gap="16">
               <Avatar src={person.avatar} size="s" />
-              <Text variant="label-default-s">{person.name}</Text>
+              <Text variant="label-default-s">By {person.name}</Text>
             </Row>
             <Text variant="body-default-xs" onBackground="neutral-weak">
               {formatDate(post.metadata.publishedAt, false)}
