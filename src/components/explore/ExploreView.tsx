@@ -777,29 +777,6 @@ export default function ExploreView() {
     }
   };
 
-  const handleGameCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    const canvas = gameCanvasRef.current;
-    if (!canvas || gameStatus !== "PLAYING" || e.touches.length === 0) return;
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const mx = (touch.clientX - rect.left) * (canvas.width / rect.width);
-    const my = (touch.clientY - rect.top) * (canvas.height / rect.height);
-
-    if (!useWebcam) {
-      if (activeGame === "bubble") {
-        bubbleRef.current.pointer = {
-          x: 1 - (mx / canvas.width),
-          y: my / canvas.height
-        };
-      } else if (activeGame === "patches") {
-        patchesRef.current.pointer = {
-          x: 1 - (mx / canvas.width),
-          y: my / canvas.height
-        };
-      }
-    }
-  };
-
   const handleGameCanvasMouseLeave = () => {
     if (!useWebcam) {
       if (activeGame === "bubble") {
