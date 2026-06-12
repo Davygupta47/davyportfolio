@@ -71,45 +71,59 @@ function useTrackTextures() {
   }, []);
 }
 
-function MercedesF1CarMesh({ headlightsRef, rearWheelsRef }: any) {
+function RedBullF1CarMesh({ headlightsRef, rearWheelsRef }: any) {
   const { glowTexture } = useTrackTextures();
   return (
     <>
+      {/* Main Chassis - Red Bull Dark Navy Blue */}
       <mesh position={[0, 1, 0]} castShadow>
         <boxGeometry args={[3, 1.5, 12]} />
-        <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
+        <meshStandardMaterial color={0x0b1326} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Nose Cone - Red Bull Matte Yellow */}
       <mesh position={[0, 1, 9]} rotation={[Math.PI / 2, Math.PI / 4, 0]} castShadow>
         <cylinderGeometry args={[0.5, 1.5, 6, 4]} />
-        <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
+        <meshStandardMaterial color={0xFCD116} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Sidepods - Red Bull Dark Navy Blue */}
       <mesh position={[0, 0.8, -1]} castShadow>
         <boxGeometry args={[5.5, 1.2, 7]} />
-        <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
+        <meshStandardMaterial color={0x0b1326} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Sidepod Trim / Accent Line - Red Bull Red */}
       <mesh position={[0, 1.4, -1]}>
         <boxGeometry args={[5.6, 0.2, 7]} />
-        <meshStandardMaterial color={0xC0C0C0} roughness={0.2} metalness={0.8} />
+        <meshStandardMaterial color={0xE10600} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Front Wing Spoiler - Dark Gray */}
       <mesh position={[0, 0.5, 11]} castShadow>
         <boxGeometry args={[6.5, 0.2, 1.5]} />
-        <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
+        <meshStandardMaterial color={0x151515} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Rear Wing Foil - Red Bull Red */}
       <mesh position={[0, 2.5, -5.5]} castShadow>
         <boxGeometry args={[5, 0.2, 1.5]} />
-        <meshStandardMaterial color={0x00D2BE} roughness={0.3} metalness={0.2} />
+        <meshStandardMaterial color={0xE10600} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Engine Intake Vertical Support - Dark Blue */}
       <mesh position={[0, 1.5, -5.5]}>
         <boxGeometry args={[1.5, 2, 1]} />
-        <meshStandardMaterial color={0x111111} roughness={0.5} metalness={0.1} />
+        <meshStandardMaterial color={0x0b1326} roughness={0.8} metalness={0.1} />
       </mesh>
 
+      {/* Cockpit Camera Pod - Red Bull Yellow */}
+      <mesh position={[0, 2.3, 0]}>
+        <boxGeometry args={[0.6, 0.4, 1]} />
+        <meshStandardMaterial color={0xFCD116} roughness={0.8} metalness={0.1} />
+      </mesh>
+
+      {/* Rear Wheels */}
       <mesh position={[3.5, 1.4, -4]} rotation={[0, 0, Math.PI / 2]} castShadow ref={(el) => { if(el && rearWheelsRef) rearWheelsRef.current[0] = el; }}>
         <cylinderGeometry args={[1.4, 1.4, 1.8, 16]} />
         <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
@@ -119,6 +133,7 @@ function MercedesF1CarMesh({ headlightsRef, rearWheelsRef }: any) {
         <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
       </mesh>
 
+      {/* Front Wheels */}
       <mesh position={[3.2, 1.2, 7]} rotation={[0, 0, Math.PI / 2]} castShadow>
         <cylinderGeometry args={[1.2, 1.2, 1.5, 16]} />
         <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
@@ -128,6 +143,7 @@ function MercedesF1CarMesh({ headlightsRef, rearWheelsRef }: any) {
         <meshStandardMaterial color={0x151515} roughness={0.9} metalness={0} />
       </mesh>
 
+      {/* Headlight Sprite Glows */}
       <sprite position={[2, 1, 12]} scale={[6, 6, 1]} ref={(el) => { if(el && headlightsRef) headlightsRef.current[0] = el; }}>
         <spriteMaterial map={glowTexture} color={0xffffff} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
       </sprite>
@@ -225,7 +241,7 @@ function MercedesF1TrackCar({ trackCurve }: { trackCurve: THREE.CatmullRomCurve3
   return (
     <group>
       <group ref={carGroupRef} scale={[CONFIG.carScale, CONFIG.carScale, CONFIG.carScale]}>
-        <MercedesF1CarMesh headlightsRef={headlightsRef} rearWheelsRef={rearWheelsRef} />
+        <RedBullF1CarMesh headlightsRef={headlightsRef} rearWheelsRef={rearWheelsRef} />
       </group>
       <ParticleTrail targetRef={carGroupRef} />
     </group>
@@ -419,7 +435,7 @@ function AboutCarScene() {
       <gridHelper args={[200, 40, 0x222222, 0x111111]} position={[0, -0.04, 0]} />
 
       <group ref={carGroupRef} scale={[CONFIG.carScale, CONFIG.carScale, CONFIG.carScale]}>
-        <MercedesF1CarMesh headlightsRef={headlightsRef} rearWheelsRef={rearWheelsRef} />
+        <RedBullF1CarMesh headlightsRef={headlightsRef} rearWheelsRef={rearWheelsRef} />
       </group>
       <ParticleTrail targetRef={carGroupRef} />
     </>
