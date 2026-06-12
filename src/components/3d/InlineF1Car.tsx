@@ -30,9 +30,9 @@ export default function InlineF1Car() {
   return (
     <div style={{ 
       width: '100%', 
-      height: '450px', 
+      height: 'clamp(280px, 45vh, 450px)', 
       position: 'relative', 
-      margin: '2rem 0', 
+      margin: '1.5rem 0', 
       cursor: 'grab',
       background: 'rgba(255, 255, 255, 0.03)',
       border: '1px solid var(--neutral-alpha-medium)',

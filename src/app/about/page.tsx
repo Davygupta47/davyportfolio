@@ -236,7 +236,7 @@ export default function About() {
               <Column fillWidth gap="l" marginBottom="40">
                 {about.work.experiences.map((experience, index) => (
                   <Column key={`${experience.company}-${experience.role}-${index}`} fillWidth className="about-experience-card">
-                    <Row fillWidth horizontal="between" vertical="end" marginBottom="4">
+                    <Row fillWidth s={{ direction: "column", align: "start", gap: "4" }} horizontal="between" vertical="end" marginBottom="4">
                       <Text id={experience.company} variant="heading-strong-l">
                         {experience.company}
                       </Text>

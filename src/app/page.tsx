@@ -28,7 +28,7 @@ export async function generateMetadata() {
 
 export default function Home() {
   return (
-    <Column maxWidth="m" gap="xl" paddingY="24" horizontal="center" style={{ position: "relative", zIndex: 1 }}>
+    <Column maxWidth="m" gap="xl" s={{ gap: "l" }} paddingY="24" horizontal="center" style={{ position: "relative", zIndex: 1 }}>
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -112,6 +112,7 @@ export default function Home() {
           fillWidth
           radius="l-4"
           padding="40"
+          s={{ padding: "24" }}
           gap="24"
           horizontal="center"
           className="cta-card"

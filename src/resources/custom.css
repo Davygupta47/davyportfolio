@@ -340,3 +340,319 @@ h1, h2, h3 {
     padding: 1.5rem !important;
   }
 }
+
+/* ============================================
+   F1 Gantry Preloader Styles
+   ============================================ */
+.f1-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #0d0d0d;
+  background-image:
+    linear-gradient(45deg, rgba(20, 20, 20, 0.95) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.95) 75%, rgba(20, 20, 20, 0.95)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.95) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.95) 75%, rgba(20, 20, 20, 0.95)) !important;
+  background-size: 10px 10px !important;
+  background-position: 0 0, 5px 5px !important;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1), transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.6s;
+}
+
+.f1-loader-overlay.fade-out {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.f1-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.25rem;
+  width: 100%;
+  max-width: 380px;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.f1-loader-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.f1-loader-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.f1-loader-subtitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: var(--f1-red);
+}
+
+/* Gantry Lights Structure */
+.f1-gantry-structure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.f1-gantry-truss {
+  height: 5px;
+  width: 250px;
+  background: #222;
+  border: 1px solid #3d3d3d;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.f1-gantry {
+  display: flex;
+  justify-content: space-between;
+  width: 230px;
+  padding: 6px 12px;
+  background: #141416;
+  border: 2px solid #28282c;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(0,0,0,0.9);
+  margin-top: -1px;
+  box-sizing: border-box;
+}
+
+.f1-light-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px;
+  background: #08080a;
+  border-radius: 4px;
+  border: 1px solid #1c1c20;
+}
+
+.f1-light-bulb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1d1d20;
+  border: 1.5px solid #0a0a0c;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.85);
+  box-sizing: border-box;
+}
+
+.f1-light-bulb.lit {
+  background-color: var(--f1-red);
+  box-shadow:
+    0 0 10px var(--f1-red),
+    0 0 20px var(--f1-red),
+    inset 0 1px 2px rgba(255,255,255,0.7);
+}
+
+/* Steering HUD display */
+.f1-dash-hud {
+  width: 100%;
+  background: rgba(18, 18, 20, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+  backdrop-filter: blur(8px);
+  box-sizing: border-box;
+}
+
+.f1-led-strip {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding: 3px 6px;
+  background: #050507;
+  border-radius: 10px;
+  border: 1px solid #131317;
+}
+
+.f1-led-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #151518;
+  transition: background-color 0.08s ease, box-shadow 0.08s ease;
+}
+
+.f1-led-dot.active.green {
+  background-color: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+.f1-led-dot.active.yellow {
+  background-color: #eab308;
+  box-shadow: 0 0 6px #eab308;
+}
+
+.f1-led-dot.active.red {
+  background-color: var(--f1-red);
+  box-shadow: 0 0 6px var(--f1-red), 0 0 12px var(--f1-red);
+}
+
+.f1-led-dot.blink {
+  animation: led-flash 0.12s infinite alternate;
+}
+
+@keyframes led-flash {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+.f1-telemetry-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.f1-hud-item {
+  background: #0a0a0c;
+  border: 1px solid #1a1a20;
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+.gear-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+}
+
+.numeric-box {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.hud-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hud-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #555562;
+  text-transform: uppercase;
+}
+
+.hud-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.gear-val {
+  font-size: 2rem;
+  line-height: 1;
+  font-family: 'Orbitron', sans-serif;
+  color: #2b2b35;
+  transition: color 0.15s ease;
+}
+
+.gear-active {
+  color: #00ffcc;
+  text-shadow: 0 0 12px rgba(0, 255, 204, 0.75);
+}
+
+.text-purple {
+  color: #a855f7 !important;
+}
+
+/* Telemetry Screen Console */
+.f1-telemetry-console {
+  width: 100%;
+  height: 40px;
+  background: #050507;
+  border: 1px solid #14141a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.console-line {
+  display: flex;
+  gap: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.68rem;
+  width: 100%;
+}
+
+.console-prompt {
+  color: var(--f1-red);
+  font-weight: bold;
+  animation: cursor-blink 0.8s infinite;
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
+
+.console-text {
+  color: #888894;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.launch-text {
+  color: #00ffcc !important;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+  animation: text-zoom 0.4s ease;
+}
+
+@keyframes text-zoom {
+  from { transform: scale(0.96); opacity: 0.8; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 400px) {
+  .f1-loader-title {
+    font-size: 1.25rem;
+  }
+  .f1-gantry-truss {
+    width: 220px;
+  }
+  .f1-gantry {
+    width: 200px;
+  }
+  .f1-light-bulb {
+    width: 16px;
+    height: 16px;
+  }
+}
