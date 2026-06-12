@@ -1,0 +1,35 @@
+---
+title: "unlearning-plm – Parameter-Efficient LLM Unlearning"
+publishedAt: "2026-06-12"
+summary: "An open-source framework designed to selectively erase specific information, private data, or biases from large language models (LLMs) without retraining from scratch."
+images:
+  - "/images/projects/myprojects/unlearning-plm.jpg"
+tag:
+  - "AI/ML"
+  - "LLM Safety"
+  - "Privacy"
+tech:
+  - "Python"
+  - "PyTorch"
+  - "Hugging Face"
+  - "WandB"
+team:
+  - name: "Dwaipayan Dasgupta"
+    role: "AI/ML Engineer"
+    avatar: "/images/my.jpg"
+    linkedIn: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319"
+link: "https://github.com/Davygupta47/unlearning-plm"
+---
+
+## Overview
+
+Welcome to **unlearning-plm**!
+
+This project implements parameter-efficient unlearning methods for Large Language Models (LLMs). The core goal is to selectively remove the influence of private, biased, or outdated training data from a pre-trained model without incurring the massive computational cost of retraining the model from scratch.
+
+### Key Features
+- **Multiple Unlearning Methods**: Implements gradient ascent, Ascent plus Descent (AD), and Ascent plus KL-divergence (AKL) regularization.
+- **Robust Evaluation**: Features perplexity measurement pipelines to ensure general model utility remains intact after unlearning.
+- **MIA Defense Validation**: Built-in Membership Inference Attack (MIA) evaluation suite utilizing ROC/AUC metrics to mathematically verify the success of data erasure.
+
+[View the Source Code on GitHub](https://github.com/Davygupta47/unlearning-plm)

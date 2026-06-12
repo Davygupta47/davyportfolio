@@ -1,0 +1,37 @@
+---
+title: "Pneumonia Detection from Chest X-Ray"
+publishedAt: "2026-06-12"
+summary: "A deep learning pipeline and Streamlit application for classifying chest X-ray images to detect pneumonia using transfer learning with ResNet-18."
+images:
+  - "/images/projects/myprojects/xray.jpg"
+tag:
+  - "Computer Vision"
+  - "Deep Learning"
+  - "Healthcare AI"
+tech:
+  - "Python"
+  - "PyTorch"
+  - "Torchvision"
+  - "Streamlit"
+  - "Pillow"
+team:
+  - name: "Dwaipayan Dasgupta"
+    role: "AI/ML Engineer"
+    avatar: "/images/my.jpg"
+    linkedIn: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319"
+link: "https://github.com/Davygupta47/xray"
+---
+
+## Overview
+
+Welcome to **pneumonia-detection-xray**!
+
+This project implements an end-to-end deep learning workflow for detecting pneumonia from pediatric chest X-ray images. By utilizing transfer learning with a pre-trained **ResNet-18** architecture, the model efficiently extracts high-level spatial features and classifies chest X-rays into **Normal** or **Pneumonia** categories. The system is deployed as an interactive web app for quick inference.
+
+### Key Features
+- **Transfer Learning Workflow**: Leverages a pre-trained **ResNet-18** model, freezing the convolutional feature extractor to train a custom fully-connected classifier head for binary classification.
+- **Robust Data Pipeline**: Processes chest X-ray images with specialized PyTorch transformations (resizing, tensor conversion, and ImageNet normalization) to prepare them for neural network inference.
+- **Interactive Streamlit Web App**: An intuitive user interface where clinicians or developers can upload chest X-ray images (JPEG/PNG) and get real-time visual output along with the predicted class.
+- **Automated Validation & Evaluation**: Features training and evaluation scripts that track validation accuracy and save the best-performing model checkpoint (`pneumonia_model.pth`) based on validation set performance.
+
+[View the Source Code on GitHub](https://github.com/Davygupta47/xray)

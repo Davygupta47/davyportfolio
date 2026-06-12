@@ -1,0 +1,38 @@
+---
+title: "StockSense – AI Trading & Machine Unlearning Platform"
+publishedAt: "2026-06-12"
+summary: "A production-grade AI trading intelligence platform utilizing Qwen LLMs for stock price forecasting, featuring real-time anomaly-based poison detection and adapter-level machine unlearning."
+images:
+  - "/images/projects/myprojects/stocksense.jpg"
+tag:
+  - "Machine Learning"
+  - "Machine Unlearning"
+  - "Financial Technology"
+tech:
+  - "Python"
+  - "PyTorch"
+  - "FastAPI"
+  - "React"
+  - "Qwen"
+  - "FAISS"
+team:
+  - name: "Dwaipayan Dasgupta"
+    role: "AI/ML Engineer"
+    avatar: "/images/my.jpg"
+    linkedIn: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319"
+link: "https://github.com/Davygupta47/stocks-project"
+---
+
+## Overview
+
+Welcome to **StockSense**!
+
+This project implements a full-stack, decoupled AI trading intelligence and security platform. By combining a **Qwen** model (integrated with LoRA adapters) for reasoning and prediction with a real-time **Poison Detection & Machine Unlearning** pipeline, the platform ensures robustness against adversarial data attacks. The system is served via a FastAPI backend and displayed through a premium, Bloomberg Terminal–inspired React dashboard.
+
+### Key Features
+- **Hybrid Modeling & RAG Architecture**: Employs a pre-trained **Qwen** model fine-tuned on enriched 30-day technical indicators, enhanced with semantic RAG retrieval from a **FAISS** vector store to forecast next-day stock movements.
+- **7-Signal Poison Detection**: Implements a real-time anomaly detection engine checking for price outliers, flash crashes, volume spikes, negative prices, stale data, regime changes, and OHLC violations.
+- **Adapter-Level Machine Unlearning**: Features clean unlearning of poisoned inputs using advanced algorithms (Ascent-Descent, Approximate KL, and Gradient Ascent) applied specifically to LoRA adapters without altering base weights.
+- **Bloomberg-Inspired UI & Portfolio Simulator**: Offers an immersive dark-themed dashboard built with React, Tailwind CSS, and Recharts, including interactive candlestick charts, live-price investment simulator, and a comprehensive admin control plane for data audit trails.
+
+[View the Source Code on GitHub](https://github.com/Davygupta47/stocks-project)

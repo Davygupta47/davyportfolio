@@ -1,0 +1,42 @@
+---
+title: "paper-to-notebook – Research Paper to Runnable Notebook"
+publishedAt: "2026-06-12"
+summary: "An automated pipeline that converts scientific research papers (PDFs) into fully functional, structured, and runnable Jupyter notebooks with complete implementations and explanations."
+images:
+  - "/images/projects/myprojects/paper-to-notebook.jpg"
+tag:
+  - "AI/ML"
+  - "LLM Agents"
+  - "API Development"
+tech:
+  - "Python"
+  - "FastAPI"
+  - "Gemini API"
+  - "PyTorch"
+  - "Jupyter (nbformat)"
+  - "Docker"
+team:
+  - name: "Dwaipayan Dasgupta"
+    role: "AI/ML Engineer"
+    avatar: "/images/my.jpg"
+    linkedIn: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319"
+link: "https://github.com/Davygupta47/paper-to-notebook"
+---
+
+## Overview
+
+Welcome to **paper-to-notebook**!
+
+This project implements an intelligent, agentic multi-step pipeline that digests machine learning research papers in PDF format and translates them into runnable, step-by-step Jupyter notebooks (`.ipynb`). It bridges the gap between static academic papers and hands-on, executable toy implementations, providing clear mathematical intuition alongside code.
+
+### Key Features
+- **Multi-Step Agentic Pipeline**: Orchestrates a 4-step pipeline using the **Gemini 2.0 Flash** model to parse the paper:
+  1. *Paper Analysis*: Extract title, core algorithms, baselines, and evaluation metrics.
+  2. *Toy Design Plan*: Design synthetic data, mock architectures, and visualization schemes.
+  3. *Cell Generation*: Draft detailed, clean markdown narrative and runnable code blocks across 11 key notebook sections.
+  4. *Validation & Repair*: Perform static code analysis to eliminate undefined variables, import issues, and unresolved placeholders.
+- **Dynamic Programmatic Generation**: Utilizes `nbformat` to construct notebooks dynamically, ensuring compatibility with Jupyter and JupyterLab environments.
+- **Asynchronous Web Interface**: Powered by a high-performance **FastAPI** backend that exposes a Server-Sent Events (SSE) endpoint to stream real-time generation progress and live thinking steps to a clean web dashboard.
+- **Containerized Deployment**: Ready for cloud-native deployment with a fully configured **Docker** stack, utilizing a concurrency-controlled pipeline execution limit to manage resource usage.
+
+[View the Source Code on GitHub](https://github.com/Davygupta47/paper-to-notebook)

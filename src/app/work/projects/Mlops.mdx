@@ -1,0 +1,39 @@
+---
+title: "mlops-1 – MovieLens MLOps Pipeline"
+publishedAt: "2026-06-12"
+summary: "An end-to-end, reproducible machine learning pipeline for ingesting, preprocessing, training, evaluating, and serving a MovieLens recommendation model."
+images:
+  - "/images/projects/myprojects/mlops-1.jpg"
+tag:
+  - "AI/ML"
+  - "MLOps"
+  - "API Development"
+tech:
+  - "Python"
+  - "FastAPI"
+  - "DVC"
+  - "MLflow"
+  - "Polars"
+  - "Scikit-Learn"
+  - "Docker"
+team:
+  - name: "Dwaipayan Dasgupta"
+    role: "AI/ML Engineer"
+    avatar: "/images/my.jpg"
+    linkedIn: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319"
+link: "https://github.com/Davygupta47/mlops-1"
+---
+
+## Overview
+
+Welcome to **mlops-1**!
+
+This project implements a reproducible, end-to-end Machine Learning Operations (MLOps) pipeline for the MovieLens dataset. It automates the workflow from raw data ingestion and high-performance preprocessing to training, evaluating, and serving the recommendation model in a containerized environment.
+
+### Key Features
+- **Pipeline Versioning & Lineage**: Orchestrated via **DVC (Data Version Control)** to manage and track data states, ensuring reproducibility across all pipeline steps (ingestion, processing, training, and evaluation).
+- **High-Performance Data Processing**: Leverages **Polars** for extremely fast data ingestion, preprocessing, and feature engineering compared to traditional pandas workflows.
+- **Experiment Tracking**: Integrated with **MLflow** to track metrics, log models, and manage experiment runs systematically.
+- **FastAPI Model Serving**: Provides API endpoints (`/predict`, `/health`) to serve real-time recommendation predictions, fully containerized using **Docker** for seamless deployment.
+
+[View the Source Code on GitHub](https://github.com/Davygupta47/mlops-1)
