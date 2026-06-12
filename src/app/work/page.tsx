@@ -15,7 +15,10 @@ export async function generateMetadata() {
 
 export default function Work() {
   const allProjects = getPosts(["src", "app", "work", "projects"])
-    .sort((a, b) => new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime(),
+    )
     .map((post) => ({
       slug: post.slug,
       title: post.metadata.title,
@@ -28,7 +31,14 @@ export default function Work() {
     }));
 
   return (
-    <Column maxWidth="l" paddingTop="40" paddingX="l" s={{ paddingX: "16", gap: "24", paddingTop: "24" }} gap="32" style={{ position: "relative", zIndex: 1, margin: "0 auto", width: "100%" }}>
+    <Column
+      maxWidth="l"
+      paddingTop="40"
+      paddingX="l"
+      s={{ paddingX: "16", gap: "24", paddingTop: "24" }}
+      gap="32"
+      style={{ position: "relative", zIndex: 1, margin: "0 auto", width: "100%" }}
+    >
       <Schema
         as="webPage"
         baseURL={baseURL}

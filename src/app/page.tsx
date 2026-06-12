@@ -28,7 +28,14 @@ export async function generateMetadata() {
 
 export default function Home() {
   return (
-    <Column maxWidth="m" gap="xl" s={{ gap: "l" }} paddingY="24" horizontal="center" style={{ position: "relative", zIndex: 1 }}>
+    <Column
+      maxWidth="m"
+      gap="xl"
+      s={{ gap: "l" }}
+      paddingY="24"
+      horizontal="center"
+      style={{ position: "relative", zIndex: 1 }}
+    >
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -45,12 +52,7 @@ export default function Home() {
       <Column fillWidth horizontal="center" gap="m">
         <Column maxWidth="s" horizontal="center" align="center">
           {home.featured.display && (
-            <RevealFx
-              fillWidth
-              horizontal="center"
-              paddingTop="12"
-              paddingBottom="24"
-            >
+            <RevealFx fillWidth horizontal="center" paddingTop="12" paddingBottom="24">
               <Badge
                 background="brand-alpha-weak"
                 paddingX="12"
@@ -121,11 +123,17 @@ export default function Home() {
             <Heading variant="heading-strong-xl" align="center">
               Let&apos;s build something amazing together
             </Heading>
-            <Text variant="body-default-m" onBackground="neutral-weak" align="center" style={{ maxWidth: "480px", lineHeight: 1.7 }}>
-              I&apos;m always open to discussing new opportunities, creative collaborations, or machine learning challenges. Reach out and let&apos;s connect!
+            <Text
+              variant="body-default-m"
+              onBackground="neutral-weak"
+              align="center"
+              style={{ maxWidth: "480px", lineHeight: 1.7 }}
+            >
+              I&apos;m always open to discussing new opportunities, creative collaborations, or
+              machine learning challenges. Reach out and let&apos;s connect!
             </Text>
           </Column>
-          
+
           <Row gap="16" vertical="center" horizontal="center" wrap style={{ width: "100%" }}>
             <Button
               href={`mailto:${person.email}`}
@@ -136,18 +144,13 @@ export default function Home() {
             >
               Email Me
             </Button>
-            <Button
-              href={about.path}
-              variant="secondary"
-              size="m"
-              data-border="rounded"
-            >
+            <Button href={about.path} variant="secondary" size="m" data-border="rounded">
               More About Me
             </Button>
           </Row>
-          
+
           <Line background="neutral-alpha-weak" />
-          
+
           <Row gap="12" horizontal="center" vertical="center">
             {social.map(
               (item) =>

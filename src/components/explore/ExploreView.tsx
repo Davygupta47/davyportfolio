@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Flex, Row, Line } from "@once-ui-system/core";
-import { PiCompassDuotone, PiGameControllerDuotone, PiCameraDuotone, PiCameraSlashDuotone, PiSpeakerSimpleHighDuotone, PiSpeakerSimpleSlashDuotone } from "react-icons/pi";
+import {
+  PiCompassDuotone,
+  PiGameControllerDuotone,
+  PiCameraDuotone,
+  PiCameraSlashDuotone,
+  PiSpeakerSimpleHighDuotone,
+  PiSpeakerSimpleSlashDuotone,
+} from "react-icons/pi";
 import styles from "./ExploreView.module.scss";
 
 // Declare global types for MediaPipe variables loaded via CDN
@@ -66,10 +73,10 @@ const PATCHES_LEVELS: Record<number, PatchesLevel> = {
     gridSize: 4,
     clues: [
       { col: 0, row: 0, size: 4, type: "square" }, // Needs 2x2
-      { col: 2, row: 0, size: 2, type: "tall" },   // Needs 1x2
-      { col: 3, row: 0, size: 2, type: "tall" },   // Needs 1x2
-      { col: 0, row: 2, size: 2, type: "wide" },   // Needs 2x1
-      { col: 0, row: 3, size: 2, type: "wide" },   // Needs 2x1
+      { col: 2, row: 0, size: 2, type: "tall" }, // Needs 1x2
+      { col: 3, row: 0, size: 2, type: "tall" }, // Needs 1x2
+      { col: 0, row: 2, size: 2, type: "wide" }, // Needs 2x1
+      { col: 0, row: 3, size: 2, type: "wide" }, // Needs 2x1
       { col: 2, row: 2, size: 4, type: "square" }, // Needs 2x2
     ],
     tray: [
@@ -79,18 +86,18 @@ const PATCHES_LEVELS: Record<number, PatchesLevel> = {
       { id: 4, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
       { id: 5, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
       { id: 6, width: 2, height: 2, color: "#ff007f" }, // Pink 2x2
-    ]
+    ],
   },
   2: {
     gridSize: 5,
     clues: [
-      { col: 0, row: 0, size: 6, type: "wide" },   // Needs 3x2
-      { col: 3, row: 0, size: 6, type: "tall" },   // Needs 2x3
+      { col: 0, row: 0, size: 6, type: "wide" }, // Needs 3x2
+      { col: 3, row: 0, size: 6, type: "tall" }, // Needs 2x3
       { col: 0, row: 2, size: 4, type: "square" }, // Needs 2x2
-      { col: 2, row: 2, size: 3, type: "tall" },   // Needs 1x3
-      { col: 3, row: 3, size: 2, type: "wide" },   // Needs 2x1
-      { col: 0, row: 4, size: 2, type: "wide" },   // Needs 2x1
-      { col: 3, row: 4, size: 2, type: "wide" },   // Needs 2x1
+      { col: 2, row: 2, size: 3, type: "tall" }, // Needs 1x3
+      { col: 3, row: 3, size: 2, type: "wide" }, // Needs 2x1
+      { col: 0, row: 4, size: 2, type: "wide" }, // Needs 2x1
+      { col: 3, row: 4, size: 2, type: "wide" }, // Needs 2x1
     ],
     tray: [
       { id: 1, width: 3, height: 2, color: "#00f3ff" }, // Cyan 3x2
@@ -100,18 +107,18 @@ const PATCHES_LEVELS: Record<number, PatchesLevel> = {
       { id: 5, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
       { id: 6, width: 2, height: 1, color: "#00ff66" }, // Green 2x1
       { id: 7, width: 2, height: 1, color: "#00f3ff" }, // Cyan 2x1
-    ]
+    ],
   },
   3: {
     gridSize: 6,
     clues: [
       { col: 0, row: 0, size: 9, type: "square" }, // Needs 3x3
-      { col: 3, row: 0, size: 6, type: "wide" },   // Needs 3x2
-      { col: 5, row: 2, size: 4, type: "tall" },   // Needs 1x4
+      { col: 3, row: 0, size: 6, type: "wide" }, // Needs 3x2
+      { col: 5, row: 2, size: 4, type: "tall" }, // Needs 1x4
       { col: 3, row: 2, size: 4, type: "square" }, // Needs 2x2
-      { col: 0, row: 3, size: 3, type: "wide" },   // Needs 3x1
+      { col: 0, row: 3, size: 3, type: "wide" }, // Needs 3x1
       { col: 0, row: 4, size: 4, type: "square" }, // Needs 2x2
-      { col: 2, row: 4, size: 2, type: "tall" },   // Needs 1x2
+      { col: 2, row: 4, size: 2, type: "tall" }, // Needs 1x2
       { col: 3, row: 4, size: 4, type: "square" }, // Needs 2x2
     ],
     tray: [
@@ -123,8 +130,8 @@ const PATCHES_LEVELS: Record<number, PatchesLevel> = {
       { id: 6, width: 2, height: 2, color: "#ff007f" }, // Pink 2x2
       { id: 7, width: 1, height: 2, color: "#9d00ff" }, // Purple 1x2
       { id: 8, width: 2, height: 2, color: "#00f3ff" }, // Cyan 2x2
-    ]
-  }
+    ],
+  },
 };
 
 // Audio Synth Utility
@@ -180,7 +187,7 @@ const playSynthSound = (type: "eat" | "pop" | "crash" | "start", muted: boolean)
       osc.type = "sine";
       osc.frequency.setValueAtTime(261.63, now); // C4
       osc.frequency.setValueAtTime(329.63, now + 0.08); // E4
-      osc.frequency.setValueAtTime(392.00, now + 0.16); // G4
+      osc.frequency.setValueAtTime(392.0, now + 0.16); // G4
       osc.frequency.setValueAtTime(523.25, now + 0.24); // C5
       gain.gain.setValueAtTime(0.08, now);
       gain.gain.setValueAtTime(0.08, now + 0.24);
@@ -382,7 +389,7 @@ export default function ExploreView() {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
         if (!active) {
-          stream.getTracks().forEach(track => track.stop());
+          stream.getTracks().forEach((track) => track.stop());
           return;
         }
 
@@ -495,11 +502,27 @@ export default function ExploreView() {
       ctx.strokeStyle = "rgba(0, 243, 255, 0.25)";
       ctx.lineWidth = 1.5;
       const connections = [
-        [0, 1], [1, 2], [2, 3], [3, 4],
-        [0, 5], [5, 6], [6, 7], [7, 8],
-        [5, 9], [9, 10], [10, 11], [11, 12],
-        [9, 13], [13, 14], [14, 15], [15, 16],
-        [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [0, 5],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+        [5, 9],
+        [9, 10],
+        [10, 11],
+        [11, 12],
+        [9, 13],
+        [13, 14],
+        [14, 15],
+        [15, 16],
+        [13, 17],
+        [17, 18],
+        [18, 19],
+        [19, 20],
+        [0, 17],
       ];
       connections.forEach(([start, end]) => {
         const sx = (1 - landmarks[start].x) * canvas.width;
@@ -516,8 +539,8 @@ export default function ExploreView() {
       const w = landmarks[0];
       const iKnuckle = landmarks[5];
       const pKnuckle = landmarks[17];
-      const px = ((1 - w.x) + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3 * canvas.width;
-      const py = (w.y + iKnuckle.y + pKnuckle.y) / 3 * canvas.height;
+      const px = ((1 - w.x + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3) * canvas.width;
+      const py = ((w.y + iKnuckle.y + pKnuckle.y) / 3) * canvas.height;
 
       // Index finger tip (landmark index 8)
       const indexTip = landmarks[8];
@@ -563,9 +586,9 @@ export default function ExploreView() {
 
           if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
             detectedDir = "RIGHT";
-          } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
+          } else if (angle > Math.PI / 4 && angle < (3 * Math.PI) / 4) {
             detectedDir = "DOWN";
-          } else if (angle >= -3 * Math.PI / 4 && angle < -Math.PI / 4) {
+          } else if (angle >= (-3 * Math.PI) / 4 && angle < -Math.PI / 4) {
             detectedDir = "UP";
           } else {
             detectedDir = "LEFT";
@@ -614,8 +637,8 @@ export default function ExploreView() {
         const w = results.multiHandLandmarks[0][0];
         const iKnuckle = results.multiHandLandmarks[0][5];
         const pKnuckle = results.multiHandLandmarks[0][17];
-        const px = ((1 - w.x) + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3 * canvas.width;
-        const py = (w.y + iKnuckle.y + pKnuckle.y) / 3 * canvas.height;
+        const px = ((1 - w.x + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3) * canvas.width;
+        const py = ((w.y + iKnuckle.y + pKnuckle.y) / 3) * canvas.height;
 
         ctx.strokeStyle = "rgba(0, 243, 255, 0.4)";
         ctx.lineWidth = 1.5;
@@ -738,13 +761,13 @@ export default function ExploreView() {
     if (!useWebcam) {
       if (activeGame === "bubble") {
         bubbleRef.current.pointer = {
-          x: 1 - (mx / canvas.width),
-          y: my / canvas.height
+          x: 1 - mx / canvas.width,
+          y: my / canvas.height,
         };
       } else if (activeGame === "patches") {
         patchesRef.current.pointer = {
-          x: 1 - (mx / canvas.width),
-          y: my / canvas.height
+          x: 1 - mx / canvas.width,
+          y: my / canvas.height,
         };
       }
     }
@@ -765,13 +788,13 @@ export default function ExploreView() {
     if (!useWebcam) {
       if (activeGame === "bubble") {
         bubbleRef.current.pointer = {
-          x: 1 - (mx / canvas.width),
-          y: my / canvas.height
+          x: 1 - mx / canvas.width,
+          y: my / canvas.height,
         };
       } else if (activeGame === "patches") {
         patchesRef.current.pointer = {
-          x: 1 - (mx / canvas.width),
-          y: my / canvas.height
+          x: 1 - mx / canvas.width,
+          y: my / canvas.height,
         };
       }
     }
@@ -788,19 +811,24 @@ export default function ExploreView() {
   };
 
   // Patches action handler (Click or Gesture triggers)
-  const handlePatchesAction = (target: { type: "tray" | "grid"; id?: number; col?: number; row?: number }) => {
+  const handlePatchesAction = (target: {
+    type: "tray" | "grid";
+    id?: number;
+    col?: number;
+    row?: number;
+  }) => {
     const pState = patchesRef.current;
 
     if (target.type === "tray" && target.id) {
       // Pick up from tray
-      const patch = pState.trayPatches.find(p => p.id === target.id);
+      const patch = pState.trayPatches.find((p) => p.id === target.id);
       if (patch && !patch.placed) {
         pState.selectedPatch = {
           id: patch.id,
           width: patch.width,
           height: patch.height,
           color: patch.color,
-          isFromGrid: false
+          isFromGrid: false,
         };
         patch.placed = true;
         playSynthSound("pop", isMuted);
@@ -813,14 +841,30 @@ export default function ExploreView() {
         const levelData = PATCHES_LEVELS[pState.level];
 
         // Center patch relative to grid cell
-        const startCol = Math.max(0, Math.min(levelData.gridSize - pState.selectedPatch.width, col - Math.floor(pState.selectedPatch.width / 2)));
-        const startRow = Math.max(0, Math.min(levelData.gridSize - pState.selectedPatch.height, row - Math.floor(pState.selectedPatch.height / 2)));
+        const startCol = Math.max(
+          0,
+          Math.min(
+            levelData.gridSize - pState.selectedPatch.width,
+            col - Math.floor(pState.selectedPatch.width / 2),
+          ),
+        );
+        const startRow = Math.max(
+          0,
+          Math.min(
+            levelData.gridSize - pState.selectedPatch.height,
+            row - Math.floor(pState.selectedPatch.height / 2),
+          ),
+        );
 
         // Check if overlaps with existing placed patches
         let overlaps = false;
         for (const existing of pState.placedPatches) {
-          const hOverlaps = Math.max(startCol, existing.col) < Math.min(startCol + pState.selectedPatch.width, existing.col + existing.width);
-          const vOverlaps = Math.max(startRow, existing.row) < Math.min(startRow + pState.selectedPatch.height, existing.row + existing.height);
+          const hOverlaps =
+            Math.max(startCol, existing.col) <
+            Math.min(startCol + pState.selectedPatch.width, existing.col + existing.width);
+          const vOverlaps =
+            Math.max(startRow, existing.row) <
+            Math.min(startRow + pState.selectedPatch.height, existing.row + existing.height);
           if (hOverlaps && vOverlaps) {
             overlaps = true;
             break;
@@ -835,7 +879,7 @@ export default function ExploreView() {
             row: startRow,
             width: pState.selectedPatch.width,
             height: pState.selectedPatch.height,
-            color: pState.selectedPatch.color
+            color: pState.selectedPatch.color,
           });
           pState.selectedPatch = null;
           playSynthSound("eat", isMuted);
@@ -849,14 +893,14 @@ export default function ExploreView() {
           }
         } else {
           // Return to tray if overlaps
-          const trayPatch = pState.trayPatches.find(p => p.id === pState.selectedPatch!.id);
+          const trayPatch = pState.trayPatches.find((p) => p.id === pState.selectedPatch!.id);
           if (trayPatch) trayPatch.placed = false;
           pState.selectedPatch = null;
           playSynthSound("crash", isMuted);
         }
       } else if (target.id) {
         // Pick up placed patch back into selected state
-        const idx = pState.placedPatches.findIndex(p => p.id === target.id);
+        const idx = pState.placedPatches.findIndex((p) => p.id === target.id);
         if (idx !== -1) {
           const placed = pState.placedPatches[idx];
           pState.selectedPatch = {
@@ -866,7 +910,7 @@ export default function ExploreView() {
             color: placed.color,
             isFromGrid: true,
             col: placed.col,
-            row: placed.row
+            row: placed.row,
           };
           pState.placedPatches.splice(idx, 1);
           playSynthSound("pop", isMuted);
@@ -899,7 +943,12 @@ export default function ExploreView() {
         }
       }
       // 2. Click grid
-      else if (mx >= gridStart && mx <= gridStart + gridWidth && my >= gridStart && my <= gridStart + gridWidth) {
+      else if (
+        mx >= gridStart &&
+        mx <= gridStart + gridWidth &&
+        my >= gridStart &&
+        my <= gridStart + gridWidth
+      ) {
         const levelData = PATCHES_LEVELS[pState.level];
         const cellSize = gridWidth / levelData.gridSize;
         const col = Math.floor((mx - gridStart) / cellSize);
@@ -909,9 +958,8 @@ export default function ExploreView() {
           handlePatchesAction({ type: "grid", col, row });
         } else {
           // Try picking up patch
-          const patch = pState.placedPatches.find(p =>
-            col >= p.col && col < p.col + p.width &&
-            row >= p.row && row < p.row + p.height
+          const patch = pState.placedPatches.find(
+            (p) => col >= p.col && col < p.col + p.width && row >= p.row && row < p.row + p.height,
           );
           if (patch) {
             handlePatchesAction({ type: "grid", id: patch.id });
@@ -920,7 +968,7 @@ export default function ExploreView() {
       } else {
         // Clicked outside bounds: if a patch is selected, return to tray
         if (pState.selectedPatch) {
-          const trayPatch = pState.trayPatches.find(p => p.id === pState.selectedPatch!.id);
+          const trayPatch = pState.trayPatches.find((p) => p.id === pState.selectedPatch!.id);
           if (trayPatch) trayPatch.placed = false;
           pState.selectedPatch = null;
           playSynthSound("crash", isMuted);
@@ -936,7 +984,9 @@ export default function ExploreView() {
     const { gridSize, clues } = levelData;
 
     // 1. Create occupancy grid
-    const occupied = Array(gridSize).fill(0).map(() => Array(gridSize).fill(false));
+    const occupied = Array(gridSize)
+      .fill(0)
+      .map(() => Array(gridSize).fill(false));
 
     // 2. Mark cells occupied by placed patches
     for (const patch of pState.placedPatches) {
@@ -965,9 +1015,12 @@ export default function ExploreView() {
     // 4. Verify clues match placed patches
     for (const clue of clues) {
       // Find the patch covering this clue cell
-      const patch = pState.placedPatches.find(p =>
-        clue.col >= p.col && clue.col < p.col + p.width &&
-        clue.row >= p.row && clue.row < p.row + p.height
+      const patch = pState.placedPatches.find(
+        (p) =>
+          clue.col >= p.col &&
+          clue.col < p.col + p.width &&
+          clue.row >= p.row &&
+          clue.row < p.row + p.height,
       );
 
       if (!patch) return false; // Clue not covered!
@@ -981,9 +1034,12 @@ export default function ExploreView() {
       if (clue.type === "tall" && patch.height <= patch.width) return false;
 
       // Check that this patch covers EXACTLY one clue
-      const cluesCovered = clues.filter(c =>
-        c.col >= patch.col && c.col < patch.col + patch.width &&
-        c.row >= patch.row && c.row < patch.row + patch.height
+      const cluesCovered = clues.filter(
+        (c) =>
+          c.col >= patch.col &&
+          c.col < patch.col + patch.width &&
+          c.row >= patch.row &&
+          c.row < patch.row + patch.height,
       );
       if (cluesCovered.length !== 1) return false; // Must contain exactly one clue
     }
@@ -994,7 +1050,7 @@ export default function ExploreView() {
   // 7. Save session scores
   const saveHighScore = (finalScore: number) => {
     if (finalScore <= 0) return;
-    setSessionScores(prev => [finalScore, ...prev]);
+    setSessionScores((prev) => [finalScore, ...prev]);
   };
 
   // Snake game runs exclusively at a smooth, slow tick rate of 220ms for optimal accessibility
@@ -1003,9 +1059,9 @@ export default function ExploreView() {
   const initPatchesLevel = (levelNum: number) => {
     const levelData = PATCHES_LEVELS[levelNum] || PATCHES_LEVELS[1];
 
-    const tray = levelData.tray.map(p => ({
+    const tray = levelData.tray.map((p) => ({
       ...p,
-      placed: false
+      placed: false,
     }));
 
     patchesRef.current = {
@@ -1044,7 +1100,11 @@ export default function ExploreView() {
         ],
         dir: "UP",
         nextDir: "UP",
-        food: generateSnakeFood(20, [{ x: 10, y: 10 }, { x: 10, y: 11 }, { x: 10, y: 12 }]),
+        food: generateSnakeFood(20, [
+          { x: 10, y: 10 },
+          { x: 10, y: 11 },
+          { x: 10, y: 12 },
+        ]),
         gridSize: gridCount,
         score: 0,
       };
@@ -1106,10 +1166,18 @@ export default function ExploreView() {
     const head = { ...sState.snake[0] };
 
     switch (sState.dir) {
-      case "UP": head.y -= 1; break;
-      case "DOWN": head.y += 1; break;
-      case "LEFT": head.x -= 1; break;
-      case "RIGHT": head.x += 1; break;
+      case "UP":
+        head.y -= 1;
+        break;
+      case "DOWN":
+        head.y += 1;
+        break;
+      case "LEFT":
+        head.x -= 1;
+        break;
+      case "RIGHT":
+        head.x += 1;
+        break;
     }
 
     if (head.x < 0 || head.x >= sState.gridSize || head.y < 0 || head.y >= sState.gridSize) {
@@ -1152,7 +1220,10 @@ export default function ExploreView() {
         y: Math.floor(Math.random() * gridSize),
       };
       attempts++;
-    } while (snake.some(segment => segment.x === food.x && segment.y === food.y) && attempts < 100);
+    } while (
+      snake.some((segment) => segment.x === food.x && segment.y === food.y) &&
+      attempts < 100
+    );
 
     return food;
   };
@@ -1388,7 +1459,7 @@ export default function ExploreView() {
         b.radius * 0.05,
         b.x,
         b.y,
-        b.radius
+        b.radius,
       );
       const rgb = hexToRgb(b.color);
       grad.addColorStop(0, "rgba(255, 255, 255, 0.45)");
@@ -1494,7 +1565,7 @@ export default function ExploreView() {
     }
 
     // B. Draw shape clues in cells
-    clues.forEach(clue => {
+    clues.forEach((clue) => {
       const cx = gridStart + clue.col * cellSize + cellSize / 2;
       const cy = gridStart + clue.row * cellSize + cellSize / 2;
 
@@ -1523,7 +1594,7 @@ export default function ExploreView() {
     });
 
     // C. Draw placed patches
-    pState.placedPatches.forEach(patch => {
+    pState.placedPatches.forEach((patch) => {
       const px = gridStart + patch.col * cellSize;
       const py = gridStart + patch.row * cellSize;
       const pW = patch.width * cellSize;
@@ -1599,16 +1670,20 @@ export default function ExploreView() {
             currentTarget = { type: "tray", id: patch.id };
           }
         }
-      } else if (px >= gridStart && px <= gridStart + gridWidth && py >= gridStart && py <= gridStart + gridWidth) {
+      } else if (
+        px >= gridStart &&
+        px <= gridStart + gridWidth &&
+        py >= gridStart &&
+        py <= gridStart + gridWidth
+      ) {
         const col = Math.floor((px - gridStart) / cellSize);
         const row = Math.floor((py - gridStart) / cellSize);
 
         if (pState.selectedPatch) {
           currentTarget = { type: "grid", col, row };
         } else {
-          const patch = pState.placedPatches.find(p =>
-            col >= p.col && col < p.col + p.width &&
-            row >= p.row && row < p.row + p.height
+          const patch = pState.placedPatches.find(
+            (p) => col >= p.col && col < p.col + p.width && row >= p.row && row < p.row + p.height,
           );
           if (patch) {
             currentTarget = { type: "grid", id: patch.id, col: patch.col, row: patch.row };
@@ -1617,9 +1692,12 @@ export default function ExploreView() {
       }
 
       if (useWebcam && currentTarget) {
-        const isSameTarget = pState.hoverTarget && (
-          (pState.hoverTarget.type === currentTarget.type && pState.hoverTarget.id === currentTarget.id && pState.hoverTarget.col === currentTarget.col && pState.hoverTarget.row === currentTarget.row)
-        );
+        const isSameTarget =
+          pState.hoverTarget &&
+          pState.hoverTarget.type === currentTarget.type &&
+            pState.hoverTarget.id === currentTarget.id &&
+            pState.hoverTarget.col === currentTarget.col &&
+          pState.hoverTarget.row === currentTarget.row;
 
         if (isSameTarget) {
           const elapsed = Date.now() - pState.hoverStart;
@@ -1648,12 +1726,30 @@ export default function ExploreView() {
       }
 
       // F. Drag previews and outlines on canvas
-      if (pState.selectedPatch && px >= gridStart && px <= gridStart + gridWidth && py >= gridStart && py <= gridStart + gridWidth) {
+      if (
+        pState.selectedPatch &&
+        px >= gridStart &&
+        px <= gridStart + gridWidth &&
+        py >= gridStart &&
+        py <= gridStart + gridWidth
+      ) {
         const col = Math.floor((px - gridStart) / cellSize);
         const row = Math.floor((py - gridStart) / cellSize);
 
-        const startCol = Math.max(0, Math.min(gridSize - pState.selectedPatch.width, col - Math.floor(pState.selectedPatch.width / 2)));
-        const startRow = Math.max(0, Math.min(gridSize - pState.selectedPatch.height, row - Math.floor(pState.selectedPatch.height / 2)));
+        const startCol = Math.max(
+          0,
+          Math.min(
+            gridSize - pState.selectedPatch.width,
+            col - Math.floor(pState.selectedPatch.width / 2),
+          ),
+        );
+        const startRow = Math.max(
+          0,
+          Math.min(
+            gridSize - pState.selectedPatch.height,
+            row - Math.floor(pState.selectedPatch.height / 2),
+          ),
+        );
 
         const previewX = gridStart + startCol * cellSize;
         const previewY = gridStart + startRow * cellSize;
@@ -1720,11 +1816,13 @@ export default function ExploreView() {
 
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 0, g: 243, b: 255 };
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 0, g: 243, b: 255 };
   };
 
   // Helper cleanups on change games
@@ -1760,11 +1858,13 @@ export default function ExploreView() {
     <div className={styles.exploreContainer}>
       <div className={styles.titleArea}>
         <h1>Explore CV Playground</h1>
-        <p>Experiment with real-time browser-based computer vision gaming powered by your hand gestures.</p>
+        <p>
+          Experiment with real-time browser-based computer vision gaming powered by your hand
+          gestures.
+        </p>
       </div>
 
       <div className={styles.arcadeGrid}>
-
         {/* Left Side: Camera Console & Controller settings */}
         <div className={styles.consoleCard}>
           <div className={styles.cardHeader}>
@@ -1772,7 +1872,9 @@ export default function ExploreView() {
               <PiCameraDuotone />
               <span>Gesture Engine</span>
             </h2>
-            <div className={`${styles.statusIndicator} ${useWebcam ? (handActive ? styles.detecting : styles.ready) : styles.off}`}>
+            <div
+              className={`${styles.statusIndicator} ${useWebcam ? (handActive ? styles.detecting : styles.ready) : styles.off}`}
+            >
               {useWebcam ? (handActive ? "Detecting Hand" : "Camera Live") : "Camera Off"}
             </div>
           </div>
@@ -1797,7 +1899,10 @@ export default function ExploreView() {
             {!useWebcam && (
               <div className={styles.cameraFallback}>
                 <PiCameraSlashDuotone />
-                <p>Webcam feedback is disabled or unavailable. Using Keyboard/Mouse controls fallback.</p>
+                <p>
+                  Webcam feedback is disabled or unavailable. Using Keyboard/Mouse controls
+                  fallback.
+                </p>
                 <button
                   className={`${styles.btn} ${styles.primary}`}
                   onClick={() => setUseWebcam(true)}
@@ -1830,10 +1935,7 @@ export default function ExploreView() {
           <div className={styles.controlGroup}>
             <div className={styles.controlRow}>
               <label>Input Control Mode</label>
-              <button
-                className={styles.btn}
-                onClick={() => setUseWebcam(!useWebcam)}
-              >
+              <button className={styles.btn} onClick={() => setUseWebcam(!useWebcam)}>
                 {useWebcam ? "Switch to Manual" : "Switch to Webcam"}
               </button>
             </div>
@@ -1849,18 +1951,39 @@ export default function ExploreView() {
             <ul className={styles.instructionList}>
               {activeGame === "snake" ? (
                 <>
-                  <li><strong>Gesture Mode</strong>: Hold your hand up in front of the lens. Move your index finger up, down, left, or right relative to the center ring. The active HUD direction lights up to guide the snake.</li>
-                  <li><strong>Manual Mode</strong>: Disable webcam, then use <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> keys to navigate.</li>
+                  <li>
+                    <strong>Gesture Mode</strong>: Hold your hand up in front of the lens. Move your
+                    index finger up, down, left, or right relative to the center ring. The active
+                    HUD direction lights up to guide the snake.
+                  </li>
+                  <li>
+                    <strong>Manual Mode</strong>: Disable webcam, then use{" "}
+                    <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> keys to navigate.
+                  </li>
                 </>
               ) : activeGame === "bubble" ? (
                 <>
-                  <li><strong>Gesture Mode</strong>: Wave your hand in front of the lens. Guide the blue targeting crosshair with your index finger to pop the bubbles!</li>
-                  <li><strong>Manual Mode</strong>: Disable webcam, then steer your cursor over the game screen to pop bubbles with your mouse.</li>
+                  <li>
+                    <strong>Gesture Mode</strong>: Wave your hand in front of the lens. Guide the
+                    blue targeting crosshair with your index finger to pop the bubbles!
+                  </li>
+                  <li>
+                    <strong>Manual Mode</strong>: Disable webcam, then steer your cursor over the
+                    game screen to pop bubbles with your mouse.
+                  </li>
                 </>
               ) : (
                 <>
-                  <li><strong>Gesture Mode</strong>: Hover your index finger over a tray patch for 0.8s to select it, then drag it over the grid. Hover over the snapping preview cell for 0.8s to drop/place it. Hover over a placed patch for 0.8s to return it to the tray.</li>
-                  <li><strong>Manual Mode</strong>: Disable webcam, then click to select, click to drop, and click placed patches to pick them up.</li>
+                  <li>
+                    <strong>Gesture Mode</strong>: Hover your index finger over a tray patch for
+                    0.8s to select it, then drag it over the grid. Hover over the snapping preview
+                    cell for 0.8s to drop/place it. Hover over a placed patch for 0.8s to return it
+                    to the tray.
+                  </li>
+                  <li>
+                    <strong>Manual Mode</strong>: Disable webcam, then click to select, click to
+                    drop, and click placed patches to pick them up.
+                  </li>
                 </>
               )}
             </ul>
@@ -1869,7 +1992,6 @@ export default function ExploreView() {
 
         {/* Right Side: Arcade Screen and Dashboard */}
         <div className={styles.arcadeConsole}>
-
           {/* Game Selection Tabs */}
           <div className={styles.gameSelectionArea}>
             <button
@@ -1898,12 +2020,20 @@ export default function ExploreView() {
           </div>
 
           {/* Retro Arcade CRT Monitor Screen */}
-          <div className={`${styles.screenOuter} ${gameStatus === "PLAYING" ? styles.activePlay : ""}`}>
-
+          <div
+            className={`${styles.screenOuter} ${gameStatus === "PLAYING" ? styles.activePlay : ""}`}
+          >
             {/* Game Canvas Top HUD bar */}
             <div className={styles.hudBar}>
               <span>
-                GAME: <strong>{activeGame === "snake" ? "SNAKE CV" : activeGame === "bubble" ? "BUBBLE POP CV" : "PATCHES CV"}</strong>
+                GAME:{" "}
+                <strong>
+                  {activeGame === "snake"
+                    ? "SNAKE CV"
+                    : activeGame === "bubble"
+                      ? "BUBBLE POP CV"
+                      : "PATCHES CV"}
+                </strong>
               </span>
               {activeGame === "patches" && (
                 <span>
@@ -1914,11 +2044,13 @@ export default function ExploreView() {
                       onClick={() => {
                         initPatchesLevel(lvl);
                         setGameStatus("PLAYING");
-                        if (bubbleRequestRef.current) cancelAnimationFrame(bubbleRequestRef.current);
+                        if (bubbleRequestRef.current)
+                          cancelAnimationFrame(bubbleRequestRef.current);
                         bubbleRequestRef.current = requestAnimationFrame(patchesGameTick);
                       }}
                       style={{
-                        background: patchesLevel === lvl ? "var(--brand-medium)" : "rgba(255,255,255,0.1)",
+                        background:
+                          patchesLevel === lvl ? "var(--brand-medium)" : "rgba(255,255,255,0.1)",
                         color: patchesLevel === lvl ? "#000" : "#fff",
                         border: "none",
                         padding: "0.15rem 0.4rem",
@@ -1926,7 +2058,7 @@ export default function ExploreView() {
                         borderRadius: "3px",
                         fontSize: "0.75rem",
                         cursor: "pointer",
-                        fontWeight: 700
+                        fontWeight: 700,
                       }}
                     >
                       {lvl}
@@ -1951,7 +2083,10 @@ export default function ExploreView() {
                 onTouchStart={handleGameCanvasTouch}
                 onTouchEnd={handleGameCanvasMouseLeave}
                 onClick={handleGameCanvasClick}
-                style={{ touchAction: (activeGame === "bubble" || activeGame === "patches") ? "none" : "auto" }}
+                style={{
+                  touchAction:
+                    activeGame === "bubble" || activeGame === "patches" ? "none" : "auto",
+                }}
               />
 
               {/* Game Over / Idle State Screens */}
@@ -1986,8 +2121,14 @@ export default function ExploreView() {
 
               {gameStatus === "GAME_OVER" && (
                 <div className={styles.screenOverlay}>
-                  <h3 style={{ color: activeGame === "patches" && score === 100 ? "#00ff66" : "#ef4444" }}>
-                    {activeGame === "patches" && score === 100 ? "Level Solved!" : "Simulation Over"}
+                  <h3
+                    style={{
+                      color: activeGame === "patches" && score === 100 ? "#00ff66" : "#ef4444",
+                    }}
+                  >
+                    {activeGame === "patches" && score === 100
+                      ? "Level Solved!"
+                      : "Simulation Over"}
                   </h3>
                   <div className={styles.overlayStats}>
                     <div className={styles.statItem}>
@@ -1995,7 +2136,14 @@ export default function ExploreView() {
                       <span className={styles.lbl}>Final Score</span>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "0.5rem", width: "100%", justifyContent: "center" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.5rem",
+                      width: "100%",
+                      justifyContent: "center",
+                    }}
+                  >
                     <button className={`${styles.btn} ${styles.primary}`} onClick={startGame}>
                       {activeGame === "patches" && score === 100 ? "Play Again" : "Replay"}
                     </button>
@@ -2022,7 +2170,11 @@ export default function ExploreView() {
                   onClick={startGame}
                   disabled={!scriptsLoaded}
                 >
-                  {gameStatus === "GAME_OVER" ? "Restart" : gameStatus === "PLAYING" ? "Reset" : "Play"}
+                  {gameStatus === "GAME_OVER"
+                    ? "Restart"
+                    : gameStatus === "PLAYING"
+                      ? "Reset"
+                      : "Play"}
                 </button>
                 {gameStatus === "PLAYING" && (
                   <button className={styles.btn} onClick={pauseGame}>
@@ -2051,38 +2203,60 @@ export default function ExploreView() {
             <div className={styles.scorePanel}>
               {/* Realtime score display */}
               <div className={styles.scoreLive}>
-                <span style={{ fontSize: "0.75rem", color: "var(--neutral-on-background-weak)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--neutral-on-background-weak)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    fontWeight: 600,
+                  }}
+                >
                   Realtime Score
                 </span>
-                <span style={{
-                  fontSize: "2.75rem",
-                  fontWeight: 800,
-                  color: "#00f3ff",
-                  fontFamily: "var(--font-code)",
-                  textShadow: "0 0 10px rgba(0, 243, 255, 0.4)",
-                  lineHeight: 1.1
-                }}>
+                <span
+                  style={{
+                    fontSize: "2.75rem",
+                    fontWeight: 800,
+                    color: "#00f3ff",
+                    fontFamily: "var(--font-code)",
+                    textShadow: "0 0 10px rgba(0, 243, 255, 0.4)",
+                    lineHeight: 1.1,
+                  }}
+                >
                   {score}
                 </span>
                 <span style={{ fontSize: "0.7rem", color: "var(--neutral-on-background-weak)" }}>
-                  active game: {activeGame === "snake" ? "Snake CV" : activeGame === "bubble" ? "Bubble Pop CV" : "Patches CV"}
+                  active game:{" "}
+                  {activeGame === "snake"
+                    ? "Snake CV"
+                    : activeGame === "bubble"
+                      ? "Bubble Pop CV"
+                      : "Patches CV"}
                 </span>
               </div>
 
               {/* Best score in session */}
               <div className={styles.scoreBest}>
-                <span style={{ fontSize: "0.8rem", color: "var(--neutral-on-background-weak)" }}>Session Best</span>
-                <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "#00ff66", fontFamily: "var(--font-code)" }}>
+                <span style={{ fontSize: "0.8rem", color: "var(--neutral-on-background-weak)" }}>
+                  Session Best
+                </span>
+                <span
+                  style={{
+                    fontSize: "0.95rem",
+                    fontWeight: 700,
+                    color: "#00ff66",
+                    fontFamily: "var(--font-code)",
+                  }}
+                >
                   {Math.max(0, ...sessionScores, score)} pts
                 </span>
               </div>
 
               {/* Session history / attempts list */}
               <div className={styles.scoreHistory}>
-                <span className={styles.historyTitle}>
-                  Recent Session Attempts
-                </span>
-                
+                <span className={styles.historyTitle}>Recent Session Attempts</span>
+
                 <div className={styles.historyList}>
                   {sessionScores.map((s, index) => (
                     <div key={index} className={styles.scoreRow}>
@@ -2100,9 +2274,7 @@ export default function ExploreView() {
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
   );

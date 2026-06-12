@@ -70,7 +70,11 @@ const home: Home = {
   },
   subline: (
     <>
-      I'm Dwaipayan, an AI/ML undergraduate specializing in <Text as="span" size="xl" weight="strong">Machine Learning and Deep Learning</Text>, developing impactful AI-driven solutions.
+      I'm Dwaipayan, an AI/ML undergraduate specializing in{" "}
+      <Text as="span" size="xl" weight="strong">
+        Machine Learning and Deep Learning
+      </Text>
+      , developing impactful AI-driven solutions.
     </>
   ),
 };
@@ -96,7 +100,11 @@ const about: About = {
     title: "Introduction",
     description: (
       <>
-        An AI/ML undergraduate specializing in Machine Learning, Deep Learning, Artificial Intelligence, and algorithms. Experienced in transforming data into meaningful, actionable insights using modern programming languages and frameworks. Dedicated to developing impactful AI-driven solutions and possesses strong team management, collaboration, and problem-solving skills to ensure successful product development.
+        An AI/ML undergraduate specializing in Machine Learning, Deep Learning, Artificial
+        Intelligence, and algorithms. Experienced in transforming data into meaningful, actionable
+        insights using modern programming languages and frameworks. Dedicated to developing
+        impactful AI-driven solutions and possesses strong team management, collaboration, and
+        problem-solving skills to ensure successful product development.
       </>
     ),
   },
@@ -110,13 +118,16 @@ const about: About = {
         role: "Technical Team Lead",
         achievements: [
           <>
-            Led a cross-functional team to develop and launch AI-driven health features, including personalized diet planning and real-time fitness tracking.
+            Led a cross-functional team to develop and launch AI-driven health features, including
+            personalized diet planning and real-time fitness tracking.
           </>,
           <>
-            Managed project timelines and coordinated team efforts to ensure the successful delivery of high-quality, HIPAA-compliant healthcare solutions.
+            Managed project timelines and coordinated team efforts to ensure the successful delivery
+            of high-quality, HIPAA-compliant healthcare solutions.
           </>,
           <>
-            Mentored team members and fostered a collaborative environment, driving continuous improvement in product development and user satisfaction.
+            Mentored team members and fostered a collaborative environment, driving continuous
+            improvement in product development and user satisfaction.
           </>,
         ],
         images: [],
@@ -127,10 +138,13 @@ const about: About = {
         role: "Global Outreach Student",
         achievements: [
           <>
-            Promoted microbial science to a global audience by organizing educational events and networking opportunities for students and professionals.
+            Promoted microbial science to a global audience by organizing educational events and
+            networking opportunities for students and professionals.
           </>,
           <>
-            Shared scientific research through workshops and outreach programs to help make complex microbiology accessible, and implemented cutting-edge AI technology for a better understanding of structures.
+            Shared scientific research through workshops and outreach programs to help make complex
+            microbiology accessible, and implemented cutting-edge AI technology for a better
+            understanding of structures.
           </>,
         ],
         images: [],
@@ -141,13 +155,17 @@ const about: About = {
         role: "Data Research Analyst",
         achievements: [
           <>
-            Extracted and synthesized large datasets using Python and SQL to identify emerging market trends, providing actionable insights that informed strategic project planning.
+            Extracted and synthesized large datasets using Python and SQL to identify emerging
+            market trends, providing actionable insights that informed strategic project planning.
           </>,
           <>
-            Developed interactive dashboards in Power BI/Tableau to visualize complex research findings, enabling stakeholders to make data-driven decisions with greater speed and accuracy.
+            Developed interactive dashboards in Power BI/Tableau to visualize complex research
+            findings, enabling stakeholders to make data-driven decisions with greater speed and
+            accuracy.
           </>,
           <>
-            Streamlined data collection and cleaning workflows by implementing automated scripts, significantly reducing manual errors and improving the reliability of research outputs.
+            Streamlined data collection and cleaning workflows by implementing automated scripts,
+            significantly reducing manual errors and improving the reliability of research outputs.
           </>,
         ],
         images: [],
@@ -160,7 +178,9 @@ const about: About = {
     institutions: [
       {
         name: "Heritage Institute of Technology",
-        description: <>B.Tech in Computer Science Engineering (AI & ML), located in Kolkata, WB. (2023-2027)</>,
+        description: (
+          <>B.Tech in Computer Science Engineering (AI & ML), located in Kolkata, WB. (2023-2027)</>
+        ),
       },
       {
         name: "Delhi Public School, Joka",
@@ -178,25 +198,23 @@ const about: About = {
     skills: [
       {
         title: "Languages",
-        description: (
-          <>Python, R, C, C++, SQL, Java, MATLAB</>
-        ),
+        description: <>Python, R, C, C++, SQL, Java, MATLAB</>,
         tags: [],
         images: [],
       },
       {
         title: "Frameworks",
         description: (
-          <>PyTorch, TensorFlow, Keras, LangChain, MLflow, Apache Spark, AWS Sagemaker, Kubernetes</>
+          <>
+            PyTorch, TensorFlow, Keras, LangChain, MLflow, Apache Spark, AWS Sagemaker, Kubernetes
+          </>
         ),
         tags: [],
         images: [],
       },
       {
         title: "Tools / Developer Tools",
-        description: (
-          <>Git, GitHub, MongoDB, PostgreSQL, Docker, Weka, Power BI, Tableau</>
-        ),
+        description: <>Git, GitHub, MongoDB, PostgreSQL, Docker, Weka, Power BI, Tableau</>,
         tags: [],
         images: [],
       },
@@ -211,7 +229,10 @@ const about: About = {
       {
         title: "Leadership & Soft Skills",
         description: (
-          <>Team Leadership, Time Management, Problem Solving, Critical Thinking, Effective Communication</>
+          <>
+            Team Leadership, Time Management, Problem Solving, Critical Thinking, Effective
+            Communication
+          </>
         ),
         tags: [],
         images: [],

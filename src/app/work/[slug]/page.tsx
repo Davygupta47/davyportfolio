@@ -73,7 +73,10 @@ export default async function Project({
   // Prepare related projects for the grid
   const relatedProjects = allPosts
     .filter((p) => p.slug !== post.slug)
-    .sort((a, b) => new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime(),
+    )
     .slice(0, 4)
     .map((p) => ({
       slug: p.slug,
@@ -130,10 +133,7 @@ export default async function Project({
           </Row>
         )}
         {post.metadata.link && (
-          <SmartLink
-            href={post.metadata.link}
-            suffixIcon="arrowUpRightFromSquare"
-          >
+          <SmartLink href={post.metadata.link} suffixIcon="arrowUpRightFromSquare">
             <Text variant="body-default-s">View on GitHub</Text>
           </SmartLink>
         )}

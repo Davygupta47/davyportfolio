@@ -119,7 +119,7 @@ export default async function RootLayout({
         >
           <GlobalF1Car />
           <F1RacingTrack />
-          
+
           <RevealFx fill position="absolute" style={{ zIndex: 1, pointerEvents: "none" }}>
             <Background
               mask={{

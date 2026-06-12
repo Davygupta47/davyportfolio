@@ -4,49 +4,76 @@
    ============================================ */
 
 /* Orbitron for racing-style accent headings */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap");
 
 /* ============================================
    CSS Custom Properties — Shared Tokens
    ============================================ */
 :root {
-  --f1-red: #E10600;
-  --f1-red-dark: #B30500;
+  --f1-red: #e10600;
+  --f1-red-dark: #b30500;
   --f1-carbon: #0d0d0d;
-  --f1-silver: #C0C0C0;
-  --f1-yellow: #FFD700;
-  --f1-purple: #A855F7;
+  --f1-silver: #c0c0c0;
+  --f1-yellow: #ffd700;
+  --f1-purple: #a855f7;
   --background: var(--page-background);
-  --transition-theme: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  --transition-theme: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* ============================================
    Keyframe Animations
    ============================================ */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(225, 6, 0, 0.15); }
-  50% { box-shadow: 0 0 40px rgba(225, 6, 0, 0.25), 0 0 60px rgba(168, 85, 247, 0.1); }
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(225, 6, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(225, 6, 0, 0.25), 0 0 60px rgba(168, 85, 247, 0.1);
+  }
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes shimmer-line {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes page-transition-enter {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================
@@ -66,9 +93,22 @@
 
 [data-theme="dark"] body {
   background-color: #0d0d0d !important;
-  background-image:
-    linear-gradient(45deg, rgba(20, 20, 20, 0.9) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.9) 75%, rgba(20, 20, 20, 0.9)),
-    linear-gradient(45deg, rgba(20, 20, 20, 0.9) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.9) 75%, rgba(20, 20, 20, 0.9)) !important;
+  background-image: linear-gradient(
+      45deg,
+      rgba(20, 20, 20, 0.9) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgba(20, 20, 20, 0.9) 75%,
+      rgba(20, 20, 20, 0.9)
+    ),
+    linear-gradient(
+      45deg,
+      rgba(20, 20, 20, 0.9) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgba(20, 20, 20, 0.9) 75%,
+      rgba(20, 20, 20, 0.9)
+    ) !important;
   background-size: 10px 10px !important;
   background-position: 0 0, 5px 5px !important;
   transition: var(--transition-theme);
@@ -96,16 +136,15 @@
 
 [data-theme="light"] body {
   background-color: #f8f8fa !important;
-  background-image:
-    repeating-linear-gradient(
-      135deg,
-      transparent,
-      transparent 80px,
-      rgba(225, 6, 0, 0.012) 80px,
-      rgba(225, 6, 0, 0.012) 81px,
-      transparent 81px,
-      transparent 160px
-    ) !important;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 80px,
+    rgba(225, 6, 0, 0.012) 80px,
+    rgba(225, 6, 0, 0.012) 81px,
+    transparent 81px,
+    transparent 160px
+  ) !important;
   transition: var(--transition-theme);
 }
 
@@ -119,8 +158,10 @@
    Body text uses Geist (loaded via next/font)
    Headings get Orbitron for the F1 racing feel
    ============================================ */
-h1, h2, h3 {
-  font-family: 'Orbitron', var(--font-heading), sans-serif !important;
+h1,
+h2,
+h3 {
+  font-family: "Orbitron", var(--font-heading), sans-serif !important;
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
@@ -128,7 +169,9 @@ h1, h2, h3 {
 /* ============================================
    Smooth Theme Transition
    ============================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -161,36 +204,27 @@ h1, h2, h3 {
 [data-theme="dark"] .cta-card {
   background: rgba(18, 18, 22, 0.75) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.03), inset 0 1px 0
+    rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .cta-card:hover {
   border-color: rgba(225, 6, 0, 0.2) !important;
-  box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(225, 6, 0, 0.1),
-    0 0 40px rgba(225, 6, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(225, 6, 0, 0.1), 0 0 40px
+    rgba(225, 6, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="light"] .cta-card {
   background: rgba(255, 255, 255, 0.8) !important;
   border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 0
+    rgba(255, 255, 255, 0.8);
 }
 
 [data-theme="light"] .cta-card:hover {
   border-color: rgba(220, 38, 38, 0.15) !important;
-  box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(220, 38, 38, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(220, 38, 38, 0.08), inset 0 1px 0
+    rgba(255, 255, 255, 0.9);
 }
 
 /* ============================================
@@ -304,7 +338,7 @@ h1, h2, h3 {
    404 Page
    ============================================ */
 .not-found-code {
-  font-family: 'Orbitron', monospace !important;
+  font-family: "Orbitron", monospace !important;
   font-size: 6rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.1em;
@@ -351,9 +385,22 @@ h1, h2, h3 {
   right: 0;
   bottom: 0;
   background-color: #0d0d0d;
-  background-image:
-    linear-gradient(45deg, rgba(20, 20, 20, 0.95) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.95) 75%, rgba(20, 20, 20, 0.95)),
-    linear-gradient(45deg, rgba(20, 20, 20, 0.95) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.95) 75%, rgba(20, 20, 20, 0.95)) !important;
+  background-image: linear-gradient(
+      45deg,
+      rgba(20, 20, 20, 0.95) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgba(20, 20, 20, 0.95) 75%,
+      rgba(20, 20, 20, 0.95)
+    ),
+    linear-gradient(
+      45deg,
+      rgba(20, 20, 20, 0.95) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgba(20, 20, 20, 0.95) 75%,
+      rgba(20, 20, 20, 0.95)
+    ) !important;
   background-size: 10px 10px !important;
   background-position: 0 0, 5px 5px !important;
   z-index: 99999;
@@ -363,7 +410,8 @@ h1, h2, h3 {
   justify-content: center;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1), transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.6s;
+  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1), transform 0.6s
+    cubic-bezier(0.23, 1, 0.32, 1), visibility 0.6s;
 }
 
 .f1-loader-overlay.fade-out {
@@ -393,7 +441,7 @@ h1, h2, h3 {
 }
 
 .f1-loader-title {
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -402,7 +450,7 @@ h1, h2, h3 {
 }
 
 .f1-loader-subtitle {
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.35em;
@@ -423,7 +471,7 @@ h1, h2, h3 {
   background: #222;
   border: 1px solid #3d3d3d;
   border-radius: 2px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .f1-gantry {
@@ -434,7 +482,7 @@ h1, h2, h3 {
   background: #141416;
   border: 2px solid #28282c;
   border-radius: 6px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(0,0,0,0.9);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(0, 0, 0, 0.9);
   margin-top: -1px;
   box-sizing: border-box;
 }
@@ -462,10 +510,8 @@ h1, h2, h3 {
 
 .f1-light-bulb.lit {
   background-color: var(--f1-red);
-  box-shadow:
-    0 0 10px var(--f1-red),
-    0 0 20px var(--f1-red),
-    inset 0 1px 2px rgba(255,255,255,0.7);
+  box-shadow: 0 0 10px var(--f1-red), 0 0 20px var(--f1-red), inset 0 1px 2px
+    rgba(255, 255, 255, 0.7);
 }
 
 /* Steering HUD display */
@@ -475,7 +521,7 @@ h1, h2, h3 {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(8px);
   box-sizing: border-box;
 }
@@ -518,8 +564,12 @@ h1, h2, h3 {
 }
 
 @keyframes led-flash {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .f1-telemetry-row {
@@ -559,7 +609,7 @@ h1, h2, h3 {
 }
 
 .hud-label {
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -576,7 +626,7 @@ h1, h2, h3 {
 .gear-val {
   font-size: 2rem;
   line-height: 1;
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   color: #2b2b35;
   transition: color 0.15s ease;
 }
@@ -607,7 +657,7 @@ h1, h2, h3 {
 .console-line {
   display: flex;
   gap: 6px;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   font-size: 0.68rem;
   width: 100%;
 }
@@ -619,7 +669,9 @@ h1, h2, h3 {
 }
 
 @keyframes cursor-blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 .console-text {
@@ -637,8 +689,14 @@ h1, h2, h3 {
 }
 
 @keyframes text-zoom {
-  from { transform: scale(0.96); opacity: 0.8; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 400px) {
@@ -654,5 +712,75 @@ h1, h2, h3 {
   .f1-light-bulb {
     width: 16px;
     height: 16px;
+  }
+}
+
+/* Audio Toggle Button for Preloader */
+.f1-audio-toggle {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 15, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 8px 14px;
+  color: #fff;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  z-index: 100000;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.f1-audio-toggle:hover {
+  background: rgba(20, 20, 25, 0.95);
+  transform: translateY(-1px);
+}
+
+.f1-audio-toggle.muted {
+  border-color: rgba(225, 6, 0, 0.4);
+  color: #888894;
+  animation: pulse-mute-btn 2s infinite ease-in-out;
+}
+
+.f1-audio-toggle.muted:hover {
+  border-color: var(--f1-red);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(225, 6, 0, 0.2);
+  animation: none;
+}
+
+.f1-audio-toggle.unmuted {
+  border-color: rgba(0, 255, 204, 0.4);
+  color: #00ffcc;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.1);
+}
+
+.f1-audio-toggle.unmuted:hover {
+  border-color: #00ffcc;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+.f1-audio-toggle .audio-icon {
+  font-size: 0.8rem;
+}
+
+@keyframes pulse-mute-btn {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.2);
+    border-color: rgba(225, 6, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 10px 2px rgba(225, 6, 0, 0.15);
+    border-color: rgba(225, 6, 0, 0.8);
   }
 }

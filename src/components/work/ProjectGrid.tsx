@@ -50,20 +50,28 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
     <div className={styles.container}>
       {/* Header Section */}
       <div className={styles.header}>
-        <h1 className={styles.headerTitle}>
-          Featured Projects
-        </h1>
+        <h1 className={styles.headerTitle}>Featured Projects</h1>
         <div className={styles.headerLine} />
         <p className={styles.headerSubtitle}>
           Discover my innovative solutions spanning from AI-powered applications to full-stack
-          technologies. Each project represents a unique challenge solved with cutting-edge technology.
+          technologies. Each project represents a unique challenge solved with cutting-edge
+          technology.
         </p>
       </div>
 
       {/* Filter Bar */}
       <div className={styles.filterSection}>
         <div className={styles.filterLabel}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
           </svg>
           <span>Filter Projects</span>
@@ -110,9 +118,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
                 </svg>
                 Completed
               </div>
-              <div className={styles.badgeYear}>
-                {getYear(project.publishedAt)}
-              </div>
+              <div className={styles.badgeYear}>{getYear(project.publishedAt)}</div>
             </div>
 
             {/* Card Body */}
@@ -125,7 +131,14 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
                 <div className={styles.cardTags}>
                   {project.tag.map((t) => (
                     <span key={t} className={styles.categoryTag}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
                         <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
                         <line x1="7" y1="7" x2="7.01" y2="7" />
                       </svg>
@@ -139,7 +152,9 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
               {project.tech && project.tech.length > 0 && (
                 <div className={styles.techStack}>
                   {project.tech.slice(0, 3).map((t) => (
-                    <span key={t} className={styles.techTag}>{t}</span>
+                    <span key={t} className={styles.techTag}>
+                      {t}
+                    </span>
                   ))}
                   {project.tech.length > 3 && (
                     <span className={styles.techTag}>+{project.tech.length - 3}</span>
@@ -156,7 +171,16 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
                 <div className={styles.viewDetailsBtn}>
                   <span className={styles.viewDetailsBtnIcon}>&lt;/&gt;</span>
                   <span>View Details</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
