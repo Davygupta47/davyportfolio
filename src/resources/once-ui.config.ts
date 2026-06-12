@@ -14,13 +14,15 @@ import {
 import { home } from "./index";
 
 // IMPORTANT: Replace with your own domain address - it's used for SEO in meta tags and schema
-const baseURL: string = "https://demo.magic-portfolio.com";
+// IMPORTANT: Update this to your Vercel deployment URL before deploying
+const baseURL: string = "https://davyportfolio.vercel.app";
 
 const routes: RoutesConfig = {
   "/": true,
   "/about": true,
   "/work": true,
-  "/blog": true,
+  // "/blog": true, // Blog route disabled — uncomment when you have blog content
+  "/blog": false,
   "/explore": true,
 };
 
@@ -186,17 +188,16 @@ const mailchimp: MailchimpConfig = {
 // default schema data
 const schema: SchemaConfig = {
   logo: "",
-  type: "Organization",
-  name: "Once UI",
+  type: "Person",
+  name: "Dwaipayan Dasgupta",
   description: home.description,
-  email: "lorant@once-ui.com",
+  email: "dwaipayan.dg07@gmail.com",
 };
 
 // social links
 const sameAs: SameAsConfig = {
-  threads: "https://www.threads.com/@once_ui",
-  linkedin: "https://www.linkedin.com/company/once-ui/",
-  discord: "https://discord.com/invite/5EyAQ4eNdS",
+  linkedin: "https://linkedin.com/in/dwaipayan-dasgupta-b97b38319",
+  github: "https://github.com/Davygupta47",
 };
 
 // social sharing configuration for blog posts

@@ -12,9 +12,8 @@ import {
   Line,
   IconButton,
 } from "@once-ui-system/core";
-import { home, about, person, baseURL, routes, social } from "@/resources";
+import { home, about, person, baseURL, social } from "@/resources";
 import { Mailchimp } from "@/components";
-import { Posts } from "@/components/blog/Posts";
 import InlineF1Car from "@/components/3d/InlineF1Car";
 
 export async function generateMetadata() {
@@ -29,7 +28,7 @@ export async function generateMetadata() {
 
 export default function Home() {
   return (
-    <Column maxWidth="m" gap="xl" paddingY="12" horizontal="center" style={{ position: "relative", zIndex: 1 }}>
+    <Column maxWidth="m" gap="xl" paddingY="24" horizontal="center" style={{ position: "relative", zIndex: 1 }}>
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -49,9 +48,8 @@ export default function Home() {
             <RevealFx
               fillWidth
               horizontal="center"
-              paddingTop="16"
-              paddingBottom="32"
-              paddingLeft="12"
+              paddingTop="12"
+              paddingBottom="24"
             >
               <Badge
                 background="brand-alpha-weak"
@@ -66,17 +64,17 @@ export default function Home() {
               </Badge>
             </RevealFx>
           )}
-          <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="16">
+          <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="12">
             <Heading wrap="balance" variant="display-strong-l">
               {home.headline}
             </Heading>
           </RevealFx>
-          <RevealFx translateY="8" delay={0.2} fillWidth horizontal="center" paddingBottom="32">
+          <RevealFx translateY="8" delay={0.2} fillWidth horizontal="center" paddingBottom="24">
             <Text wrap="balance" onBackground="neutral-weak" variant="heading-default-xl">
               {home.subline}
             </Text>
           </RevealFx>
-          <RevealFx paddingTop="12" delay={0.4} horizontal="center" paddingLeft="12">
+          <RevealFx paddingTop="8" delay={0.4} horizontal="center">
             <Button
               id="about"
               data-border="rounded"
@@ -106,42 +104,24 @@ export default function Home() {
         <InlineF1Car />
       </RevealFx>
 
-      {/* Gradient fade separator */}
-      <div style={{
-        width: "100%",
-        height: "150px",
-        background: "linear-gradient(to bottom, transparent, var(--page-background))",
-        position: "absolute",
-        bottom: "350px",
-        left: 0,
-        zIndex: 1,
-        pointerEvents: "none"
-      }} />
+      {/* Gradient accent line separator */}
+      <div className="gradient-accent-line" />
 
       <RevealFx translateY="16" delay={0.6} fillWidth>
         <Column
           fillWidth
-          background="neutral-alpha-weak"
-          border="neutral-alpha-weak"
           radius="l-4"
-          padding="32"
+          padding="40"
           gap="24"
           horizontal="center"
-          style={{
-            position: "relative",
-            zIndex: 2,
-            marginTop: "6rem",
-            backdropFilter: "blur(12px)",
-            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.2)",
-            border: "1px solid var(--neutral-alpha-medium)",
-          }}
+          className="cta-card"
         >
-          <Column gap="8" horizontal="center" align="center">
+          <Column gap="12" horizontal="center" align="center">
             <Heading variant="heading-strong-xl" align="center">
-              Let's build something amazing together
+              Let&apos;s build something amazing together
             </Heading>
-            <Text variant="body-default-m" onBackground="neutral-weak" align="center" style={{ maxWidth: "480px" }}>
-              I'm always open to discussing new opportunities, creative collaborations, or machine learning challenges. Reach out and let's connect!
+            <Text variant="body-default-m" onBackground="neutral-weak" align="center" style={{ maxWidth: "480px", lineHeight: 1.7 }}>
+              I&apos;m always open to discussing new opportunities, creative collaborations, or machine learning challenges. Reach out and let&apos;s connect!
             </Text>
           </Column>
           
@@ -167,7 +147,7 @@ export default function Home() {
           
           <Line background="neutral-alpha-weak" />
           
-          <Row gap="16" horizontal="center" vertical="center">
+          <Row gap="12" horizontal="center" vertical="center">
             {social.map(
               (item) =>
                 item.link && (

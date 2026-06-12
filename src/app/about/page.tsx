@@ -109,7 +109,7 @@ export default function About() {
             )}
           </Column>
         )}
-        <Column className={styles.blockAlign} flex={9} maxWidth={40}>
+        <Column className={styles.blockAlign} flex={9} maxWidth="m">
           <Column
             id={about.intro.title}
             fillWidth
@@ -202,6 +202,9 @@ export default function About() {
             </Column>
           )}
 
+          {/* Section Divider */}
+          <div className="about-section-divider" />
+
           {about.studies.display && (
             <>
               <Heading as="h2" id={about.studies.title} variant="display-strong-s" marginBottom="m">
@@ -209,7 +212,7 @@ export default function About() {
               </Heading>
               <Column fillWidth gap="l" marginBottom="40">
                 {about.studies.institutions.map((institution, index) => (
-                  <Column key={`${institution.name}-${index}`} fillWidth gap="4">
+                  <Column key={`${institution.name}-${index}`} fillWidth gap="4" className="about-experience-card">
                     <Text id={institution.name} variant="heading-strong-l">
                       {institution.name}
                     </Text>
@@ -222,6 +225,9 @@ export default function About() {
             </>
           )}
 
+          {/* Section Divider */}
+          <div className="about-section-divider" />
+
           {about.work.display && (
             <>
               <Heading as="h2" id={about.work.title} variant="display-strong-s" marginBottom="m">
@@ -229,7 +235,7 @@ export default function About() {
               </Heading>
               <Column fillWidth gap="l" marginBottom="40">
                 {about.work.experiences.map((experience, index) => (
-                  <Column key={`${experience.company}-${experience.role}-${index}`} fillWidth>
+                  <Column key={`${experience.company}-${experience.role}-${index}`} fillWidth className="about-experience-card">
                     <Row fillWidth horizontal="between" vertical="end" marginBottom="4">
                       <Text id={experience.company} variant="heading-strong-l">
                         {experience.company}
@@ -281,6 +287,9 @@ export default function About() {
             </>
           )}
 
+          {/* Section Divider */}
+          <div className="about-section-divider" />
+
           {about.technical.display && (
             <>
               <Heading
@@ -293,7 +302,7 @@ export default function About() {
               </Heading>
               <Column fillWidth gap="l">
                 {about.technical.skills.map((skill, index) => (
-                  <Column key={`${skill}-${index}`} fillWidth gap="4">
+                  <Column key={`${skill}-${index}`} fillWidth gap="4" className="about-experience-card">
                     <Text id={skill.title} variant="heading-strong-l">
                       {skill.title}
                     </Text>

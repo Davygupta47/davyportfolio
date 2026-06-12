@@ -136,6 +136,12 @@ $f1-glow: rgba(225, 6, 0, 0.3);
   color: $f1-white !important;
   font-weight: 600;
   box-shadow: 0 4px 20px rgba(225, 6, 0, 0.3), 0 0 0 1px rgba(168, 85, 247, 0.2);
+  transform: translateY(-1px);
+}
+
+.filterBtn:focus-visible {
+  outline: 2px solid $f1-red;
+  outline-offset: 2px;
 }
 
 /* ===================== Grid ===================== */

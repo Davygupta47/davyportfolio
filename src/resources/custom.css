@@ -1,36 +1,58 @@
-/* :root {
-  --font-size-display-multiplier:   1;
-  --font-size-heading-multiplier:   1;
-  --font-size-body-multiplier:      1;
-  --font-size-label-multiplier:     1;
+/* ============================================
+   Custom Styles — Dwaipayan Portfolio
+   F1 Racing Theme with Professional Polish
+   ============================================ */
 
-  --line-height-display-multiplier: 1;
-  --line-height-heading-multiplier: 1;
-  --line-height-body-multiplier:    1;
-  --line-height-label-multiplier:   1;
+/* Orbitron for racing-style accent headings */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap');
 
-  --default-border:        var(--neutral-border-medium);
-} */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;700;800&display=swap');
-
+/* ============================================
+   CSS Custom Properties — Shared Tokens
+   ============================================ */
 :root {
-  --font-body: 'Inter', sans-serif;
-  --font-heading: 'Orbitron', sans-serif;
-  --background: var(--page-background);
-  /* F1 Theme Shared Tokens */
   --f1-red: #E10600;
   --f1-red-dark: #B30500;
   --f1-carbon: #0d0d0d;
   --f1-silver: #C0C0C0;
   --f1-yellow: #FFD700;
+  --f1-purple: #A855F7;
+  --background: var(--page-background);
+  --transition-theme: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ============================================
+   Keyframe Animations
+   ============================================ */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(225, 6, 0, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(225, 6, 0, 0.25), 0 0 60px rgba(168, 85, 247, 0.1); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer-line {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes page-transition-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================
    DARK MODE — Carbon Fiber Racing Aesthetic
    ============================================ */
 [data-theme="dark"] {
-  /* F1 Track CSS Variables */
   --f1-track-color: rgba(225, 6, 0, 0.12);
   --f1-track-mid: rgba(168, 85, 247, 0.08);
   --f1-track-border: rgba(255, 255, 255, 0.04);
@@ -44,23 +66,23 @@
 
 [data-theme="dark"] body {
   background-color: #0d0d0d !important;
-  background-image: 
-    linear-gradient(45deg, rgba(20, 20, 20, 0.9) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.9) 75%, rgba(20, 20, 20, 0.9)), 
+  background-image:
     linear-gradient(45deg, rgba(20, 20, 20, 0.9) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.9) 75%, rgba(20, 20, 20, 0.9)),
-    linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8)) !important;
-  background-size: 10px 10px, 10px 10px, 100% 100% !important;
-  background-position: 0 0, 5px 5px, 0 0 !important;
+    linear-gradient(45deg, rgba(20, 20, 20, 0.9) 25%, transparent 25%, transparent 75%, rgba(20, 20, 20, 0.9) 75%, rgba(20, 20, 20, 0.9)) !important;
+  background-size: 10px 10px !important;
+  background-position: 0 0, 5px 5px !important;
+  transition: var(--transition-theme);
 }
 
-[data-theme="dark"] h1, [data-theme="dark"] h2 {
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+[data-theme="dark"] h1,
+[data-theme="dark"] h2 {
+  text-shadow: 0 0 20px rgba(225, 6, 0, 0.25), 0 0 40px rgba(168, 85, 247, 0.1);
 }
 
 /* ============================================
-   LIGHT MODE — Clean Sporty Paddock Aesthetic
+   LIGHT MODE — Clean Professional Aesthetic
    ============================================ */
 [data-theme="light"] {
-  /* F1 Track CSS Variables — adapted for light bg */
   --f1-track-color: rgba(225, 6, 0, 0.08);
   --f1-track-mid: rgba(168, 85, 247, 0.06);
   --f1-track-border: rgba(0, 0, 0, 0.04);
@@ -74,7 +96,6 @@
 
 [data-theme="light"] body {
   background-color: #f8f8fa !important;
-  /* Subtle diagonal racing stripe texture */
   background-image:
     repeating-linear-gradient(
       135deg,
@@ -85,100 +106,237 @@
       transparent 81px,
       transparent 160px
     ) !important;
+  transition: var(--transition-theme);
 }
 
-[data-theme="light"] h1, [data-theme="light"] h2 {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+[data-theme="light"] h1,
+[data-theme="light"] h2 {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* ============================================
-   Shared Typography — Racing Theme
+   Typography — Racing Theme Headings
+   Body text uses Geist (loaded via next/font)
+   Headings get Orbitron for the F1 racing feel
    ============================================ */
 h1, h2, h3 {
-  font-family: var(--font-heading) !important;
+  font-family: 'Orbitron', var(--font-heading), sans-serif !important;
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
 
-p, span, div {
-  font-family: var(--font-body) !important;
+/* ============================================
+   Smooth Theme Transition
+   ============================================ */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ============================================
-   F1 Scrollbar — Both Themes
+   Gradient Accent Line (Home page separator)
+   ============================================ */
+.gradient-accent-line {
+  width: 100%;
+  max-width: 200px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--f1-red), var(--f1-purple), transparent);
+  background-size: 200% 100%;
+  animation: gradient-shift 4s ease infinite;
+  border-radius: 2px;
+  margin: 1rem auto;
+  opacity: 0.7;
+}
+
+/* ============================================
+   CTA Card — Glassmorphism Effect
+   ============================================ */
+.cta-card {
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-theme="dark"] .cta-card {
+  background: rgba(18, 18, 22, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .cta-card:hover {
+  border-color: rgba(225, 6, 0, 0.2) !important;
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(225, 6, 0, 0.1),
+    0 0 40px rgba(225, 6, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="light"] .cta-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .cta-card:hover {
+  border-color: rgba(220, 38, 38, 0.15) !important;
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(220, 38, 38, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ============================================
+   About Page — Section Styling
+   ============================================ */
+.about-section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--f1-red), var(--f1-purple), transparent);
+  opacity: 0.3;
+  margin: 2rem 0;
+}
+
+.about-experience-card {
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  border-left: 3px solid var(--f1-red);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .about-experience-card {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .about-experience-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 20px rgba(225, 6, 0, 0.06);
+}
+
+[data-theme="light"] .about-experience-card {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+[data-theme="light"] .about-experience-card:hover {
+  background: rgba(0, 0, 0, 0.025);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   Scrollbar — Both Themes
    ============================================ */
 [data-theme="dark"] ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 [data-theme="dark"] ::-webkit-scrollbar-track {
   background: #0d0d0d;
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--f1-red), #A855F7);
-  border-radius: 4px;
+  background: linear-gradient(180deg, var(--f1-red), var(--f1-purple));
+  border-radius: 3px;
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ff1a1a, #c084fc);
 }
 
 [data-theme="light"] ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 [data-theme="light"] ::-webkit-scrollbar-track {
   background: #f0f0f2;
 }
 [data-theme="light"] ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--f1-red), #d946ef);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ff1a1a, #e879f9);
 }
 
 /* ============================================
-   F1 Selection Color
+   Selection Color
    ============================================ */
 ::selection {
-  background: rgba(225, 6, 0, 0.3);
+  background: rgba(225, 6, 0, 0.25);
   color: #ffffff;
 }
 ::-moz-selection {
-  background: rgba(225, 6, 0, 0.3);
+  background: rgba(225, 6, 0, 0.25);
   color: #ffffff;
 }
 
 [data-theme="light"] ::selection {
-  background: rgba(225, 6, 0, 0.2);
+  background: rgba(225, 6, 0, 0.15);
   color: #1a1a1a;
-}
-
-/* ============================================
-   F1 Transitions & Animations
-   ============================================ */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
-}
-.page-transition-exit {
-  opacity: 1;
-}
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity 300ms;
 }
 
 /* ============================================
    F1 Post Card Hover
    ============================================ */
 .f1-post-card {
-  transition: box-shadow 0.3s ease, border-color 0.3s ease !important;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease !important;
 }
 .f1-post-card:hover {
-  box-shadow: 0 0 20px rgba(225, 6, 0, 0.2) !important;
-  border-color: rgba(225, 6, 0, 0.4) !important;
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.15) !important;
+  border-color: rgba(225, 6, 0, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   Footer Top Gradient Border
+   ============================================ */
+.footer-gradient-border {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--f1-red), var(--f1-purple), transparent);
+  opacity: 0.25;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   404 Page
+   ============================================ */
+.not-found-code {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 6rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, var(--f1-red), var(--f1-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+/* ============================================
+   Focus Visible — Accessibility
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--f1-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 768px) {
+  .not-found-code {
+    font-size: 4rem !important;
+  }
+
+  .gradient-accent-line {
+    max-width: 120px;
+  }
+
+  .cta-card {
+    padding: 1.5rem !important;
+  }
 }
