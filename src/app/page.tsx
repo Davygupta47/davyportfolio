@@ -41,7 +41,7 @@ const featuredProjects = [
     slug: "twinvora",
     title: "Twinvora",
     summary:
-      "Adaptive Clinical Intelligence Platform using Patient Digital Twins, causal AI and ambient scribes.",
+      "Adaptive Clinical Intelligence Platform using Patient Digital Twins and ambient scribes.",
     image: "/images/projects/myprojects/twinvora.jpg",
     github: "https://github.com/Davygupta47/twinvora",
     tags: ["Healthcare", "Causal AI", "LLaMA-3"],
