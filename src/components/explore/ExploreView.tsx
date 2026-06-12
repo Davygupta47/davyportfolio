@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Flex, Row, Line } from "@once-ui-system/core";
 import {
-  PiCompassDuotone,
   PiGameControllerDuotone,
-  PiCameraDuotone,
-  PiCameraSlashDuotone,
   PiSpeakerSimpleHighDuotone,
   PiSpeakerSimpleSlashDuotone,
 } from "react-icons/pi";
@@ -209,9 +205,9 @@ export default function ExploreView() {
   const [gameStatus, setGameStatus] = useState<"IDLE" | "PLAYING" | "PAUSED" | "GAME_OVER">("IDLE");
   const [score, setScore] = useState(0);
   const [sessionScores, setSessionScores] = useState<number[]>([]);
-  const [useWebcam, setUseWebcam] = useState(true);
+  const [useWebcam, setUseWebcam] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [scriptsLoaded, setScriptsLoaded] = useState(false);
+  const [scriptsLoaded, setScriptsLoaded] = useState(true);
   const [handActive, setHandActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [patchesLevel, setPatchesLevel] = useState<number>(1);
@@ -1857,140 +1853,19 @@ export default function ExploreView() {
   return (
     <div className={styles.exploreContainer}>
       <div className={styles.titleArea}>
-        <h1>Explore CV Playground</h1>
+        <h1>Explore Arcade</h1>
         <p>
-          Experiment with real-time browser-based computer vision gaming powered by your hand
-          gestures.
+          Browser-based games with retro-arcade aesthetics. Play with your keyboard, mouse, or
+          touch controls.
         </p>
       </div>
 
-      <div className={styles.arcadeGrid}>
-        {/* Left Side: Camera Console & Controller settings */}
-        <div className={styles.consoleCard}>
-          <div className={styles.cardHeader}>
-            <h2>
-              <PiCameraDuotone />
-              <span>Gesture Engine</span>
-            </h2>
-            <div
-              className={`${styles.statusIndicator} ${useWebcam ? (handActive ? styles.detecting : styles.ready) : styles.off}`}
-            >
-              {useWebcam ? (handActive ? "Detecting Hand" : "Camera Live") : "Camera Off"}
-            </div>
-          </div>
+      {/* Hidden camera elements for webcam mode (kept for optional future use) */}
+      <video ref={videoRef} autoPlay playsInline muted style={{ display: "none" }} />
+      <canvas ref={cameraCanvasRef} width={320} height={240} style={{ display: "none" }} />
 
-          {/* Video Stream & Overlay Canvas */}
-          <div className={styles.webcamWrapper}>
-            {useWebcam && <div className={styles.scanningEffect} />}
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              style={{ display: useWebcam ? "block" : "none" }}
-            />
-            <canvas
-              ref={cameraCanvasRef}
-              width={320}
-              height={240}
-              style={{ display: useWebcam ? "block" : "none" }}
-            />
-
-            {!useWebcam && (
-              <div className={styles.cameraFallback}>
-                <PiCameraSlashDuotone />
-                <p>
-                  Webcam feedback is disabled or unavailable. Using Keyboard/Mouse controls
-                  fallback.
-                </p>
-                <button
-                  className={`${styles.btn} ${styles.primary}`}
-                  onClick={() => setUseWebcam(true)}
-                  disabled={!scriptsLoaded}
-                >
-                  Activate Cam
-                </button>
-              </div>
-            )}
-
-            {useWebcam && cameraError && (
-              <div className={styles.cameraFallback}>
-                <p style={{ color: "#ef4444" }}>{cameraError}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Coordinates Debug HUD */}
-          {useWebcam && handActive && trackedCoords && (
-            <div className={styles.debugCoordinates}>
-              <span>X: {trackedCoords.x}px</span>
-              <span>Y: {trackedCoords.y}px</span>
-              {activeGame === "snake" && activeGestureDirection && (
-                <span style={{ fontWeight: 700 }}>DIR: {activeGestureDirection}</span>
-              )}
-            </div>
-          )}
-
-          {/* Controller Info and Switches */}
-          <div className={styles.controlGroup}>
-            <div className={styles.controlRow}>
-              <label>Input Control Mode</label>
-              <button className={styles.btn} onClick={() => setUseWebcam(!useWebcam)}>
-                {useWebcam ? "Switch to Manual" : "Switch to Webcam"}
-              </button>
-            </div>
-          </div>
-
-          {/* Simulation speed is locked to slow for maximum accessibility */}
-
-          <Line background="neutral-alpha-weak" />
-
-          {/* Instructions Panel */}
-          <div className={styles.controlGroup}>
-            <label>Controls & calibration</label>
-            <ul className={styles.instructionList}>
-              {activeGame === "snake" ? (
-                <>
-                  <li>
-                    <strong>Gesture Mode</strong>: Hold your hand up in front of the lens. Move your
-                    index finger up, down, left, or right relative to the center ring. The active
-                    HUD direction lights up to guide the snake.
-                  </li>
-                  <li>
-                    <strong>Manual Mode</strong>: Disable webcam, then use{" "}
-                    <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> keys to navigate.
-                  </li>
-                </>
-              ) : activeGame === "bubble" ? (
-                <>
-                  <li>
-                    <strong>Gesture Mode</strong>: Wave your hand in front of the lens. Guide the
-                    blue targeting crosshair with your index finger to pop the bubbles!
-                  </li>
-                  <li>
-                    <strong>Manual Mode</strong>: Disable webcam, then steer your cursor over the
-                    game screen to pop bubbles with your mouse.
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    <strong>Gesture Mode</strong>: Hover your index finger over a tray patch for
-                    0.8s to select it, then drag it over the grid. Hover over the snapping preview
-                    cell for 0.8s to drop/place it. Hover over a placed patch for 0.8s to return it
-                    to the tray.
-                  </li>
-                  <li>
-                    <strong>Manual Mode</strong>: Disable webcam, then click to select, click to
-                    drop, and click placed patches to pick them up.
-                  </li>
-                </>
-              )}
-            </ul>
-          </div>
-        </div>
-
-        {/* Right Side: Arcade Screen and Dashboard */}
+      <div className={styles.arcadeGrid} style={{ gridTemplateColumns: "1fr", maxWidth: "720px", margin: "0 auto", width: "100%" }}>
+        {/* Arcade Screen and Dashboard */}
         <div className={styles.arcadeConsole}>
           {/* Game Selection Tabs */}
           <div className={styles.gameSelectionArea}>
@@ -1998,24 +1873,24 @@ export default function ExploreView() {
               onClick={() => selectGame("snake")}
               className={`${styles.gameCard} ${activeGame === "snake" ? styles.active : ""}`}
             >
-              <h3>Snake CV</h3>
-              <p>Steer via finger joystick. Avoid walls and collisions.</p>
+              <h3>Snake</h3>
+              <p>Steer with arrow keys. Eat snacks, avoid walls.</p>
             </button>
 
             <button
               onClick={() => selectGame("bubble")}
               className={`${styles.gameCard} ${activeGame === "bubble" ? styles.active : ""}`}
             >
-              <h3>Bubble Pop CV</h3>
-              <p>Use your finger as a cursor to pop floating bubbles.</p>
+              <h3>Bubble Pop</h3>
+              <p>Move your mouse to pop floating bubbles before they escape.</p>
             </button>
 
             <button
               onClick={() => selectGame("patches")}
               className={`${styles.gameCard} ${activeGame === "patches" ? styles.active : ""}`}
             >
-              <h3>Patches CV</h3>
-              <p>Place patches on the grid to solve the spatial logic puzzle.</p>
+              <h3>Patches</h3>
+              <p>Drag colored tiles to solve the spatial logic puzzle.</p>
             </button>
           </div>
 
@@ -2029,10 +1904,10 @@ export default function ExploreView() {
                 GAME:{" "}
                 <strong>
                   {activeGame === "snake"
-                    ? "SNAKE CV"
+                    ? "SNAKE"
                     : activeGame === "bubble"
-                      ? "BUBBLE POP CV"
-                      : "PATCHES CV"}
+                      ? "BUBBLE POP"
+                      : "PATCHES"}
                 </strong>
               </span>
               {activeGame === "patches" && (
@@ -2097,10 +1972,10 @@ export default function ExploreView() {
                     <h3>Ready to Play?</h3>
                     <p style={{ marginTop: "0.5rem" }}>
                       {activeGame === "snake"
-                        ? "Steer the snake and eat glowing snacks. Control via gestures or arrow keys."
+                        ? "Steer the snake and eat glowing snacks. Use arrow keys or W, A, S, D."
                         : activeGame === "bubble"
-                          ? "Hover your hand or mouse to pop glowing bubbles before they drift off screen."
-                          : "Drag colored patches from the bottom tray to cover the board matching the clue constraints."}
+                          ? "Move your mouse over the game to pop glowing bubbles before they drift away."
+                          : "Click to select patches from the tray, then click on the board to place them."}
                     </p>
                   </div>
                   <button className={`${styles.btn} ${styles.primary}`} onClick={startGame}>
@@ -2150,16 +2025,6 @@ export default function ExploreView() {
                   </div>
                 </div>
               )}
-
-              {/* Scripts loading overlay */}
-              {!scriptsLoaded && (
-                <div className={styles.screenOverlay}>
-                  <div className={styles.loaderOverlay}>
-                    <div className={styles.spinner} />
-                    <p>Initializing CV Models via CDN...</p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Screen Controls Toolbar */}
@@ -2168,7 +2033,6 @@ export default function ExploreView() {
                 <button
                   className={`${styles.btn} ${gameStatus === "PLAYING" ? "" : styles.primary}`}
                   onClick={startGame}
-                  disabled={!scriptsLoaded}
                 >
                   {gameStatus === "GAME_OVER"
                     ? "Restart"
@@ -2193,6 +2057,34 @@ export default function ExploreView() {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Controls Info */}
+          <div className={styles.consoleCard}>
+            <div className={styles.cardHeader}>
+              <h2>
+                <PiGameControllerDuotone />
+                <span>Controls</span>
+              </h2>
+            </div>
+            <ul className={styles.instructionList}>
+              {activeGame === "snake" ? (
+                <li>
+                  Use <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> to steer the snake.
+                  Collect food to grow and earn points.
+                </li>
+              ) : activeGame === "bubble" ? (
+                <li>
+                  Move your <strong>mouse cursor</strong> (or <strong>touch</strong> on mobile) over
+                  the game screen to pop bubbles before they drift off.
+                </li>
+              ) : (
+                <li>
+                  <strong>Click</strong> a patch in the tray to select it, then <strong>click</strong>{" "}
+                  on the grid to place it. Click placed patches to return them.
+                </li>
+              )}
+            </ul>
           </div>
 
           {/* Realtime Session Stats Dashboard */}
@@ -2229,10 +2121,10 @@ export default function ExploreView() {
                 <span style={{ fontSize: "0.7rem", color: "var(--neutral-on-background-weak)" }}>
                   active game:{" "}
                   {activeGame === "snake"
-                    ? "Snake CV"
+                    ? "Snake"
                     : activeGame === "bubble"
-                      ? "Bubble Pop CV"
-                      : "Patches CV"}
+                      ? "Bubble Pop"
+                      : "Patches"}
                 </span>
               </div>
 

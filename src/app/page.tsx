@@ -26,6 +26,37 @@ export async function generateMetadata() {
   });
 }
 
+/* ── Featured project data (top 3) ── */
+const featuredProjects = [
+  {
+    slug: "stocksense",
+    title: "StockSense",
+    summary:
+      "AI trading intelligence using Qwen LLMs with real-time poison detection and adapter-level machine unlearning.",
+    image: "/images/projects/myprojects/stocksense.jpg",
+    github: "https://github.com/Davygupta47/stocks-project",
+    tags: ["ML", "FinTech", "Unlearning"],
+  },
+  {
+    slug: "twinvora",
+    title: "Twinvora",
+    summary:
+      "Adaptive Clinical Intelligence Platform using Patient Digital Twins, causal AI and ambient scribes.",
+    image: "/images/projects/myprojects/twinvora.jpg",
+    github: "https://github.com/Davygupta47/twinvora",
+    tags: ["Healthcare", "Causal AI", "LLaMA-3"],
+  },
+  {
+    slug: "unlearning-plm",
+    title: "Unlearning‑PLM",
+    summary:
+      "Parameter-efficient unlearning framework to selectively erase private data and biases from LLMs.",
+    image: "/images/projects/myprojects/Unlearning-plm.jpg",
+    github: "https://github.com/Davygupta47/unlearning-plm",
+    tags: ["LLM Safety", "Privacy", "PyTorch"],
+  },
+];
+
 export default function Home() {
   return (
     <Column
@@ -109,7 +140,114 @@ export default function Home() {
       {/* Gradient accent line separator */}
       <div className="gradient-accent-line" />
 
+      {/* ═══════ RESUME SECTION ═══════ */}
+      <RevealFx translateY="16" delay={0.55} fillWidth>
+        <div className="resume-section">
+          <div className="resume-section__inner">
+            <div className="resume-section__text">
+              <Heading variant="heading-strong-l">
+                Résumé
+              </Heading>
+              <Text variant="body-default-m" onBackground="neutral-weak" style={{ maxWidth: "480px", lineHeight: 1.7 }}>
+                Download my full résumé for a detailed look at my experience in
+                machine learning engineering, research publications, and leadership.
+              </Text>
+            </div>
+
+            <div className="resume-section__actions">
+              <Button
+                id="resume-download"
+                href="/resume/Dwaipayan_Dasgupta_Resume.pdf"
+                variant="primary"
+                size="m"
+                data-border="rounded"
+                prefixIcon="download"
+              >
+                Download Résumé
+              </Button>
+              <Button
+                id="resume-about"
+                href={about.path}
+                variant="secondary"
+                size="m"
+                data-border="rounded"
+                arrowIcon
+              >
+                View Full Profile
+              </Button>
+            </div>
+          </div>
+        </div>
+      </RevealFx>
+
+      {/* ═══════ FEATURED PROJECTS SECTION ═══════ */}
       <RevealFx translateY="16" delay={0.6} fillWidth>
+        <Column fillWidth gap="24">
+          <Column gap="8" horizontal="center" align="center">
+            <Heading variant="heading-strong-l" align="center">
+              Featured Projects
+            </Heading>
+            <Text variant="body-default-m" onBackground="neutral-weak" align="center" style={{ maxWidth: "520px", lineHeight: 1.7 }}>
+              A curated selection of my most impactful work in AI/ML — from
+              production trading systems to clinical intelligence platforms.
+            </Text>
+          </Column>
+
+          <div className="featured-projects-grid">
+            {featuredProjects.map((project) => (
+              <a
+                key={project.slug}
+                href={`/work/${project.slug}`}
+                className="featured-project-card"
+              >
+                <div className="featured-project-card__img-wrap">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="featured-project-card__img"
+                  />
+                  <div className="featured-project-card__overlay" />
+                </div>
+
+                <div className="featured-project-card__body">
+                  <div className="featured-project-card__tags">
+                    {project.tags.map((t) => (
+                      <span key={t} className="featured-project-card__tag">{t}</span>
+                    ))}
+                  </div>
+                  <h3 className="featured-project-card__title">{project.title}</h3>
+                  <p className="featured-project-card__summary">{project.summary}</p>
+                  <div className="featured-project-card__footer">
+                    <span className="featured-project-card__link">
+                      View Project →
+                    </span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <Row horizontal="center" paddingTop="8">
+            <Button
+              id="view-all-projects"
+              href="/work"
+              variant="secondary"
+              size="m"
+              data-border="rounded"
+              arrowIcon
+            >
+              View All Projects
+            </Button>
+          </Row>
+        </Column>
+      </RevealFx>
+
+      {/* Gradient accent line separator */}
+      <div className="gradient-accent-line" />
+
+      {/* ═══════ CONTACT / CTA SECTION ═══════ */}
+      <RevealFx translateY="16" delay={0.7} fillWidth>
         <Column
           fillWidth
           radius="l-4"

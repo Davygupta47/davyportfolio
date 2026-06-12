@@ -35,11 +35,15 @@ export default function InlineF1Car() {
         position: "relative",
         margin: "1.5rem 0",
         cursor: "grab",
-        background: "rgba(255, 255, 255, 0.03)",
+        /*background: "rgba(255, 255, 255, 0.03)",
         border: "1px solid var(--neutral-alpha-medium)",
         borderRadius: "24px",
         backdropFilter: "blur(16px)",
-        boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.3)",
+        boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.3)",*/
+        /* Box/container removed for clean floating look */
+        background: "transparent",
+        border: "none",
+        borderRadius: "0",
         overflow: "hidden",
       }}
     >
