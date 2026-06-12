@@ -188,8 +188,8 @@ export default function Home() {
                     </Text>
                   </div>
                   <div className="resume-card__meta">
-                    <Badge variant="neutral" size="s">PDF</Badge>
-                    <Badge variant="neutral" size="s">148 KB</Badge>
+                    <Badge background="neutral-alpha-weak" paddingX="8" paddingY="2" onBackground="neutral-weak" textVariant="label-default-xs">PDF</Badge>
+                    <Badge background="neutral-alpha-weak" paddingX="8" paddingY="2" onBackground="neutral-weak" textVariant="label-default-xs">148 KB</Badge>
                   </div>
                 </div>
                 <Text variant="body-default-s" onBackground="neutral-weak" style={{ lineHeight: 1.5 }}>
@@ -234,8 +234,8 @@ export default function Home() {
                     </Text>
                   </div>
                   <div className="resume-card__meta">
-                    <Badge variant="neutral" size="s">PDF</Badge>
-                    <Badge variant="neutral" size="s">197 KB</Badge>
+                    <Badge background="neutral-alpha-weak" paddingX="8" paddingY="2" onBackground="neutral-weak" textVariant="label-default-xs">PDF</Badge>
+                    <Badge background="neutral-alpha-weak" paddingX="8" paddingY="2" onBackground="neutral-weak" textVariant="label-default-xs">197 KB</Badge>
                   </div>
                 </div>
                 <Text variant="body-default-s" onBackground="neutral-weak" style={{ lineHeight: 1.5 }}>
