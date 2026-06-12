@@ -223,6 +223,7 @@ export default function ExploreView() {
   const webcamStreamRef = useRef<MediaStream | null>(null);
   const anchorRef = useRef<{ x: number; y: number } | null>(null);
   const smoothedPointerRef = useRef<{ x: number; y: number } | null>(null);
+  const palmRef = useRef<{ x: number; y: number } | null>(null);
 
   // Refs for tracking React state inside external MediaPipe callbacks
   const activeGameRef = useRef(activeGame);
@@ -446,6 +447,7 @@ export default function ExploreView() {
     setTrackedCoords(null);
     setActiveGestureDirection(null);
     anchorRef.current = null;
+    palmRef.current = null;
     if (webcamStreamRef.current) {
       webcamStreamRef.current.getTracks().forEach((track) => track.stop());
       webcamStreamRef.current = null;
@@ -538,6 +540,8 @@ export default function ExploreView() {
       const px = ((1 - w.x + (1 - iKnuckle.x) + (1 - pKnuckle.x)) / 3) * canvas.width;
       const py = ((w.y + iKnuckle.y + pKnuckle.y) / 3) * canvas.height;
 
+      palmRef.current = { x: px, y: py };
+
       // Index finger tip (landmark index 8)
       const indexTip = landmarks[8];
       const pointerX = (1 - indexTip.x) * canvas.width;
@@ -611,6 +615,7 @@ export default function ExploreView() {
       setTrackedCoords(null);
       setActiveGestureDirection(null);
       anchorRef.current = null; // Reset anchor so it re-centers next time the hand appears
+      palmRef.current = null;
       if (activeGameRef.current === "bubble") {
         bubbleRef.current.pointer = null;
       }
@@ -1332,6 +1337,95 @@ export default function ExploreView() {
     });
 
     drawParticles(ctx);
+
+    // Draw Gesture D-Pad Joystick Overlay on Game Canvas (Scaled)
+    if (useWebcam && anchorRef.current && handActive && palmRef.current) {
+      // Scale coordinates from camera space (typically 320x240) to game canvas space (500x500)
+      const camW = cameraCanvasRef.current?.width || 320;
+      const camH = cameraCanvasRef.current?.height || 240;
+      const scaleX = canvas.width / camW;
+      const scaleY = canvas.height / camH;
+
+      const ax = anchorRef.current.x * scaleX;
+      const ay = anchorRef.current.y * scaleY;
+      const px = palmRef.current.x * scaleX;
+      const py = palmRef.current.y * scaleY;
+
+      const innerRadius = Math.min(canvas.width, canvas.height) * 0.07;
+      const outerRadius = Math.min(canvas.width, canvas.height) * 0.22;
+
+      ctx.save();
+
+      // Draw tether line from anchor to palm
+      ctx.strokeStyle = "rgba(0, 243, 255, 0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(px, py);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw small glowing dot on palm center
+      ctx.fillStyle = "#ff007f";
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = "#ff007f";
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Draw Neutral Zone
+      ctx.strokeStyle = "rgba(0, 243, 255, 0.25)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(ax, ay, innerRadius, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Outer boundary
+      ctx.strokeStyle = "rgba(0, 243, 255, 0.05)";
+      ctx.beginPath();
+      ctx.arc(ax, ay, outerRadius, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Draw active quadrant highlight
+      const drawArrow = (angle: number, label: string, active: boolean) => {
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(angle);
+
+        // Arrow quadrant fill
+        ctx.strokeStyle = active ? "#00f3ff" : "rgba(255, 255, 255, 0.12)";
+        ctx.fillStyle = active ? "rgba(0, 243, 255, 0.2)" : "rgba(255, 255, 255, 0.01)";
+        ctx.lineWidth = active ? 2.5 : 1;
+        if (active) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "#00f3ff";
+        }
+
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRadius, -Math.PI / 4, Math.PI / 4);
+        ctx.lineTo(innerRadius * Math.cos(Math.PI / 4), innerRadius * Math.sin(Math.PI / 4));
+        ctx.arc(0, 0, innerRadius, Math.PI / 4, -Math.PI / 4, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Icon text/arrow character
+        ctx.fillStyle = active ? "#00f3ff" : "rgba(255, 255, 255, 0.25)";
+        ctx.font = "bold 9px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(label, (innerRadius + outerRadius) / 2, 3);
+
+        ctx.restore();
+      };
+
+      const act = activeGestureDirection;
+      drawArrow(0, "▶ R", act === "RIGHT");
+      drawArrow(Math.PI / 2, "▼ D", act === "DOWN");
+      drawArrow(Math.PI, "◀ L", act === "LEFT");
+      drawArrow(-Math.PI / 2, "▲ U", act === "UP");
+      ctx.restore();
+    }
   };
 
   const drawParticles = (ctx: CanvasRenderingContext2D) => {
@@ -1941,6 +2035,18 @@ export default function ExploreView() {
                   ))}
                 </span>
               )}
+              {useWebcam && (
+                <span
+                  style={{
+                    color: handActive ? "#00ff66" : "#ffb700",
+                    textShadow: handActive ? "0 0 8px rgba(0, 255, 102, 0.4)" : "none",
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                  }}
+                >
+                  {handActive ? "🖐️ TRACKING ACTIVE" : "📷 CAMERA ON (WAVE HAND)"}
+                </span>
+              )}
               <span>
                 SCORE: <strong>{score}</strong>
               </span>
@@ -2047,7 +2153,15 @@ export default function ExploreView() {
                 )}
               </div>
 
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <button
+                  className={`${styles.btn} ${useWebcam ? styles.primary : ""}`}
+                  onClick={() => setUseWebcam(!useWebcam)}
+                  title={useWebcam ? "Disable camera gestures" : "Enable camera gestures (Beta)"}
+                  style={{ fontSize: "0.75rem", padding: "0.5rem 0.85rem" }}
+                >
+                  {useWebcam ? "🖐️ Gestures: ON" : "🖐️ Gestures: OFF"}
+                </button>
                 <button
                   className={`${styles.btn} ${styles.iconOnly}`}
                   onClick={() => setIsMuted(!isMuted)}
@@ -2057,6 +2171,12 @@ export default function ExploreView() {
                 </button>
               </div>
             </div>
+
+            {cameraError && (
+              <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "0.75rem", textAlign: "center", width: "100%", maxWidth: "500px" }}>
+                ⚠️ {cameraError}
+              </div>
+            )}
           </div>
 
           {/* Controls Info */}
@@ -2068,21 +2188,37 @@ export default function ExploreView() {
               </h2>
             </div>
             <ul className={styles.instructionList}>
-              {activeGame === "snake" ? (
-                <li>
-                  Use <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> to steer the snake.
-                  Collect food to grow and earn points.
-                </li>
-              ) : activeGame === "bubble" ? (
-                <li>
-                  Move your <strong>mouse cursor</strong> (or <strong>touch</strong> on mobile) over
-                  the game screen to pop bubbles before they drift off.
-                </li>
+              {useWebcam ? (
+                activeGame === "snake" ? (
+                  <li>
+                    Wave your hand to register control. Drag your palm away from the center anchor in any direction (<strong>UP, DOWN, LEFT, RIGHT</strong>) to steer.
+                  </li>
+                ) : activeGame === "bubble" ? (
+                  <li>
+                    Hover your index finger over the bubbles to pop them. Keep your hand in view of the camera.
+                  </li>
+                ) : (
+                  <li>
+                    Hover your index finger over a patch to select it, then hover over the board to place it. Hovering for 800ms triggers action.
+                  </li>
+                )
               ) : (
-                <li>
-                  <strong>Click</strong> a patch in the tray to select it, then <strong>click</strong>{" "}
-                  on the grid to place it. Click placed patches to return them.
-                </li>
+                activeGame === "snake" ? (
+                  <li>
+                    Use <strong>Arrow Keys</strong> or <strong>W, A, S, D</strong> to steer the snake.
+                    Collect food to grow and earn points.
+                  </li>
+                ) : activeGame === "bubble" ? (
+                  <li>
+                    Move your <strong>mouse cursor</strong> (or <strong>touch</strong> on mobile) over
+                    the game screen to pop bubbles before they drift off.
+                  </li>
+                ) : (
+                  <li>
+                    <strong>Click</strong> a patch in the tray to select it, then <strong>click</strong>{" "}
+                    on the grid to place it. Click placed patches to return them.
+                  </li>
+                )
               )}
             </ul>
           </div>

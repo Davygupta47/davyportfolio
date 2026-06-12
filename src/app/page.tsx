@@ -144,37 +144,129 @@ export default function Home() {
       <RevealFx translateY="16" delay={0.55} fillWidth>
         <div className="resume-section">
           <div className="resume-section__inner">
-            <div className="resume-section__text">
-              <Heading variant="heading-strong-l">
-                Résumé
-              </Heading>
-              <Text variant="body-default-m" onBackground="neutral-weak" style={{ maxWidth: "480px", lineHeight: 1.7 }}>
-                Download my full résumé for a detailed look at my experience in
-                machine learning engineering, research publications, and leadership.
-              </Text>
+            {/* Visual Resume Skeleton (Left Column - Desktop Only) */}
+            <div className="resume-skeleton">
+              <div className="resume-skeleton__glow" />
+              <div className="resume-skeleton__header">
+                <div className="resume-skeleton__avatar" />
+                <div className="resume-skeleton__header-text">
+                  <div className="resume-skeleton__line brand" style={{ width: "65%", height: "10px" }} />
+                  <div className="resume-skeleton__line" style={{ width: "45%", height: "6px" }} />
+                </div>
+              </div>
+              <div className="resume-skeleton__section">
+                <div className="resume-skeleton__section-title" />
+                <div className="resume-skeleton__line accent" style={{ width: "85%" }} />
+                <div className="resume-skeleton__line" style={{ width: "95%" }} />
+                <div className="resume-skeleton__line" style={{ width: "70%" }} />
+              </div>
+              <div className="resume-skeleton__section">
+                <div className="resume-skeleton__section-title" style={{ width: "25%" }} />
+                <div className="resume-skeleton__line accent" style={{ width: "80%" }} />
+                <div className="resume-skeleton__line" style={{ width: "90%" }} />
+              </div>
+              <div className="resume-skeleton__skills">
+                <div className="resume-skeleton__skill-tag" style={{ width: "50px" }} />
+                <div className="resume-skeleton__skill-tag" style={{ width: "65px" }} />
+                <div className="resume-skeleton__skill-tag" style={{ width: "45px" }} />
+                <div className="resume-skeleton__skill-tag" style={{ width: "55px" }} />
+                <div className="resume-skeleton__skill-tag" style={{ width: "60px" }} />
+              </div>
             </div>
 
-            <div className="resume-section__actions">
-              <Button
-                id="resume-download"
-                href="/resume/Dwaipayan_Dasgupta_Resume.pdf"
-                variant="primary"
-                size="m"
-                data-border="rounded"
-                prefixIcon="download"
-              >
-                Download Résumé
-              </Button>
-              <Button
-                id="resume-about"
-                href={about.path}
-                variant="secondary"
-                size="m"
-                data-border="rounded"
-                arrowIcon
-              >
-                View Full Profile
-              </Button>
+            {/* Resume Cards (Right Column) */}
+            <div className="resume-cards-container">
+              {/* Card 1: Professional Resume */}
+              <div className="resume-card">
+                <div className="resume-card__header">
+                  <div className="resume-card__title-area">
+                    <Heading variant="heading-strong-m">
+                      Professional Resume
+                    </Heading>
+                    <Text variant="body-default-xs" onBackground="neutral-weak">
+                      Focused on AI/ML Engineering & Tech Industry
+                    </Text>
+                  </div>
+                  <div className="resume-card__meta">
+                    <Badge variant="neutral" size="s">PDF</Badge>
+                    <Badge variant="neutral" size="s">148 KB</Badge>
+                  </div>
+                </div>
+                <Text variant="body-default-s" onBackground="neutral-weak" style={{ lineHeight: 1.5 }}>
+                  Detailed overview of hands-on industry experience building machine learning models, MLOps pipelines, and full-stack software systems.
+                </Text>
+                <div className="resume-card__actions">
+                  <Button
+                    id="view-resume"
+                    href="/resume/Resume_Dwaipayan_Dasgupta.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                    size="s"
+                    data-border="rounded"
+                    prefixIcon="eye"
+                  >
+                    View Resume
+                  </Button>
+                  <Button
+                    id="download-resume"
+                    href="/resume/Resume_Dwaipayan_Dasgupta.pdf"
+                    download="Resume_Dwaipayan_Dasgupta.pdf"
+                    variant="primary"
+                    size="s"
+                    data-border="rounded"
+                    prefixIcon="download"
+                  >
+                    Download
+                  </Button>
+                </div>
+              </div>
+
+              {/* Card 2: Academic CV */}
+              <div className="resume-card">
+                <div className="resume-card__header">
+                  <div className="resume-card__title-area">
+                    <Heading variant="heading-strong-m">
+                      Curriculum Vitae (CV)
+                    </Heading>
+                    <Text variant="body-default-xs" onBackground="neutral-weak">
+                      Focused on Academic Research & Publications
+                    </Text>
+                  </div>
+                  <div className="resume-card__meta">
+                    <Badge variant="neutral" size="s">PDF</Badge>
+                    <Badge variant="neutral" size="s">197 KB</Badge>
+                  </div>
+                </div>
+                <Text variant="body-default-s" onBackground="neutral-weak" style={{ lineHeight: 1.5 }}>
+                  Comprehensive record of academic background, research papers, publications, teaching experience, and scholarly projects.
+                </Text>
+                <div className="resume-card__actions">
+                  <Button
+                    id="view-cv"
+                    href="/resume/Dwaipayan_Dasgupta_CV.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="secondary"
+                    size="s"
+                    data-border="rounded"
+                    prefixIcon="eye"
+                  >
+                    View CV
+                  </Button>
+                  <Button
+                    id="download-cv"
+                    href="/resume/Dwaipayan_Dasgupta_CV.pdf"
+                    download="Dwaipayan_Dasgupta_CV.pdf"
+                    variant="primary"
+                    size="s"
+                    data-border="rounded"
+                    prefixIcon="download"
+                  >
+                    Download
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

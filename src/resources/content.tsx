@@ -113,6 +113,20 @@ const about: About = {
     title: "Work Experience",
     experiences: [
       {
+        company: "Dkafka",
+        timeframe: "May 2026 - Present",
+        role: "AI Product Growth Intern",
+        achievements: [
+          <>
+            Managed AI development products in early-stage building, finding solutions for market deployement.
+          </>,
+          <>
+            Executed targeted outreach to early signals and lead generation for AI-applied products.
+          </>,
+        ],
+        images: [],
+      },
+      {
         company: "Fizofy (Startup)",
         timeframe: "Oct 2025 - Jan 2026",
         role: "Technical Team Lead",
