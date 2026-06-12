@@ -1695,8 +1695,8 @@ export default function ExploreView() {
         const isSameTarget =
           pState.hoverTarget &&
           pState.hoverTarget.type === currentTarget.type &&
-            pState.hoverTarget.id === currentTarget.id &&
-            pState.hoverTarget.col === currentTarget.col &&
+          pState.hoverTarget.id === currentTarget.id &&
+          pState.hoverTarget.col === currentTarget.col &&
           pState.hoverTarget.row === currentTarget.row;
 
         if (isSameTarget) {

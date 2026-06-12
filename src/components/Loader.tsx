@@ -2,236 +2,6 @@
 
 import React, { useEffect, useState, useRef } from "react";
 
-// Web Audio API Sound Synthesizer for F1 Gantry Lights and Engine
-class F1EngineSynth {
-  private ctx: AudioContext | null = null;
-  private osc1: OscillatorNode | null = null;
-  private osc2: OscillatorNode | null = null;
-  private filter: BiquadFilterNode | null = null;
-  private mainGain: GainNode | null = null;
-  private revLimiterInterval: any = null;
-  private isMuted: boolean = true;
-  private isRunning: boolean = false;
-
-  constructor() {
-    // Lazy initialization
-  }
-
-  public init() {
-    if (this.ctx) return;
-    try {
-      if (typeof window !== "undefined") {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContextClass) {
-          this.ctx = new AudioContextClass();
-        }
-      }
-    } catch (e) {
-      console.error("Web Audio API not supported", e);
-    }
-  }
-
-  public resume() {
-    this.init();
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume();
-    }
-  }
-
-  public startEngine() {
-    this.init();
-    if (this.isRunning || !this.ctx || this.isMuted) return;
-
-    if (this.ctx.state === "suspended") {
-      return;
-    }
-
-    this.isRunning = true;
-
-    const ctx = this.ctx;
-    const now = ctx.currentTime;
-
-    this.osc1 = ctx.createOscillator();
-    this.osc2 = ctx.createOscillator();
-    this.filter = ctx.createBiquadFilter();
-    this.mainGain = ctx.createGain();
-
-    this.osc1.type = "sawtooth";
-    this.osc1.frequency.setValueAtTime(70, now);
-
-    this.osc2.type = "sawtooth";
-    this.osc2.frequency.setValueAtTime(70.5, now);
-
-    this.filter.type = "lowpass";
-    this.filter.frequency.setValueAtTime(500, now);
-    this.filter.Q.setValueAtTime(1.5, now);
-
-    this.mainGain.gain.setValueAtTime(0.0, now);
-    this.mainGain.gain.linearRampToValueAtTime(0.08, now + 0.3);
-
-    this.osc1.connect(this.filter);
-    this.osc2.connect(this.filter);
-    this.filter.connect(this.mainGain);
-    this.mainGain.connect(ctx.destination);
-
-    this.osc1.start(now);
-    this.osc2.start(now);
-  }
-
-  public updateRPM(rpm: number) {
-    this.init();
-    if (this.isMuted) return;
-
-    if (!this.isRunning && this.ctx && this.ctx.state === "running") {
-      this.startEngine();
-    }
-
-    if (!this.isRunning || !this.osc1 || !this.osc2 || !this.filter || !this.mainGain || !this.ctx)
-      return;
-
-    const now = this.ctx.currentTime;
-    const baseFreq = 70 + (rpm / 13500) * 530;
-
-    this.osc1.frequency.setTargetAtTime(baseFreq, now, 0.05);
-    this.osc2.frequency.setTargetAtTime(baseFreq * 1.008, now, 0.05);
-
-    const filterCutoff = 500 + (rpm / 13500) * 1500;
-    this.filter.frequency.setTargetAtTime(filterCutoff, now, 0.05);
-
-    const baseGain = 0.06 + (rpm / 13500) * 0.08;
-    this.mainGain.gain.setTargetAtTime(baseGain, now, 0.05);
-  }
-
-  public playLightBeep() {
-    this.init();
-    if (!this.ctx || this.isMuted) return;
-
-    if (this.ctx.state === "suspended") return;
-
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(1100, now);
-
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } catch (e) {
-      console.warn("Failed to play light beep", e);
-    }
-  }
-
-  public triggerRevLimiter() {
-    if (this.isMuted) return;
-    this.init();
-
-    if (!this.isRunning && this.ctx && this.ctx.state === "running") {
-      this.startEngine();
-    }
-
-    if (!this.isRunning || !this.mainGain || !this.ctx) return;
-    if (this.revLimiterInterval) return;
-
-    let high = true;
-    this.revLimiterInterval = setInterval(() => {
-      if (!this.mainGain || !this.ctx) return;
-      const now = this.ctx.currentTime;
-
-      const val = high ? 0.15 : 0.02;
-      this.mainGain.gain.setValueAtTime(val, now);
-
-      const freq = high ? 600 : 570;
-      this.osc1?.frequency.setValueAtTime(freq, now);
-      this.osc2?.frequency.setValueAtTime(freq * 1.008, now);
-
-      high = !high;
-    }, 45);
-  }
-
-  public triggerLaunch() {
-    if (this.revLimiterInterval) {
-      clearInterval(this.revLimiterInterval);
-      this.revLimiterInterval = null;
-    }
-
-    if (this.isMuted) return;
-    this.init();
-
-    if (!this.isRunning || !this.osc1 || !this.osc2 || !this.mainGain || !this.ctx) return;
-
-    const now = this.ctx.currentTime;
-
-    this.osc1.frequency.setValueAtTime(600, now);
-    this.osc1.frequency.linearRampToValueAtTime(450, now + 0.08);
-    this.osc1.frequency.exponentialRampToValueAtTime(950, now + 0.9);
-
-    this.osc2.frequency.setValueAtTime(605, now);
-    this.osc2.frequency.linearRampToValueAtTime(453, now + 0.08);
-    this.osc2.frequency.exponentialRampToValueAtTime(957, now + 0.9);
-
-    if (this.filter) {
-      this.filter.frequency.setValueAtTime(2000, now);
-      this.filter.frequency.exponentialRampToValueAtTime(3800, now + 0.9);
-    }
-
-    this.mainGain.gain.setValueAtTime(0.15, now);
-    this.mainGain.gain.setValueAtTime(0.15, now + 0.1);
-    this.mainGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-
-    setTimeout(() => {
-      this.stop();
-    }, 1300);
-  }
-
-  public setMute(muted: boolean) {
-    this.isMuted = muted;
-    if (muted) {
-      this.stop();
-    } else {
-      this.resume();
-      this.startEngine();
-    }
-  }
-
-  public stop() {
-    this.isRunning = false;
-    if (this.revLimiterInterval) {
-      clearInterval(this.revLimiterInterval);
-      this.revLimiterInterval = null;
-    }
-    try {
-      if (this.osc1) {
-        this.osc1.stop();
-        this.osc1.disconnect();
-        this.osc1 = null;
-      }
-      if (this.osc2) {
-        this.osc2.stop();
-        this.osc2.disconnect();
-        this.osc2 = null;
-      }
-      if (this.filter) {
-        this.filter.disconnect();
-        this.filter = null;
-      }
-      if (this.mainGain) {
-        this.mainGain.disconnect();
-        this.mainGain = null;
-      }
-    } catch (e) {
-      // Ignore
-    }
-  }
-}
-
 export const Loader = () => {
   const [mounted, setMounted] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -242,13 +12,18 @@ export const Loader = () => {
   const [gear, setGear] = useState("N");
   const [isMuted, setIsMuted] = useState(true);
 
-  const synthRef = useRef<F1EngineSynth | null>(null);
-  const beepedRef = useRef<boolean[]>([false, false, false, false, false]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const isFirstTime = useRef(true);
 
   useEffect(() => {
     setMounted(true);
-    synthRef.current = new F1EngineSynth();
+
+    // Initialize HTML5 Audio with f1.mp3
+    if (typeof window !== "undefined") {
+      audioRef.current = new Audio("/f1.mp3");
+      audioRef.current.preload = "auto";
+      audioRef.current.volume = 0.6;
+    }
 
     // Check if the user has already seen the loader in this session
     const hasSeen = sessionStorage.getItem("hasSeenLoader");
@@ -265,59 +40,61 @@ export const Loader = () => {
       return () => clearTimeout(timer);
     }
 
-    // First time visitor sequence
-    const duration = 2500; // 2.5 seconds total
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
+  // Manage progress bar timer. If unmuted, syncs with audio duration.
+  useEffect(() => {
+    if (!mounted) return;
+    const hasSeen = sessionStorage.getItem("hasSeenLoader");
+    if (hasSeen === "true") return;
+
+    if (progress >= 100) return;
+
+    // If muted, run loader in 3.5 seconds.
+    // If unmuted, run loader synchronized with the actual f1.mp3 duration.
+    const getDuration = () => {
+      if (!isMuted && audioRef.current && audioRef.current.duration && !isNaN(audioRef.current.duration)) {
+        return audioRef.current.duration * 1000;
+      }
+      return isMuted ? 3500 : 6000; // 6 seconds standard fallback
+    };
+
+    const duration = getDuration();
     const intervalTime = 16; // ~60fps
     const step = 100 / (duration / intervalTime);
 
     const timer = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + step * (0.8 + Math.random() * 0.4); // slightly variable speed
-        if (next >= 100) {
+        if (prev >= 100) {
           clearInterval(timer);
           return 100;
         }
-        return next;
+        const next = prev + step * (0.85 + Math.random() * 0.3); // slight jitter for realism
+        return next >= 100 ? 100 : next;
       });
     }, intervalTime);
 
-    return () => {
-      clearInterval(timer);
-      synthRef.current?.stop();
-    };
-  }, []);
+    return () => clearInterval(timer);
+  }, [mounted, isMuted, progress === 0]);
 
   // Update RPM, gear, and lights out status based on progress
   useEffect(() => {
     if (!mounted) return;
 
-    // Trigger light beeps as progress crosses thresholds
-    if (isFirstTime.current) {
-      const thresholds = [15, 35, 55, 75, 90];
-      thresholds.forEach((threshold, index) => {
-        if (progress >= threshold && !beepedRef.current[index]) {
-          beepedRef.current[index] = true;
-          synthRef.current?.playLightBeep();
-        }
-      });
-    }
-
     if (progress >= 100) {
       setRpm(13500); // Rev limiter
       setGear("1");
-
-      if (isFirstTime.current) {
-        synthRef.current?.triggerRevLimiter();
-      }
 
       // Wait 600ms with all lights red, then trigger LIGHTS OUT
       const lightsOutTimer = setTimeout(() => {
         setLightsOut(true);
         sessionStorage.setItem("hasSeenLoader", "true");
-
-        if (isFirstTime.current) {
-          synthRef.current?.triggerLaunch();
-        }
 
         // Fade out the overlay 800ms after lights out
         const fadeTimer = setTimeout(() => {
@@ -333,20 +110,13 @@ export const Loader = () => {
     }
 
     // Scale RPM from 0 to 13000
-    let currentRpm = 0;
     if (progress < 85) {
-      currentRpm = Math.floor(progress * 135);
-      setRpm(currentRpm);
+      setRpm(Math.floor(progress * 135));
       setGear("N");
     } else {
       // Shift to 1st gear near launch
-      currentRpm = Math.floor(11000 + (progress - 85) * 150);
-      setRpm(currentRpm);
+      setRpm(Math.floor(11000 + (progress - 85) * 150));
       setGear("1");
-    }
-
-    if (isFirstTime.current) {
-      synthRef.current?.updateRPM(currentRpm);
     }
   }, [progress, mounted]);
 
@@ -399,8 +169,13 @@ export const Loader = () => {
   const handleOverlayClick = () => {
     if (isMuted && isFirstTime.current && !lightsOut) {
       setIsMuted(false);
-      synthRef.current?.setMute(false);
-      synthRef.current?.updateRPM(rpm);
+      setProgress(0);
+      setLightsOut(false);
+      setFadeOut(false);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch((e) => console.warn("Failed to play audio", e));
+      }
     }
   };
 
@@ -409,9 +184,16 @@ export const Loader = () => {
     if (!isFirstTime.current || lightsOut) return;
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
-    synthRef.current?.setMute(nextMuted);
-    if (!nextMuted) {
-      synthRef.current?.updateRPM(rpm);
+    if (nextMuted) {
+      audioRef.current?.pause();
+    } else {
+      setProgress(0);
+      setLightsOut(false);
+      setFadeOut(false);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch((e) => console.warn("Failed to play audio", e));
+      }
     }
   };
 
